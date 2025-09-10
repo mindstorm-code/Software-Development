@@ -20,4 +20,4 @@ This repository contains assignments, projects, and documentation for my Softwar
 ---
 
 ## 🎯 Why I’m Taking This Program  
-“I’m in this program because I like working with people, and I want to build skills that help me contribute to projects and support others in their goals.” Jeffrey Jenson
+“I’m in this program because I like working with people, and I want to build skills that help me contribute to projects and support others in their goals; also my personal software goals.” Jeffrey Jenson
