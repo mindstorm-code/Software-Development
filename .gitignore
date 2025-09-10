@@ -1,0 +1,11 @@
+# Ignore macOS system files
+.DS_Store
+
+# Ignore compiled Java class files
+*.class
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.tmp
