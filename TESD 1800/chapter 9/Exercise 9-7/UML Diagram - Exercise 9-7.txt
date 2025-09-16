@@ -1,0 +1,26 @@
+*/ TESD 1800 Software Development
+Jeffrey Jenson #6200029698
+9/16/2025/*
+
+-----------------------------------------
+|              Account                  |
+-----------------------------------------
+| - id: int                             |
+| - balance: double                     |
+| - annualInterestRate: static double   |
+| - dateCreated: Date                   |
+-----------------------------------------
+| + Account()                           |
+| + Account(id: int, balance: double)   |
+| + getId(): int                        |
+| + getBalance(): double                |
+| + getAnnualInterestRate(): static double |
+| + getDateCreated(): Date              |
+| + setId(id: int): void                |
+| + setBalance(balance: double): void   |
+| + setAnnualInterestRate(rate: double): static void |
+| + getMonthlyInterestRate(): double    |
+| + getMonthlyInterest(): double        |
+| + withdraw(amount: double): void      |
+| + deposit(amount: double): void       |
+-----------------------------------------
