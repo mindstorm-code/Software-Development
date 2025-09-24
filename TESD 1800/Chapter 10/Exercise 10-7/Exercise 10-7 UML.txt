@@ -1,0 +1,26 @@
+// Jeffrey Jenson - Stu#6200029698
+// Date: 9/24/2025
+// Exercise 10-7
+
+---------------------------------
+           Account
+---------------------------------
+- id: int
+- balance: double
+- annualInterestRate: double (static)
+- dateCreated: Date
+---------------------------------
++ Account()
++ Account(id: int, balance: double)
++ getId(): int
++ setId(id: int): void
++ getBalance(): double
++ setBalance(balance: double): void
++ getAnnualInterestRate(): double
++ setAnnualInterestRate(rate: double): void
++ getDateCreated(): Date
++ getMonthlyInterestRate(): double
++ getMonthlyInterest(): double
++ withdraw(amount: double): void
++ deposit(amount: double): void
+---------------------------------
