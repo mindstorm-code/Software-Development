@@ -1,0 +1,50 @@
+/* 
+ 1800 TESD - Exercise 11-3: Planning - UML Diagram (all Classes) 
+ Jeffrey Jenson - #6200029698
+ Date: 09/29/2025
+ */
+
+---------------------------------
+Account
+---------------------------------
+- accountNumber: int
+- balance: double
+- annualInterestRate: double
+- dateCreated: java.util.Date
+---------------------------------
++ Account()
++ Account(accountNumber: int, balance: double)
++ getAccountNumber(): int
++ getBalance(): double
++ setBalance(balance: double): void
++ getAnnualInterestRate(): double
++ setAnnualInterestRate(rate: double): void
++ getDateCreated(): java.util.Date
++ deposit(amount: double): void
++ withdraw(amount: double): void
++ toString(): String
+---------------------------------
+
+---------------------------------
+CheckingAccount
+---------------------------------
+- overdraftLimit: double
+---------------------------------
++ CheckingAccount()
++ CheckingAccount(accountNumber: int, balance: double, overdraftLimit: double)
++ getOverdraftLimit(): double
++ setOverdraftLimit(limit: double): void
++ withdraw(amount: double): void
++ toString(): String
+---------------------------------
+
+---------------------------------
+SavingsAccount
+---------------------------------
+(no additional fields)
+---------------------------------
++ SavingsAccount()
++ SavingsAccount(accountNumber: int, balance: double)
++ withdraw(amount: double): void
++ toString(): String
+---------------------------------

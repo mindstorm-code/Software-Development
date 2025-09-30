@@ -1,0 +1,41 @@
+
+/* 
+ 1800 TESD - Exercise 11-1: Planning 
+ Jeffrey Jenson - #6200029698 
+ Date: 09/29/2025 
+ */
+
+---------------------------------
+GeometricObject
+---------------------------------
+- color: String
+- filled: boolean
+- dateCreated: java.util.Date
+---------------------------------
++ GeometricObject()
++ GeometricObject(color: String, filled: boolean)
++ getColor(): String
++ setColor(color: String): void
++ isFilled(): boolean
++ setFilled(filled: boolean): void
++ getDateCreated(): Date
++ toString(): String
+---------------------------------
+
+
+---------------------------------
+Triangle
+---------------------------------
+- side1: double = 1.0
+- side2: double = 1.0
+- side3: double = 1.0
+---------------------------------
++ Triangle()
++ Triangle(side1: double, side2: double, side3: double)
++ getSide1(): double
++ getSide2(): double
++ getSide3(): double
++ getPerimeter(): double
++ getArea(): double
++ toString(): String
+---------------------------------

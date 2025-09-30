@@ -1,0 +1,177 @@
+Microsoft Windows [Version 10.0.26100.4946]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\jeffr>cd
+C:\Users\jeffr
+
+C:\Users\jeffr>cd C:\Users\jeffr\TESD 1400
+
+C:\Users\jeffr\TESD 1400>dir
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\TESD 1400
+
+09/08/2025  05:18 PM    <DIR>          .
+09/09/2025  08:40 AM    <DIR>          ..
+09/08/2025  02:33 PM             1,977 GuessCapitals.class
+09/08/2025  02:32 PM             1,632 GuessCapitals.java
+09/08/2025  01:21 PM               872 LockerPuzzle.class
+09/08/2025  01:19 PM               920 LockerPuzzle.java
+09/08/2025  05:18 PM             3,784 Mod7Test.class
+09/08/2025  05:22 PM             4,393 Mod7Test.java
+09/08/2025  01:40 PM             2,056 TicTacToe.class
+09/08/2025  02:24 PM             2,277 TicTacToe.java
+               8 File(s)         17,911 bytes
+               2 Dir(s)  927,586,209,792 bytes free
+
+C:\Users\jeffr\TESD 1400>mkdir Test
+
+C:\Users\jeffr\TESD 1400>cd Test
+
+C:\Users\jeffr\TESD 1400\Test> echo This is some text > newfile.txt
+
+C:\Users\jeffr\TESD 1400\Test>type newfile.txt
+This is some text
+
+C:\Users\jeffr\TESD 1400\Test>rename newfile.txt testfile.txt
+
+C:\Users\jeffr\TESD 1400\Test>move testfile.txt %USERPROFILE%\Desktop
+        1 file(s) moved.
+
+C:\Users\jeffr\TESD 1400\Test>del %USERPROFILE%\Desktop\testfile.txt
+The directory name is invalid.
+
+C:\Users\jeffr\TESD 1400\Test>move testfile.txt C:\Users\jeffr\Desktop
+The system cannot find the file specified.
+
+C:\Users\jeffr\TESD 1400\Test>cd
+C:\Users\jeffr\TESD 1400\Test
+
+C:\Users\jeffr\TESD 1400\Test>dir
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\TESD 1400\Test
+
+09/09/2025  01:06 PM    <DIR>          .
+09/09/2025  01:01 PM    <DIR>          ..
+               0 File(s)              0 bytes
+               2 Dir(s)  927,617,622,016 bytes free
+
+C:\Users\jeffr\TESD 1400\Test>cd
+C:\Users\jeffr\TESD 1400\Test
+
+C:\Users\jeffr\TESD 1400\Test>echo This is some text > newfile.tx
+
+C:\Users\jeffr\TESD 1400\Test>dir
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\TESD 1400\Test
+
+09/09/2025  01:14 PM    <DIR>          .
+09/09/2025  01:01 PM    <DIR>          ..
+09/09/2025  01:14 PM                20 newfile.tx
+               1 File(s)             20 bytes
+               2 Dir(s)  927,610,519,552 bytes free
+
+C:\Users\jeffr\TESD 1400\Test>rename newfile.txt testfile.txt
+The system cannot find the file specified.
+
+C:\Users\jeffr\TESD 1400\Test>rename newfile.tx testfile.txt
+
+C:\Users\jeffr\TESD 1400\Test>dir
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\TESD 1400\Test
+
+09/09/2025  01:16 PM    <DIR>          .
+09/09/2025  01:01 PM    <DIR>          ..
+09/09/2025  01:14 PM                20 testfile.txt
+               1 File(s)             20 bytes
+               2 Dir(s)  927,608,426,496 bytes free
+
+C:\Users\jeffr\TESD 1400\Test>rename newfile.tx testfile.txt
+The system cannot find the file specified.
+
+C:\Users\jeffr\TESD 1400\Test>move testfile.txt C:\Users\jeffr\Desktop
+Overwrite C:\Users\jeffr\Desktop? (Yes/No/All): YEs
+        1 file(s) moved.
+
+C:\Users\jeffr\TESD 1400\Test>dir
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\TESD 1400\Test
+
+09/09/2025  01:20 PM    <DIR>          .
+09/09/2025  01:01 PM    <DIR>          ..
+               0 File(s)              0 bytes
+               2 Dir(s)  926,517,325,824 bytes free
+
+C:\Users\jeffr\TESD 1400\Test>cd "C:\Users\jeffr\TESD 1400\Test"
+
+C:\Users\jeffr\TESD 1400\Test>dir
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\TESD 1400\Test
+
+09/09/2025  01:20 PM    <DIR>          .
+09/09/2025  01:01 PM    <DIR>          ..
+               0 File(s)              0 bytes
+               2 Dir(s)  926,516,363,264 bytes free
+
+C:\Users\jeffr\TESD 1400\Test>C:\Users\jeffr\Desktop
+'C:\Users\jeffr\Desktop' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\jeffr\TESD 1400\Test>cd
+C:\Users\jeffr\TESD 1400\Test
+
+C:\Users\jeffr\TESD 1400\Test>cd "C:\Users\jeffr\TESD 1400"
+
+C:\Users\jeffr\TESD 1400>mkdir test
+A subdirectory or file test already exists.
+
+C:\Users\jeffr\TESD 1400>cd test\
+
+C:\Users\jeffr\TESD 1400\Test>echo This is some text > newfile.txt
+
+C:\Users\jeffr\TESD 1400\Test>tpye newfile.txt
+'tpye' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\jeffr\TESD 1400\Test>type newfile.txt
+This is some text
+
+C:\Users\jeffr\TESD 1400\Test>rename newfile.txt testfile.txt
+
+C:\Users\jeffr\TESD 1400\Test>move testfile.txt "C:\Users\jeffr\Desktop"
+Overwrite C:\Users\jeffr\Desktop? (Yes/No/All): Yes
+        1 file(s) moved.
+
+C:\Users\jeffr\TESD 1400\Test>move testfile.txt "C:\Users\jeffr\Desktop"
+Overwrite C:\Users\jeffr\Desktop? (Yes/No/All): yes
+        1 file(s) moved.
+
+C:\Users\jeffr\TESD 1400\Test>move testfile.txt "C:\Users\jeffr\Desktop\testfile.txt"
+The system cannot find the path specified.
+        0 file(s) moved.
+
+C:\Users\jeffr\TESD 1400\Test>dir "C:\Users\jeffr\Desktop\testfile.txt"
+ Volume in drive C has no label.
+ Volume Serial Number is 7C25-D4C6
+
+ Directory of C:\Users\jeffr\Desktop
+
+File Not Found
+
+C:\Users\jeffr\TESD 1400\Test>del "C:\Users\jeffr\Desktop\testfile.txt"
+The directory name is invalid.
+
+C:\Users\jeffr\TESD 1400\Test>
+
+So it kept deleting the file instead of moving it. I had your assistant come look at it, and he could figure it out. 
