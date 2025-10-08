@@ -1,0 +1,51 @@
+/*
+===============================================================
+Exercise 13-1: Planning
+Student: Jeffrey Jenson — Stu#6200029698
+Date: 10/8/2025
+Course: TESD 1800
+===============================================================
+*/
+
+UML DIAGRAMS
+===============================================================
+Abstract Class: GeometricObject
+---------------------------------------------------------------
+- color: String
+- filled: boolean
+- dateCreated: java.util.Date
+---------------------------------------------------------------
++ GeometricObject()
++ GeometricObject(color: String, filled: boolean)
++ getColor(): String
++ setColor(color: String): void
++ isFilled(): boolean
++ setFilled(filled: boolean): void
++ getDateCreated(): java.util.Date
++ toString(): String
+# getArea(): double          // abstract
+# getPerimeter(): double     // abstract
+===============================================================
+
+
+Class: Triangle  (extends GeometricObject)
+---------------------------------------------------------------
+- side1: double
+- side2: double
+- side3: double
+---------------------------------------------------------------
++ Triangle()
++ Triangle(side1: double, side2: double, side3: double)
++ getSide1(): double
++ getSide2(): double
++ getSide3(): double
++ getArea(): double          // overrides abstract
++ getPerimeter(): double     // overrides abstract
++ toString(): String
+===============================================================
+
+Relationship:
+Triangle ⟶ extends ⟶ GeometricObject
+(Use an open-triangle arrow in UML)
+
+---------------------------------------------------------------

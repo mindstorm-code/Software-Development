@@ -1,0 +1,12 @@
+Exercise 12-3: Planning
+Student: Jeffrey Jenson — Stu#6200029698
+Date: 10/1/2025
+Course: TESD 1800
+
+-------------------------
+|   ArrayOutOfBoundsApp |
+-------------------------
+| - numbers : int[]      |
+-------------------------
+| + main(args:String[]):void |
+-------------------------

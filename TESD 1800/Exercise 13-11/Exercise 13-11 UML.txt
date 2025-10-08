@@ -1,0 +1,50 @@
+/* 
+TESD 1800 Exercise 13-11 UML
+Jeffrey Jenson Stu# 6200029698
+10/8/2025
+*/
+
+UML DIAGRAMS Exercise 13.11
+===============================================================
+<<abstract class>> GeometricObject
+---------------------------------------------------------------
+- color: String
+- filled: boolean
+- dateCreated: java.util.Date
+---------------------------------------------------------------
++ GeometricObject()
++ GeometricObject(color: String, filled: boolean)
++ getColor(): String
++ setColor(color: String): void
++ isFilled(): boolean
++ setFilled(filled: boolean): void
++ getDateCreated(): java.util.Date
++ toString(): String
+# getArea(): double          // abstract
+# getPerimeter(): double     // abstract
+===============================================================
+
+<<interface>> Comparable<T>
+---------------------------------------------------------------
++ compareTo(o: T): int
+---------------------------------------------------------------
+
+<<interface>> Cloneable
+---------------------------------------------------------------
+(no methods — acts as a marker interface)
+===============================================================
+
+Class: Octagon  (extends GeometricObject, implements Comparable<Octagon>, Cloneable)
+---------------------------------------------------------------
+- side: double
+---------------------------------------------------------------
++ Octagon() 
++ Octagon(side: double)
++ getSide(): double
++ setSide(side: double): void
++ getArea(): double              // overrides abstract
++ getPerimeter(): double         // overrides abstract
++ compareTo(o: Octagon): int     // from Comparable
++ clone(): Object                // from Cloneable
++ toString(): String
+===============================================================
