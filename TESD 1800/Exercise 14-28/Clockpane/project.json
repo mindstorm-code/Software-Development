@@ -1,0 +1,42 @@
+{
+  "name": "clockpane",
+  "version": "1.0.0",
+  "description": "Exercise 14-28: ClockPane implementation with visible/invisible hand controls",
+  "main": "App.java",
+  "author": "Jeffrey Jenson - Stu#6200029698",
+  "date": "10/22/2025",
+  "course": "TESD 1800",
+  "exercise": "Exercise 14-28",
+  "language": "Java",
+  "framework": "JavaFX",
+  "requirements": {
+    "java": "8+",
+    "javafx": "11+"
+  },
+  "features": [
+    "ClockPane class with hour, minute, and second hands",
+    "Boolean visibility properties for each hand",
+    "Accessor and mutator methods for hand visibility",
+    "Random time generation (hour: 0-11, minute: 0 or 30)",
+    "Test program displaying only hour and minute hands"
+  ],
+  "files": {
+    "source": ["src/App.java", "src/clockpane.java"],
+    "compiled": "bin/",
+    "libraries": "lib/"
+  },
+  "implementation": {
+    "hourHandVisible": "Boolean property to control hour hand visibility",
+    "minuteHandVisible": "Boolean property to control minute hand visibility",
+    "secondHandVisible": "Boolean property to control second hand visibility",
+    "randomGeneration": {
+      "hour": "Random integer between 0 and 11",
+      "minute": "Random selection of either 0 or 30"
+    }
+  },
+  "testProgram": {
+    "description": "Displays clock with only hour and minute hands visible",
+    "secondHandVisible": false,
+    "timeGeneration": "Random"
+  }
+}
