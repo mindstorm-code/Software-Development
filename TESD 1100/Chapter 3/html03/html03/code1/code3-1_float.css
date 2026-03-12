@@ -1,0 +1,21 @@
+﻿/* Float/drop-cap rules for Coding Challenge 3-1 */
+
+p:first-of-type:first-letter {
+  float: left;
+  font-size: 4em;
+  line-height: 0.8em;
+  margin-right: 0.1em;
+  padding-right: 0.1em;
+  padding-bottom: 0.2em;
+}
+
+p:first-of-type:first-line {
+  font-variant: small-caps;
+  font-size: 1.4em;
+}
+
+img {
+  height: 3.3em;
+  float: right;
+  clear: right;
+}

@@ -1,0 +1,332 @@
+<!doctype html>
+<html>
+  <head>
+    <title>PHASE Personalities™ Assessment</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="card">
+        <h1>PHASE Personalities</h1>
+        <p class="sub">
+          Answer honestly. No what you want to be. Just what you actually do.
+        </p>
+      </header>
+
+      <main class="card">
+        <form action="process.php" method="post">
+          <div class="grid">
+            <div>
+              <label>Your Name</label>
+              <input type="text" name="name" required />
+            </div>
+            <div>
+              <label>Email</label>
+              <input type="email" name="email" required />
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>PHASE Personality Questions (Pick 1 per question)</legend>
+
+            <!-- Q1 -->
+            <div class="question">
+              <div class="q-title">
+                1) When starting something new, you usually.
+              </div>
+              <label class="option"
+                ><input type="radio" name="q1" value="Pioneer" required /> chase
+                the new idea fast</label
+              >
+              <label class="option"
+                ><input type="radio" name="q1" value="Analyzer" /> think it
+                through strategically</label
+              >
+              <label class="option"
+                ><input type="radio" name="q1" value="Stabilizer" /> build a
+                plan and structure</label
+              >
+              <label class="option"
+                ><input type="radio" name="q1" value="Harmonizer" /> get people
+                aligned first</label
+              >
+              <label class="option"
+                ><input type="radio" name="q1" value="Energizer" /> rally
+                excitement and momentum</label
+              >
+            </div>
+
+            <!-- Q2 -->
+            <div class="question">
+              <div class="q-title">
+                2) In team conflict, your instinct is to.
+              </div>
+              <label class="option"
+                ><input type="radio" name="q2" value="Harmonizer" required />
+                smooth it out and restore trust</label
+              >
+              <label class="option"
+                ><input type="radio" name="q2" value="Analyzer" /> find the root
+                cause logically</label
+              >
+              <label class="option"
+                ><input type="radio" name="q2" value="Stabilizer" /> return to
+                rules/process</label
+              >
+              <label class="option"
+                ><input type="radio" name="q2" value="Pioneer" /> push forward
+                and stop the drag</label
+              >
+              <label class="option"
+                ><input type="radio" name="q2" value="Energizer" /> re-energize
+                the group</label
+              >
+            </div>
+
+            <!-- Q3 -->
+            <div class="question">
+              <div class="q-title">
+                3) You feel most in your zone when you're.
+              </div>
+              <label class="option"
+                ><input type="radio" name="q3" value="Analyzer" required />
+                solving complex problems</label
+              >
+              <label class="option"
+                ><input type="radio" name="q3" value="Stabilizer" /> organizing
+                and executing reliably</label
+              >
+              <label class="option"
+                ><input type="radio" name="q3" value="Pioneer" /> inventing new
+                paths and possibilities</label
+              >
+              <label class="option"
+                ><input type="radio" name="q3" value="Harmonizer" /> supporting
+                and developing people</label
+              >
+              <label class="option"
+                ><input type="radio" name="q3" value="Energizer" />
+                communicating and motivating others</label
+              >
+            </div>
+
+            <!-- Q4 -->
+            <div class="question">
+              <div class="q-title">4) Under stress, youre most likely to.</div>
+              <label class="option"
+                ><input type="radio" name="q4" value="Pioneer" required /> get
+                impatient and jump to the next idea</label
+              >
+              <label class="option"
+                ><input type="radio" name="q4" value="Analyzer" /> overthink and
+                withdraw</label
+              >
+              <label class="option"
+                ><input type="radio" name="q4" value="Stabilizer" /> get rigid
+                and rule-focused</label
+              >
+              <label class="option"
+                ><input type="radio" name="q4" value="Harmonizer" /> absorb
+                emotions and shut down</label
+              >
+              <label class="option"
+                ><input type="radio" name="q4" value="Energizer" /> get
+                scattered or overcommit</label
+              >
+            </div>
+
+            <!-- Q5 -->
+            <div class="question">
+              <div class="q-title">5) People usually describe you as.</div>
+              <label class="option"
+                ><input type="radio" name="q5" value="Energizer" required />
+                upbeat / motivating</label
+              >
+              <label class="option"
+                ><input type="radio" name="q5" value="Stabilizer" /> dependable
+                / steady</label
+              >
+              <label class="option"
+                ><input type="radio" name="q5" value="Analyzer" /> sharp /
+                analytical</label
+              >
+              <label class="option"
+                ><input type="radio" name="q5" value="Harmonizer" /> kind /
+                supportive</label
+              >
+              <label class="option"
+                ><input type="radio" name="q5" value="Pioneer" /> visionary /
+                bold</label
+              >
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>MBTI (5 Questions Pick 1 per question)</legend>
+            <p class="hint">Choose what you do most of the time.</p>
+
+            <div class="question">
+              <div class="q-title">
+                MB1) After a long week, you recharge best by.
+              </div>
+              <label class="option"
+                ><input type="radio" name="mb1" value="I" required /> quiet time
+                alone</label
+              >
+              <label class="option"
+                ><input type="radio" name="mb1" value="E" /> being around people
+              </label>
+            </div>
+
+            <div class="question">
+              <div class="q-title">
+                MB2) When learning something new, you prefer.
+              </div>
+              <label class="option"
+                ><input type="radio" name="mb2" value="S" required /> examples +
+                step-by-step facts</label
+              >
+              <label class="option"
+                ><input type="radio" name="mb2" value="N" /> concepts + patterns
+                + big picture</label
+              >
+            </div>
+
+            <div class="question">
+              <div class="q-title">
+                MB3) When making a decision, you usually prioritize.
+              </div>
+              <label class="option"
+                ><input type="radio" name="mb3" value="T" required /> logic +
+                consistency</label
+              >
+              <label class="option"
+                ><input type="radio" name="mb3" value="F" /> values + people
+                impact</label
+              >
+            </div>
+
+            <div class="question">
+              <div class="q-title">MB4) Your work style is more.</div>
+              <label class="option"
+                ><input type="radio" name="mb4" value="J" required /> planned +
+                decided</label
+              >
+              <label class="option"
+                ><input type="radio" name="mb4" value="P" /> flexible + adaptive
+              </label>
+            </div>
+
+            <div class="question">
+              <div class="q-title">MB5) In conversations, you tend to.</div>
+              <label class="option"
+                ><input type="radio" name="mb5" value="I" required /> think
+                first, then speak</label
+              >
+              <label class="option"
+                ><input type="radio" name="mb5" value="E" /> speak to think it
+                through</label
+              >
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>EOS Role (5 Questions Pick 1 per question)</legend>
+            <p class="hint">
+              Visionary = future. Integrator = past/lessons + coordination.
+              Technician = present/execution.
+            </p>
+
+            <div class="question">
+              <div class="q-title">EOS1) What do you naturally focus on?</div>
+              <label class="option"
+                ><input type="radio" name="e1" value="V" required /> Future
+                possibilities + direction</label
+              >
+              <label class="option"
+                ><input type="radio" name="e1" value="I" /> Past lessons +
+                keeping teams aligned</label
+              >
+              <label class="option"
+                ><input type="radio" name="e1" value="T" /> Present tasks +
+                getting it done</label
+              >
+            </div>
+
+            <div class="question">
+              <div class="q-title">
+                EOS2) When something breaks, your first move is.
+              </div>
+              <label class="option"
+                ><input type="radio" name="e2" value="T" required /> fix the
+                issue right now</label
+              >
+              <label class="option"
+                ><input type="radio" name="e2" value="I" /> stabilize the system
+                + assign owners</label
+              >
+              <label class="option"
+                ><input type="radio" name="e2" value="V" /> redesign the
+                approach so it doesnt happen again</label
+              >
+            </div>
+
+            <div class="question">
+              <div class="q-title">
+                EOS3) In meetings, youre usually the person who.
+              </div>
+              <label class="option"
+                ><input type="radio" name="e3" value="V" required /> brings new
+                ideas + vision</label
+              >
+              <label class="option"
+                ><input type="radio" name="e3" value="I" /> organizes next steps
+                + accountability</label
+              >
+              <label class="option"
+                ><input type="radio" name="e3" value="T" /> handles the real
+                work details</label
+              >
+            </div>
+
+            <div class="question">
+              <div class="q-title">EOS4) Your biggest strength is usually.</div>
+              <label class="option"
+                ><input type="radio" name="e4" value="I" required /> execution
+                through people + processes</label
+              >
+              <label class="option"
+                ><input type="radio" name="e4" value="V" /> seeing the next
+                opportunity</label
+              >
+              <label class="option"
+                ><input type="radio" name="e4" value="T" /> making things work
+                with your hands/skills</label
+              >
+            </div>
+
+            <div class="question">
+              <div class="q-title">
+                EOS5) When you look at a business, you notice.
+              </div>
+              <label class="option"
+                ><input type="radio" name="e5" value="V" required /> where it
+                could go next
+              </label>
+              <label class="option"
+                ><input type="radio" name="e5" value="I" /> whats been working /
+                not working
+              </label>
+              <label class="option"
+                ><input type="radio" name="e5" value="T" /> what needs doing
+                today
+              </label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn">Get My Results</button>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>

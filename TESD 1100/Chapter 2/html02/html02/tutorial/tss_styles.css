@@ -1,0 +1,162 @@
+﻿/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 2
+   Tutorial Case
+   
+   TSS Typographic Style Sheet
+   Author: Jeffrey Jenson
+   Date: 12/8/2025
+   
+   Filename: tss_styles.css
+*/
+
+/* ================================
+   HTML and Body Styles
+   ================================ */
+
+html {
+  background-color: rgb(181, 201, 235);
+}
+
+body {
+  background-color: white;
+  color: rgb(51, 51, 51);
+  font-family: Verdana, Geneva, sans-serif;
+  margin: 0 auto;
+}
+
+/* ================================
+   Heading Styles
+   ================================ */
+
+h1,
+h2 {
+  font-family: "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+h1 {
+  text-transform: uppercase;
+  font-size: 1.6em;
+  margin: 0.6em 0;
+}
+
+h2 {
+  font-size: 1.2em;
+  margin-top: 1.2em;
+}
+
+/* ================================
+   Aside and Blockquote Styles
+   ================================ */
+
+aside {
+  background-color: rgb(231, 237, 248);
+  padding: 10px;
+}
+
+aside h1 {
+  font-size: 1.2em;
+  margin-top: 0;
+}
+
+aside blockquote {
+  font-size: 0.9em;
+  margin: 0 0 0.8em 0;
+  padding-left: 10px;
+  border-left: 3px solid rgb(102, 102, 102);
+}
+
+/* ================================
+   Navigation Styles
+   ================================ */
+
+nav {
+  font-family: "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+}
+
+nav h1 {
+  font-size: 1.1em;
+  text-transform: uppercase;
+  margin: 0.7em 0;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  margin-bottom: 4px;
+}
+
+nav li.newgroup {
+  margin-top: 10px;
+}
+
+nav a {
+  display: block;
+  text-decoration: none;
+  padding: 6px 8px;
+  background-color: rgb(40, 52, 90);
+  color: white;
+  font-size: 0.9em;
+}
+
+nav a:hover {
+  background-color: rgb(111, 132, 180);
+}
+
+/* ================================
+   List Styles
+   ================================ */
+
+article.syllabus ul {
+  list-style-type: square;
+  margin-left: 1.4em;
+}
+
+article.syllabus ol {
+  margin-left: 1.4em;
+}
+
+article.syllabus ol ol {
+  list-style-type: upper-alpha;
+}
+
+article.syllabus ol ol ol {
+  list-style-type: decimal;
+}
+
+/* ================================
+   Footer Styles
+   ================================ */
+
+footer {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 10px 0;
+  border-top: 1px solid rgb(102, 102, 102);
+  clear: both;
+}
+
+footer address {
+  font-style: normal;
+}
+
+/*
+Notice for the Quicksand-Regular Font
+------------------------------------------------------------------------------
+SIL Open Font License v1.10
+
+This license can also be found at this permalink: http://www.fontsquirrel.com/license/quicksand
+
+Copyright (c) 2011, Andrew Paglinawan (http://www.andrewpaglinawan.com andrew.paglinawan@gmail.com), 
+with Reserved Font Name “Quicksand”.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at: http://scripts.sil.org/OFL
+
+[license text unchanged…]
+*/

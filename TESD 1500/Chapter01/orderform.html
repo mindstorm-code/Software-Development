@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Bob's Auto Parts</title>
+  </head>
+  <body>
+    <h1>Bob's Auto Parts</h1>
+
+    <form action="processorder.php" method="post">
+      <table border="1">
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+        </tr>
+        <tr>
+          <td>Tires</td>
+          <td><input type="text" name="tireqty" /></td>
+        </tr>
+        <tr>
+          <td>Oil</td>
+          <td><input type="text" name="oilqty" /></td>
+        </tr>
+        <tr>
+          <td>Spark Plugs</td>
+          <td><input type="text" name="sparkqty" /></td>
+        </tr>
+      </table>
+
+      <br />
+      <input type="submit" value="Submit Order" />
+    </form>
+  </body>
+</html>

@@ -1,0 +1,190 @@
+﻿<!doctype html>
+<!--
+Author: Jeffrey Jenson
+Last Updated: 1/27/2026
+
+Project: Final Website Project
+Description: Booking/contact page for speaking inquiries. Includes form and FAQ.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book / Contact | James Thelin</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="container nav-inner">
+        <a class="brand" href="index.html">JAMES THELIN | ENTREPRENEUR | KEYNOTE SPEAKER | AUTHOR</a>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="phase.html">PHASE + Quiz</a>
+          <a href="blog.html">Blog</a>
+          <a href="contact.html">Book / Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="container">
+          <h2>Book James to Speak</h2>
+          <p class="mini">
+            Use this form for school assemblies, staff trainings, or business
+            workshops. (This demo form does not send emails, it's for the class
+            project.)
+          </p>
+
+          <div class="split">
+            <div class="callout">
+              <h3>Inquiry Form</h3>
+              <form class="form" action="#" method="post">
+                <label>
+                  Your Name
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Jane Smith"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Organization
+                  <input
+                    type="text"
+                    name="org"
+                    placeholder="Cedar Valley High School"
+                  />
+                </label>
+
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Audience Type
+                  <select name="audience">
+                    <option>Middle School</option>
+                    <option>High School</option>
+                    <option>College</option>
+                    <option>Business / Team</option>
+                    <option>Other</option>
+                  </select>
+                </label>
+
+                <label>
+                  Message
+                  <textarea
+                    name="message"
+                    placeholder="Tell us your goals, dates, and audience size."
+                  ></textarea>
+                </label>
+
+                <button class="btn btn-primary" type="submit">
+                  Submit Inquiry
+                </button>
+                <p class="mini">
+                  Tip: In real life, this form would connect to email or a CRM.
+                </p>
+              </form>
+            </div>
+
+            <div>
+              <div class="card">
+                <img
+                  class="speaker-img"
+                  src="images/IMG_0141.jpg"
+                  alt="James Thelin speaking"
+                />
+              </div>
+
+              <div class="card">
+                <h3>Popular Topics</h3>
+                <ul class="mini">
+                  <li>Own your mistakes and recover fast</li>
+                  <li>Attention, phones, and dopamine loops</li>
+                  <li>Using AI ethically, without outsourcing your brain</li>
+                  <li>Leadership and identity under pressure</li>
+                </ul>
+              </div>
+
+              <div class="card" style="margin-top: 18px">
+                <h3>Format Options</h3>
+                <ul class="mini">
+                  <li>45-minute assembly keynote</li>
+                  <li>60 to 90-minute interactive workshop</li>
+                  <li>Staff PD session</li>
+                  <li>Parent night add-on</li>
+                </ul>
+              </div>
+
+              <div class="card" style="margin-top: 18px">
+                <h3>Quick Insight</h3>
+                <p id="quote" class="mini">Attention is power. Protect it.</p>
+                <button class="btn btn-primary" onclick="newQuote()">
+                  Next Insight
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <hr class="sep" />
+
+          <h2>FAQ</h2>
+          <p class="mini">Click a question to expand.</p>
+
+          <div class="card">
+            <h3 style="cursor: pointer" onclick="toggleFaq('faq1')">
+              Is this a diagnosis or therapy?
+            </h3>
+            <p class="mini" id="faq1" style="display: none">
+              No. This is educational content designed to help people understand
+              patterns and build better habits.
+            </p>
+          </div>
+
+          <div class="card" style="margin-top: 12px">
+            <h3 style="cursor: pointer" onclick="toggleFaq('faq2')">
+              Do you cover AI and cheating?
+            </h3>
+            <p class="mini" id="faq2" style="display: none">
+              Yes. The program teaches learning-first AI use and clear
+              guardrails. You own the outcome.
+            </p>
+          </div>
+
+          <div class="card" style="margin-top: 12px">
+            <h3 style="cursor: pointer" onclick="toggleFaq('faq3')">
+              What does the school need for A/V?
+            </h3>
+            <p class="mini" id="faq3" style="display: none">
+              A microphone (preferred), projector or screen if available, and a
+              space sized for your audience.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        &copy; <span id="year"></span> James Thelin. Educational content. Not a
+        diagnosis.
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,74 @@
+@charset "utf-8";
+
+/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 3
+   Coding Challenge 3-2
+
+   Author: Jeffrey Jenson
+   Date: 01/05/2026
+
+   Filename: code3-2_layout.css
+*/
+
+/* Step 3 */
+header,
+footer,
+aside,
+article,
+a {
+  padding: 10px;
+  outline: 3px dashed gray;
+}
+
+/* Step 4 */
+body {
+  width: 90%;
+  min-width: 640px;
+  max-width: 1024px;
+  margin: 30px auto;
+
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 50px 30px 1fr 1fr 100px;
+  gap: 15px;
+}
+
+/* Step 5 */
+a {
+  display: block;
+}
+
+/* Step 6a */
+header {
+  grid-column: 1 / -1;
+}
+
+/* Step 6b */
+article#intro {
+  grid-column: 1 / span 2;
+  grid-row: 3 / span 2;
+}
+
+/* Step 6c */
+article#main {
+  grid-column: 3 / span 3;
+  grid-row: 3 / span 2;
+}
+
+/* Place sidebars to match the figure */
+aside#side1 {
+  grid-column: 6;
+  grid-row: 3;
+}
+
+aside#side2 {
+  grid-column: 6;
+  grid-row: 4;
+}
+
+/* Step 6d (size) + put footers on bottom row */
+footer {
+  grid-column: span 2;
+  grid-row: 5;
+}

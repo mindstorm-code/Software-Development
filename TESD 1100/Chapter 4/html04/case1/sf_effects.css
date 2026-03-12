@@ -1,0 +1,83 @@
+@charset "utf-8";
+
+/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 4
+   Case Problem 1
+   
+   Save your Fork Graphic Design Styles
+   Author: Jeffrey Jenson
+   Date: 1-13-2026
+
+   Filename: sf_effects.css
+*/
+
+/* Body Header Styles */
+
+body {
+  /* Drop shadows on left and right edges of the page */
+  box-shadow: -10px 0 50px rgb(51, 51, 51),
+    /* left shadow */ 10px 0 50px rgb(51, 51, 51); /* right shadow */
+}
+
+/* Navigation Tabs List Styles */
+
+body > header nav.tabs {
+  background-image: url("sf_back1.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+body > header nav.tabs li {
+  /* Trapezoid effect via 3D transform */
+  transform: perspective(50px) rotateX(20deg);
+  transform-origin: bottom;
+}
+
+/* Hover rollover effect on tabs */
+body > header nav.tabs li:hover {
+  background-color: rgb(231, 231, 231);
+}
+
+/* Left Section Styles */
+
+section#left nav.vertical {
+  border: 1px solid rgb(20, 167, 170);
+  border-radius: 25px;
+}
+
+section#left nav.vertical h1 {
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+}
+
+/* Center Article Styles */
+
+section#center article {
+  /* Radial gradient background */
+  background: radial-gradient(
+    circle at center,
+    white 30%,
+    rgb(151, 151, 151) 100%
+  );
+
+  border: 1px solid rgb(151, 151, 151);
+  border-radius: 50px;
+
+  box-shadow: 10px 10px 20px rgb(51, 51, 51);
+}
+
+/* Blockquote Styles */
+
+blockquote {
+  background-image: url("sf_speech.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(5px 5px 10px rgb(51, 51, 51));
+}
+
+/* Reviewer photos as circles */
+cite img {
+  border-radius: 50%;
+}

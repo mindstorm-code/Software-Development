@@ -1,0 +1,48 @@
+﻿@charset "utf-8";
+
+/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 4
+   Coding Challenge 1
+
+   Author: Jeffrey Jenson
+   Date: 1-12-2026
+   
+   Filename: code4-1_back.css
+*/
+
+body {
+  background-color: #d6d3f5;
+  border: 12px solid #35345f;
+  border-radius: 18px;
+  padding: 40px 50px 80px 50px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+  position: relative;
+
+  /* Shakespeare portrait – tuned to match book figure */
+  background-image: url("ws.png");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 180px) calc(100% - 160px);
+  background-size: 340px;
+}
+
+/* TITLE BAR */
+header h1 {
+  text-align: center;
+  font-size: 1.6em;
+  margin: 0 0 20px 0;
+  padding-bottom: 8px;
+  border-bottom: 4px solid #35345f;
+}
+
+header span {
+  font-size: 0.6em;
+  font-style: italic;
+  margin-left: 12px;
+}
+
+/* poem spacing */
+p {
+  line-height: 1.4;
+  margin-bottom: 20px;
+}

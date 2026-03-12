@@ -1,0 +1,83 @@
+@charset "utf-8";
+
+/*
+   Layout Style Sheet for A Soldier's Scrapbook
+   Author: Jeffrey Jenson
+   Date: 12/15/2025
+   Filename: ss_layout.css
+*/
+
+/* Article Styles */
+
+article {
+  float: left;
+  width: 384px;
+  padding-bottom: 20px;
+}
+
+/* First Line and Drop Cap Styles */
+
+article p:first-of-type::first-letter {
+  float: left;
+  font-size: 3em;
+  line-height: 1em;
+  padding-right: 8px;
+}
+
+/* Aside Styles */
+
+aside {
+  float: left;
+}
+
+/* Map Styles */
+
+#battleMap {
+  position: relative;
+  width: 768px;
+}
+
+#mapImage {
+  display: block;
+}
+
+/* Interactive Map Styles */
+
+.battleMarkers {
+  position: absolute;
+}
+
+#marker1 {
+  top: 120px;
+  left: 310px;
+}
+#marker2 {
+  top: 230px;
+  left: 260px;
+}
+#marker3 {
+  top: 260px;
+  left: 320px;
+}
+#marker4 {
+  top: 210px;
+  left: 370px;
+}
+#marker5 {
+  top: 240px;
+  left: 410px;
+}
+#marker6 {
+  top: 190px;
+  left: 460px;
+}
+
+/* Map Information Styles */
+
+.mapInfo {
+  display: none;
+}
+
+.battleMarkers:hover + .mapInfo {
+  display: block;
+}

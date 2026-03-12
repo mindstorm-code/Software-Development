@@ -1,0 +1,64 @@
+﻿@charset "utf-8";
+
+/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 4
+   Coding Challenge 4
+
+   Author: Jeffrey Jenson
+   Date: 1-12-2026
+
+   Filename: code4-4_.css
+*/
+
+body {
+  width: 900px;
+  margin: 20px auto;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 1.1em;
+  background-color: #f5f5f5;
+}
+
+article {
+  margin: 20px auto;
+  padding: 40px 60px 60px 60px;
+  background-color: ivory; /* will be combined with gradients in debug CSS */
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin: 0;
+}
+
+h1 {
+  font-size: 2.6em;
+  letter-spacing: 0.06em;
+}
+
+h2 {
+  font-size: 1.3em;
+  margin-top: 6px;
+}
+
+.part {
+  font-weight: bold;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+p {
+  line-height: 1.6;
+}
+
+.year {
+  text-align: center;
+  margin-top: 25px;
+  font-style: italic;
+}
+
+cite {
+  display: block;
+  font-size: 0.8em;
+  margin-top: 10px;
+}

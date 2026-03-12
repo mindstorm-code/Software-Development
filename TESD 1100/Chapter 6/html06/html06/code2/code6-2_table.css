@@ -1,0 +1,32 @@
+﻿/* Author: Jeffrey Jenson | Date: 01/13/2026 */
+
+/* TABLE BASE STYLES */
+table {
+  margin: 20px;
+  border-collapse: collapse; /* grid lines share borders */
+}
+
+/* HEADER CELL */
+thead tr th {
+  color: white;
+  background-color: red;
+  font-size: 1.5em;
+  border: 1px solid gray;
+  padding: 8px 0;
+}
+
+/* EVERY GRID CELL */
+td {
+  width: 50px;
+  height: 50px;
+  font-size: 0.7em;
+  border: 1px solid gray;
+  vertical-align: top;
+  text-align: left;
+  padding: 2px;
+}
+
+/* SHADED BLANK CELLS */
+td.blank {
+  background-image: linear-gradient(to bottom right, red, gray);
+}

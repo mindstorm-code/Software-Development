@@ -1,0 +1,50 @@
+﻿@charset "utf-8";
+
+/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 2
+   Coding Challenge 2
+
+   Author: Jeffery Jenson
+   Date: 12/02/2025
+   
+   Filename: code2-2.css
+*/
+
+/* 4. h1 that are direct children of header */
+header > h1 {
+  text-align: center;
+  font-family: Impact, sans-serif;
+  font-size: 3em;
+}
+
+/* 5. h1 that are direct children of nav */
+nav > h1 {
+  font-size: 1.2em;
+  color: white;
+  background-color: black;
+  text-align: center;
+}
+
+/* 6. h1 that are direct children of article */
+article > h1 {
+  font-size: 2em;
+  font-family: cursive;
+}
+
+/* 7. ul elements nested within nav */
+nav ul {
+  list-style-type: none;
+  line-height: 2em;
+}
+
+/* 8. all hypertext links */
+a {
+  color: ivory;
+  text-decoration: none;
+}
+
+/* 9. hovered links */
+a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,66 @@
+@charset "utf-8";
+
+/*
+   Color and Typography Styles for Slate & Pencil Tutoring
+   Author: Jeffrey Jenson
+   Date: 12/15/2025
+   Filename: sp_styles.css
+*/
+
+body {
+  font-family: Verdana, Geneva, sans-serif;
+  background-color: rgb(240, 240, 240);
+  color: rgb(60, 60, 60);
+}
+
+#logo {
+  background-color: rgb(50, 50, 50);
+  padding: 10px;
+}
+
+nav.vertical {
+  background-color: rgb(220, 220, 220);
+}
+
+nav.vertical a:link,
+nav.vertical a:visited {
+  display: block;
+  padding: 10px;
+  color: rgb(40, 40, 40);
+}
+
+nav.vertical a:hover,
+nav.vertical a:active {
+  background-color: rgb(180, 180, 180);
+}
+
+nav.horizontal {
+  background-color: rgb(60, 60, 60);
+}
+
+nav.horizontal a:link,
+nav.horizontal a:visited {
+  display: block;
+  padding: 10px;
+  color: white;
+  text-align: center;
+}
+
+nav.horizontal a:hover,
+nav.horizontal a:active {
+  background-color: rgb(100, 100, 100);
+}
+
+section,
+aside {
+  background-color: white;
+  padding: 10px;
+}
+
+footer {
+  background-color: rgb(50, 50, 50);
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.8em;
+}

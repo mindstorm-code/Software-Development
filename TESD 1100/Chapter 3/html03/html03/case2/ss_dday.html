@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 3
+   Case Problem 2
+   
+   Normandy Invasion Day 1 Page
+   Author: Jeffrey Jenson
+   Date: 12/15/2025
+   
+   Filename: ss_dday.html
+   -->
+    <meta charset="utf-8" />
+    <title>Normandy Invasion: Day 1</title>
+
+    <!-- REQUIRED STYLE SHEETS -->
+    <link href="ss_styles.css" rel="stylesheet" />
+    <link href="ss_layout.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <header>
+      <img src="ss_logo.png" alt="A Soldier's Scrapbook" />
+      <nav class="horizontal">
+        <ul>
+          <li><a href="#">Blitzkrieg</a></li>
+          <li><a href="#">Battle of Britain</a></li>
+          <li><a href="#">Normandy Invasion</a></li>
+          <li><a href="#">Market Garden</a></li>
+          <li><a href="#">Fall of Berlin</a></li>
+          <li><a href="#">Postwar Upheaval</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <article>
+      <h1>The Normandy Invasion</h1>
+      <p>
+        The invasion on the beaches of Normandy on June 6, 1944, was the largest
+        air, land, and sea operation undertaken before or since that date.
+        <em>Operation Overlord</em> involved over 150,000 service men stationed
+        on over 5,000 ships and 11,000 airplanes.
+      </p>
+      <p>
+        The landing beaches were intended to provide footholds that would allow
+        rapid reinforcement and expansion inland before the enemy could mount a
+        major counter-attack.
+      </p>
+      <p>
+        Supporting the beach landings, especially at Omaha Beach, airborne
+        divisions descended behind enemy lines, helping ensure that the beach
+        assaults were successful.
+      </p>
+    </article>
+
+    <aside>
+      <h1>Interactive Map</h1>
+      <p>
+        Hover over the battle markers <img src="ss_marker.png" alt="" /> to view
+        detailed information.
+      </p>
+
+      <div id="battleMap">
+        <img src="ss_map.png" id="mapImage" alt="battle map" />
+
+        <a id="marker1" class="battleMarkers" href="#marker1"
+          ><img src="ss_marker.png" alt=""
+        /></a>
+        <div class="mapInfo" id="info1">...</div>
+
+        <a id="marker2" class="battleMarkers" href="#marker2"
+          ><img src="ss_marker.png" alt=""
+        /></a>
+        <div class="mapInfo" id="info2">...</div>
+
+        <a id="marker3" class="battleMarkers" href="#marker3"
+          ><img src="ss_marker.png" alt=""
+        /></a>
+        <div class="mapInfo" id="info3">...</div>
+
+        <a id="marker4" class="battleMarkers" href="#marker4"
+          ><img src="ss_marker.png" alt=""
+        /></a>
+        <div class="mapInfo" id="info4">...</div>
+
+        <a id="marker5" class="battleMarkers" href="#marker5"
+          ><img src="ss_marker.png" alt=""
+        /></a>
+        <div class="mapInfo" id="info5">...</div>
+
+        <a id="marker6" class="battleMarkers" href="#marker6"
+          ><img src="ss_marker.png" alt=""
+        /></a>
+        <div class="mapInfo" id="info6">...</div>
+      </div>
+    </aside>
+
+    <footer>Raleigh Veteran's Museum</footer>
+  </body>
+</html>

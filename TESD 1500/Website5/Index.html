@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jeffrey's Store</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <h1>Jeffrey's Auto Store</h1>
+    <h2>Order Form</h2>
+
+    <form action="process.php" method="post">
+      <label>Tires:</label>
+      <input type="number" name="tireqty" /><br /><br />
+
+      <label>Oil:</label>
+      <input type="number" name="oilqty" /><br /><br />
+
+      <label>Spark Plugs:</label>
+      <input type="number" name="sparkqty" /><br /><br />
+
+      <label>Shipping Address:</label>
+      <input type="text" name="address" /><br /><br />
+
+      <input type="submit" value="Submit Order" />
+    </form>
+  </body>
+</html>

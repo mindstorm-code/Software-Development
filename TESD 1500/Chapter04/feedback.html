@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Customer Feedback</title>
+  </head>
+
+  <body>
+    <h1>Customer Feedback</h1>
+
+    <form action="processfeedback_v2.php" method="post">
+      <p>
+        <label for="name">Your name:</label><br />
+        <input type="text" name="name" id="name" />
+      </p>
+
+      <p>
+        <label for="email">Your email address:</label><br />
+        <input type="text" name="email" id="email" />
+      </p>
+
+      <p>
+        <label for="feedback">Your feedback:</label><br />
+        <textarea name="feedback" id="feedback" rows="6" cols="40"></textarea>
+      </p>
+
+      <p>
+        <input type="submit" value="Send Feedback" />
+      </p>
+    </form>
+  </body>
+</html>

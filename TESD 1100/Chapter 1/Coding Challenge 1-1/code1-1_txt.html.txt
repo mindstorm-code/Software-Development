@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <!--
+        Coding Challenge 1-1
+        Author: Jeffrey Jenson
+        Date: 11/25/2025
+    -->
+
+    <title>Government Sites on the Web</title>
+</head>
+
+<body>
+
+    <h1>Government Sites on the Web</h1>
+
+    <nav>
+        <ul>
+            <li><a href="https://www.usa.gov">USA government</a></li>
+            <li><a href="https://www.loc.gov">Library of Congress</a></li>
+            <li><a href="https://www.congress.gov">U.S. Congress</a></li>
+            <li><a href="https://www.fdlp.gov">Federal Depository Library System</a></li>
+            <li><a href="https://bensguide.gpo.gov">Ben’s Guide to US Government for Kids</a></li>
+            <li><a href="https://www.healthfinder.gov">Health Finder</a></li>
+            <li><a href="https://www.cdc.gov/nchs">National Center for Health Statistics</a></li>
+            <li><a href="https://www.whitehouse.gov">The Whitehouse</a></li>
+            <li><a href="https://www.census.gov">U.S. Census Bureau</a></li>
+            <li><a href="https://www.cia.gov/library/publications/the-world-factbook/">CIA World Factbook</a></li>
+        </ul>
+    </nav>
+
+</body>
+</html>

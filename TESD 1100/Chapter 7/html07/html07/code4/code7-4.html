@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+      New Perspectives on HTML5 and CSS3, 8th Edition
+      Tutorial 7
+      Coding Challenge 4
+
+      Author: Jeffrey Jenson
+      Date: 01/13/2026
+      Filename: code7-4.html
+   -->
+    <meta charset="utf-8" />
+    <title>Coding Challenge 7-4</title>
+    <!-- Link to the provided form styles -->
+    <link rel="stylesheet" href="code7-4_forms.css" />
+  </head>
+  <body>
+    <h1>Contact Information</h1>
+
+    <form action="submit-form.php" method="post">
+      <fieldset>
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="firstName" />
+
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="lastName" />
+
+        <label for="studentid">Student ID</label>
+        <input
+          type="text"
+          id="studentid"
+          name="studentid"
+          maxlength="8"
+          pattern="^uw-\d{5}$"
+        />
+
+        <label for="year">Year</label>
+        <select id="year" name="year">
+          <option value="1">Freshman</option>
+          <option value="2">Sophomore</option>
+          <option value="3">Junior</option>
+          <option value="4">Senior</option>
+          <option value="5">Graduate School</option>
+          <option value="6">Part-time</option>
+          <option value="99">--Other--</option>
+        </select>
+
+        <label for="residencehall">Residence Hall</label>
+        <input
+          type="text"
+          id="residencehall"
+          name="residencehall"
+          list="hallName"
+        />
+
+        <datalist id="hallName">
+          <option value="Auger">Auger</option>
+          <option value="Bernard">Bernard</option>
+          <option value="Chadbourne">Chadbourne</option>
+          <option value="Claratine">Claratine</option>
+          <option value="Cuffs">Cuffs</option>
+          <option value="Eagleton">Eagleton</option>
+          <option value="Eastside 1">Eastside 1</option>
+          <option value="Eastside 2">Eastside 2</option>
+          <option value="Frenches">Frenches</option>
+          <option value="Morning Side">Morning Side</option>
+          <option value="Newton">Newton</option>
+          <option value="Sandberg">Sandberg</option>
+          <option value="Summex">Summex</option>
+          <option value="Westside 1">Westside 1</option>
+          <option value="Westside 2">Westside 2</option>
+          <option value="Westside 3">Westside 3</option>
+        </datalist>
+      </fieldset>
+
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+@charset "utf-8";
+
+/*
+   New Perspectives on HTML5 and CSS3, 8th Edition
+   Tutorial 8
+   Case Problem 1
+
+   Rhetoric in the United States Styles for Media
+   Author: Jeffrey Jenson
+   Date: 2026-01-21
+
+   Filename: ws_media.css
+
+*/
+
+/* VideoPlayer Styles */
+
+video {
+  display: block;
+  width: 90%;
+  margin: 5px auto;
+}
+
+@media screen and (min-width: 521px) {
+  video {
+    width: 360px;
+    float: right;
+    margin: 10px;
+  }
+}
+
+/* Track Styles */
+
+::cue {
+  font: 1.3em sans-serif;
+  color: rgb(221, 128, 160);
+  background-color: rgba(255, 255, 255, 0.8);
+}
