@@ -1,0 +1,116 @@
+<!doctype html>
+<!--
+Author: Jeffrey Jenson
+Last Updated: 1/27/2026
+
+Project: Final Website Project
+Description: Blog page with short posts related to speaking, growth, and attention.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog | James Thelin</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="container nav-inner">
+        <a class="brand" href="index.html"
+          >JAMES THELIN | ENTREPRENEUR | KEYNOTE SPEAKER | AUTHOR</a
+        >
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="phase.php">PHASE + Quiz</a>
+          <a href="blog.html">Blog</a>
+          <a href="contact.php">Book / Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="container">
+          <h2>Ideas that help people grow faster</h2>
+          <p class="mini">
+            Short, practical insights from the PHASE framework, keynote
+            sessions, and the book. Built for students, teachers, and leaders.
+          </p>
+
+          <div class="grid-3">
+            <div class="card">
+              <p class="post-meta">Jan 20, 2026 · Attention</p>
+              <h3>Protecting focus in a noisy world</h3>
+              <p class="mini">
+                Tiny choices add up. We show how students can defend attention
+                without banning every device.
+              </p>
+            </div>
+            <div class="card">
+              <p class="post-meta">Jan 18, 2026 · Growth</p>
+              <h3>Failure isn’t the end, it’s data</h3>
+              <p class="mini">
+                A simple reframe that turns setbacks into the next instruction,
+                not a verdict.
+              </p>
+            </div>
+            <div class="card">
+              <p class="post-meta">Jan 15, 2026 · Leadership</p>
+              <h3>Why momentum beats motivation</h3>
+              <p class="mini">
+                Motivation fades. Momentum compounds. Build micro-wins that
+                produce real progress.
+              </p>
+            </div>
+            <div class="card">
+              <p class="post-meta">Jan 12, 2026 · AI + Ethics</p>
+              <h3>Using AI without outsourcing your brain</h3>
+              <p class="mini">
+                AI is a tool, not an authority. We model clear guardrails that
+                protect learning.
+              </p>
+            </div>
+            <div class="card">
+              <p class="post-meta">Jan 10, 2026 · Workshops</p>
+              <h3>What makes a student assembly stick</h3>
+              <p class="mini">
+                We teach one core skill, one story, and one action step students
+                can do tomorrow.
+              </p>
+            </div>
+            <div class="card">
+              <p class="post-meta">Jan 8, 2026 · PHASE</p>
+              <h3>Charger vs. Analyzer: two growth moves</h3>
+              <p class="mini">
+                Two profiles, two strengths, two guardrails. Simple language
+                that makes teams work better together.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container callout">
+          <h2>Want a talk on one of these topics?</h2>
+          <p class="mini">
+            Book a keynote or workshop customized to your audience and goals.
+          </p>
+          <a class="btn btn-primary" href="contact.php">Book James to Speak</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        &copy; <span id="year"></span> James Thelin. Educational content. Not a
+        diagnosis.
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<!--
+Author: Jeffrey Jenson
+Last Updated: 1/27/2026
+
+Project: Final Website Project
+Description: Promotional and educational website for James Thelin speaking + book,
+             including PHASE mini-quiz, grid layout, images, and JavaScript interaction.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>James Thelin | The Art of Collapsing Time</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="container nav-inner">
+        <a class="brand" href="index.html"
+          >JAMES THELIN | ENTREPRENEUR | KEYNOTE SPEAKER | AUTHOR
+        </a>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="phase.php">PHASE + Quiz</a>
+          <a href="blog.html">Blog</a>
+          <a href="contact.php">Book / Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Collapse Time. Accelerate Growth.</h1>
+          <h2>Turn setbacks into success faster than ever</h2>
+          <p>
+            Keynote speaker and author of <em>The Art of Collapsing Time</em>.
+            Built for students, educators, and leaders who want better focus,
+            stronger character, and practical tools for growth.
+          </p>
+          <div class="button-row">
+            <a class="btn btn-primary" href="contact.php"
+              >Book James to Speak</a
+            >
+            <a class="btn btn-secondary" href="phase.php#book">Buy the Book</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <section class="section">
+        <div class="container">
+          <h2>What students and teams learn</h2>
+          <p class="mini">
+            Clear, practical, and non-shaming. Tools they use next week.
+          </p>
+
+          <div class="grid-3">
+            <div class="card">
+              <h3>Own Your Mistakes</h3>
+              <p class="mini">
+                Recover fast, take responsibility, and turn failure into
+                feedback.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Protect Attention</h3>
+              <p class="mini">
+                Simple habits to beat distractions, notifications, and dopamine
+                loops.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Use AI Ethically</h3>
+              <p class="mini">
+                AI helps you learn. It doesn't replace your thinking. You own
+                the outcome.
+              </p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 18px">
+            <img
+              class="speaker-img"
+              src="images/James Workshop.png"
+              alt="James Thelin leading a workshop"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split">
+          <div>
+            <h2>Featured Book</h2>
+            <p>
+              <strong>The Art of Collapsing Time</strong> is a framework for
+              turning setbacks into momentum. It helps people make faster
+              progress without losing integrity, creativity, or focus.
+            </p>
+            <a class="btn btn-primary" href="phase.php#book">Buy the Book</a>
+            <p class="mini" style="margin-top: 10px">
+              Want a school bundle or bulk order? Use the booking form.
+            </p>
+          </div>
+          <div>
+            <img
+              class="book-img"
+              src="images/book-cover.png"
+              alt="Book cover: The Art of Collapsing Time"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container callout">
+          <h2>Quick Insights</h2>
+          <p id="quote" class="mini">Failure is feedback in disguise.</p>
+          <button class="btn btn-primary" onclick="newQuote()">
+            Next Insight
+          </button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <h2>Next step</h2>
+          <p class="mini">
+            Take the PHASE Quick Check and explore how the framework works.
+          </p>
+          <a class="btn btn-primary" href="phase.php">Go to PHASE + Quiz</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        &copy; <span id="year"></span> James Thelin. Educational content. Not a
+        diagnosis.
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
