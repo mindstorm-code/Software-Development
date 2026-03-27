@@ -4,11 +4,13 @@ import {
   orderBy,
   query,
   where,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseApp";
 import { createDoc, getDocById, updateDocById } from "./firestore";
 import { isDemoMode } from "../utils/mode";
-import { queryDemoByField } from "./demoStore";
+import { queryDemoByField, deleteDemoDoc } from "./demoStore";
 
 export const createChore = async (payload) => createDoc("chores", payload);
 
@@ -18,6 +20,14 @@ export const updateChore = async (choreId, payload) => {
 
 export const getChoreById = async (choreId) => {
   return getDocById("chores", choreId);
+};
+
+export const deleteChore = async (choreId) => {
+  if (isDemoMode()) {
+    deleteDemoDoc("chores", choreId);
+    return;
+  }
+  await deleteDoc(doc(db, "chores", choreId));
 };
 
 export const getChoresByChild = async (childId, familyId) => {

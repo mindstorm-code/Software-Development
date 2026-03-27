@@ -15,6 +15,8 @@ const defaultStore = {
       displayName: "Demo Kid",
       role: "child",
       familyId: "demo-family",
+      pinHash: "",
+      pinResetRequired: false,
     },
   ],
   families: [
@@ -49,6 +51,8 @@ const defaultStore = {
       active: true,
       createdBy: "demo-parent",
       createdAt: new Date().toISOString(),
+      beforeImageUrl: "",
+      afterImageUrl: "",
     },
   ],
   choreInstances: [],
@@ -74,6 +78,17 @@ const defaultStore = {
       reason: "Welcome bonus",
       sourceType: "manual_adjustment",
       sourceId: "seed",
+      createdAt: new Date().toISOString(),
+    },
+  ],
+  coupons: [
+    {
+      id: "demo-coupon-1",
+      familyId: "demo-family",
+      title: "Ice Cream Coupon",
+      description: "One scoop at the local shop.",
+      pointCost: 40,
+      imageUrl: "",
       createdAt: new Date().toISOString(),
     },
   ],
@@ -136,6 +151,12 @@ export const updateDemoDoc = (collectionName, id, data) => {
 export const getDemoDoc = (collectionName, id) => {
   const collection = getCollection(collectionName);
   return collection.find((item) => item.id === id) || null;
+};
+
+export const deleteDemoDoc = (collectionName, id) => {
+  const collection = getCollection(collectionName);
+  const filtered = collection.filter((item) => item.id !== id);
+  setCollection(collectionName, filtered);
 };
 
 export const queryDemoByField = (collectionName, field, value) => {

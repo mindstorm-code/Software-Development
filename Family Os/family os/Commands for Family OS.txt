@@ -1,0 +1,7 @@
+Commands for Family OS 
+
+Front End 
+ cd "C:\Users\jeffr\Software-Development\Family Os\family os\frontend"
+
+Back End 
+cd "C:\Users\jeffr\Software-Development\Family Os\family os\backend"

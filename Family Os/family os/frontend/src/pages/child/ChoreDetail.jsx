@@ -18,6 +18,7 @@ const ChildChoreDetail = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [startedAt, setStartedAt] = useState(Date.now());
 
   useEffect(() => {
     const loadChore = async () => {
@@ -28,6 +29,7 @@ const ChildChoreDetail = () => {
       setChoreInstance(instance);
       setChore(choreDoc);
       setLoading(false);
+      setStartedAt(Date.now());
     };
 
     loadChore();
@@ -77,7 +79,9 @@ const ChildChoreDetail = () => {
 
     const imageUrls = uploads.map((upload) => upload.url);
     const imageHashes = uploads.map((upload) => upload.hash).filter(Boolean);
+    const submittedImageUrl = imageUrls[0];
 
+    const durationSeconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
     const submissionId = await createSubmission({
       familyId,
       choreInstanceId: id,
@@ -85,17 +89,22 @@ const ChildChoreDetail = () => {
       checklistCompleted,
       imageUrls,
       imageHashes,
+      submittedImageUrl,
       status: "submitted",
+      startedAt: new Date(startedAt).toISOString(),
+      durationSeconds,
     });
 
-    await updateChoreInstance(id, { status: "submitted" });
+    await updateChoreInstance(id, { status: "submitted", durationSeconds });
 
     if (chore.aiVerificationEnabled) {
       const aiReview = await verifyChoreSubmission({
         choreTitle: chore.title,
         choreDescription: chore.description,
         checklist: chore.checklist || [],
-        imageUrls,
+        submittedImageUrl,
+        afterImageUrl: chore.afterImageUrl,
+        beforeImageUrl: chore.beforeImageUrl,
       });
       await updateSubmission(submissionId, { aiReview });
     }
@@ -108,6 +117,9 @@ const ChildChoreDetail = () => {
   return (
     <div className="page">
       <PageHeader title="Submit chore" subtitle="Show your work and earn points." />
+      <button className="btn ghost" onClick={() => window.history.back()} style={{ marginBottom: "8px" }}>
+        Back
+      </button>
 
       <form className="form" onSubmit={handleSubmit}>
         {loading && <p className="muted">Loading chore...</p>}

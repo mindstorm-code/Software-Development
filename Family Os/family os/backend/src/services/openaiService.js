@@ -3,22 +3,34 @@ const OpenAI = require("openai");
 const SYSTEM_PROMPT =
   "You review chore submissions. Return ONLY valid JSON with keys: confidenceScore (0-1), status (likely_complete|needs_review|likely_incomplete), notes (string). Keep notes short.";
 
-const buildUserPrompt = ({ choreTitle, choreDescription, checklist, imageUrls, childNotes }) => {
+const buildUserPrompt = ({
+  choreTitle,
+  choreDescription,
+  checklist,
+  imageUrls,
+  childNotes,
+  afterImageUrl,
+  beforeImageUrl,
+  submittedImageUrl,
+}) => {
   const checklistText = Array.isArray(checklist) && checklist.length
     ? checklist.map((item, index) => `${index + 1}. ${item}`).join("\n")
     : "No checklist provided.";
 
   const imagesText = Array.isArray(imageUrls) && imageUrls.length
     ? imageUrls.map((url, index) => `${index + 1}. ${url}`).join("\n")
-    : "No image URLs provided.";
+    : "No legacy image URLs provided.";
 
   return [
     `Chore: ${choreTitle}`,
     choreDescription ? `Description: ${choreDescription}` : "Description: (none)",
     `Checklist:\n${checklistText}`,
-    `Images:\n${imagesText}`,
+    `Submitted image: ${submittedImageUrl || "none"}`,
+    `Expected AFTER image: ${afterImageUrl || "none"}`,
+    `Optional BEFORE image: ${beforeImageUrl || "none"}`,
+    `Legacy images list:\n${imagesText}`,
     childNotes ? `Child notes: ${childNotes}` : "Child notes: (none)",
-    "Evaluate likelihood the chore is complete based on provided info.",
+    "Compare submitted image to AFTER image. Use BEFORE image to gauge improvement if present. Use checklist as rules. If no AFTER image, rely on checklist only. Return structured JSON only.",
   ].join("\n\n");
 };
 
@@ -60,7 +72,15 @@ const verifyChoreWithAI = async (payload) => {
       temperature: 0.2,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserPrompt(payload) },
+        {
+          role: "user",
+          content: buildUserPrompt({
+            ...payload,
+            submittedImageUrl:
+              payload.submittedImageUrl ||
+              (Array.isArray(payload.imageUrls) ? payload.imageUrls[0] : undefined),
+          }),
+        },
       ],
     });
 

@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
-import Badge from "../../components/Badge";
 import ProgressBar from "../../components/ProgressBar";
 import BottomNav from "../../components/BottomNav";
-import StatCard from "../../components/StatCard";
 import { useAuth } from "../../contexts/AuthContext";
 import { getChoreInstancesForToday } from "../../services/choreInstances";
 import { getChoreById } from "../../services/chores";
@@ -53,46 +51,70 @@ const ChildDashboard = () => {
   }, [user?.uid, familyId]);
 
   const bigReward = rewards[0];
+  const quickWins = chores.filter((c) => c.pointValue > 0 && c.pointValue <= 10);
 
   return (
     <div className="page">
-      <PageHeader title="Hey there!" subtitle="Your chores for today." />
+      <PageHeader
+        title={user?.displayName ? `Hey ${user.displayName} 👋` : "Hey there! 👋"}
+        subtitle=""
+        action={<button className="btn ghost" onClick={() => window.history.back()}>Back</button>}
+      />
 
-      <section className="stat-grid">
-        <StatCard label="Points balance" value={loading ? "..." : points} />
-        <StatCard label="Streak" value="-" helper="Coming soon" />
+      <section className="hero-strip">
+        <div className="hero-chip">⭐ {loading ? "..." : points} points</div>
+        <div className="hero-chip">🔥 2-day streak</div>
+        <div className="hero-chip">🏅 Level 1 Explorer</div>
       </section>
 
       <section className="section">
-        <h2>Due today</h2>
-        <div className="card-list">
+        <h2>🎯 Your Missions Today</h2>
+        <div className="missions-grid">
           {loading && <p className="muted">Loading chores...</p>}
           {!loading && chores.length === 0 && (
             <p className="muted">No chores due today.</p>
           )}
           {chores.map((chore) => (
-            <Card
-              key={chore.instanceId}
-              title={chore.choreTitle}
-              footer={<Badge label={`${chore.pointValue} pts`} />}
-            >
-              <p>{chore.description}</p>
-              <p className="muted">Proof: {chore.proofType}</p>
-              <Link className="btn ghost" to={`/child/chore/${chore.instanceId}`}>
-                Open chore
-              </Link>
-            </Card>
+            <Link key={chore.instanceId} to={`/child/chore/${chore.instanceId}`} className="mission-card">
+              <div className="mission-emoji">⭐</div>
+              <div className="mission-content">
+                <h3>{chore.choreTitle}</h3>
+                <p className="muted">{chore.description}</p>
+              </div>
+              <div className="mission-points">+{chore.pointValue} ⭐</div>
+            </Link>
           ))}
         </div>
       </section>
 
       {bigReward && (
         <section className="section">
-          <h2>Saving for</h2>
+          <h2>🎁 Saving For</h2>
           <Card title={bigReward.title}>
             <p>{bigReward.description}</p>
             <ProgressBar value={points} max={bigReward.pointCost} />
+            <p className="muted">
+              {points} / {bigReward.pointCost} ⭐ • You're close! Just{" "}
+              {Math.max(0, Math.ceil((bigReward.pointCost - points) / 10))} more chores!
+            </p>
           </Card>
+        </section>
+      )}
+
+      {quickWins.length > 0 && (
+        <section className="section">
+          <h2>⚡ Quick Wins</h2>
+          <div className="missions-grid quick">
+            {quickWins.map((chore) => (
+              <Link key={chore.instanceId} to={`/child/chore/${chore.instanceId}`} className="mission-card small">
+                <div className="mission-emoji">⚡</div>
+                <div className="mission-content">
+                  <h3>{chore.choreTitle}</h3>
+                </div>
+                <div className="mission-points">+{chore.pointValue} ⭐</div>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
@@ -101,6 +123,7 @@ const ChildDashboard = () => {
           { label: "Dashboard", to: "/child/dashboard" },
           { label: "Chores", to: "/child/dashboard" },
           { label: "Rewards", to: "/child/rewards" },
+          { label: "Profile", to: "/child/profile" },
         ]}
       />
     </div>

@@ -26,27 +26,30 @@ export const getChoreInstanceById = async (instanceId) => {
 
 export const getChoreInstancesForToday = async (childId, familyId) => {
   if (!childId || !familyId) return [];
+  const startIso = getStartOfToday().toISOString();
+  const endIso = getEndOfToday().toISOString();
+
+  const matchChild = (ci) =>
+    ci.childId === childId || ci.childId === "all" || ci.childId === "open";
+
   if (isDemoMode()) {
-    const start = getStartOfToday().toISOString();
-    const end = getEndOfToday().toISOString();
-    return queryDemoByFields("choreInstances", [
-      ["familyId", familyId],
-      ["childId", childId],
-    ]).filter(
-      (ci) => ci.dueDate >= start && ci.dueDate <= end
+    return queryDemoByFields("choreInstances", [["familyId", familyId]]).filter(
+      (ci) =>
+        matchChild(ci) && ci.dueDate >= startIso && ci.dueDate <= endIso
     );
   }
+
   const start = Timestamp.fromDate(getStartOfToday());
   const end = Timestamp.fromDate(getEndOfToday());
-
+  // Firestore OR via 'in'
+  const childIds = [childId, "all", "open"];
   const q = query(
     collection(db, "choreInstances"),
     where("familyId", "==", familyId),
-    where("childId", "==", childId),
+    where("childId", "in", childIds),
     where("dueDate", ">=", start),
     where("dueDate", "<=", end)
   );
-
   const snapshot = await getDocs(q);
   return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
 };

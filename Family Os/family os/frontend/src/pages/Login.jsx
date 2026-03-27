@@ -17,7 +17,7 @@ const Login = () => {
     setError("");
     try {
       await login(form);
-      navigate("/");
+      navigate("/select-role");
     } catch (err) {
       setError(err.message);
     }
@@ -56,6 +56,9 @@ const Login = () => {
         </form>
         <p className="form-helper">
           New parent? <Link to="/signup">Create an account</Link>
+        </p>
+        <p className="form-helper">
+          Prefer PIN? <Link to="/select-role">Use PIN login</Link>
         </p>
       </div>
     </div>

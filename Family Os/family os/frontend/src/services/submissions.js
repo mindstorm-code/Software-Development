@@ -107,3 +107,19 @@ export const rejectSubmission = async ({
     await updateChoreInstance(choreInstanceId, { status: "rejected" });
   }
 };
+
+export const getSubmissionsByChild = async (childId, familyId) => {
+  if (!childId || !familyId) return [];
+  if (isDemoMode()) {
+    return queryDemoByField("submissions", "childId", childId).filter(
+      (s) => s.familyId === familyId
+    );
+  }
+  const q = query(
+    collection(db, "submissions"),
+    where("familyId", "==", familyId),
+    where("childId", "==", childId)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+};

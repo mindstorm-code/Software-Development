@@ -7,8 +7,9 @@ import {
 } from "firebase/auth";
 import { auth, firebaseConfigMissing, firebaseInitError } from "../firebase/firebaseApp";
 import { createUserProfile } from "../services/firestore";
-import { ensureUserProfile } from "../services/users";
+import { ensureUserProfile, findUserByPin } from "../services/users";
 import { isDemoMode } from "../utils/mode";
+import { hashPin } from "../utils/pin";
 
 const AuthContext = createContext(null);
 const VALID_ROLES = ["parent", "child"];
@@ -77,6 +78,14 @@ export const AuthProvider = ({ children }) => {
           setRole(safeRole);
           setFamilyId(ensuredProfile.familyId || null);
           console.log("[Auth] Role resolved:", safeRole);
+          if (!safeRole) {
+            console.error("[Auth] Missing or invalid role");
+            setAuthError("missing_role");
+          }
+          if (!ensuredProfile.familyId) {
+            console.error("[Auth] Missing familyId for user");
+            setAuthError("missing_family");
+          }
           if (ensuredProfile.createdAt === undefined) {
             console.log("[Auth] Profile missing on first load, created in ensureUserProfile");
           }
@@ -85,6 +94,7 @@ export const AuthProvider = ({ children }) => {
           setRole(null);
           setFamilyId(null);
           console.log("[Auth] Profile missing and not created");
+          setAuthError("profile_error");
         }
       } catch (err) {
         setAuthError("profile_error");
@@ -155,6 +165,22 @@ export const AuthProvider = ({ children }) => {
     console.log("[Auth] Logged out");
   };
 
+  const loginWithPin = async ({ pin, forceRole, child }) => {
+    const hashed = await hashPin(pin);
+    let userRecord = child || (await findUserByPin(pin));
+    if (!userRecord) throw new Error("Invalid PIN");
+
+    const nextUser = { uid: userRecord.id || userRecord.uid || userRecord.id, email: userRecord.email || "" };
+    const safeRole = forceRole || (VALID_ROLES.includes(userRecord.role) ? userRecord.role : null);
+
+    setUser(nextUser);
+    setRole(safeRole);
+    setFamilyId(userRecord.familyId || null);
+    setProfile({ ...userRecord, id: userRecord.id || nextUser.uid });
+    setAuthError("");
+    return { user: nextUser, role: safeRole, familyId: userRecord.familyId };
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -164,6 +190,7 @@ export const AuthProvider = ({ children }) => {
       loading,
       authError,
       login,
+      loginWithPin,
       signupParent,
       logout,
       setRole,

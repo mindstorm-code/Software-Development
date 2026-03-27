@@ -5,7 +5,12 @@ const ParentRoute = () => {
   const { user, role, loading } = useAuth();
 
   if (loading) {
-    return null;
+    return (
+      <div className="app-loading">
+        <div className="spinner" />
+        <p>Loading your family dashboard...</p>
+      </div>
+    );
   }
 
   if (!user) {

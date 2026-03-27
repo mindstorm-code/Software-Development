@@ -7,6 +7,9 @@ const verifyChore = async (req, res, next) => {
       choreDescription,
       checklist,
       imageUrls = [],
+      afterImageUrl,
+      beforeImageUrl,
+      submittedImageUrl,
       childNotes = "",
     } = req.body || {};
 
@@ -19,6 +22,9 @@ const verifyChore = async (req, res, next) => {
       choreDescription,
       checklist,
       imageUrls,
+      afterImageUrl,
+      beforeImageUrl,
+      submittedImageUrl,
       childNotes,
     });
 

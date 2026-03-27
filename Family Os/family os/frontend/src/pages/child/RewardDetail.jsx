@@ -50,6 +50,7 @@ const ChildRewardDetail = () => {
       <PageHeader
         title={reward?.title || "Reward"}
         subtitle={reward?.description || ""}
+        action={<button className="btn ghost" onClick={() => window.history.back()}>Back</button>}
       />
 
       <div className="card">

@@ -24,7 +24,20 @@ const ParentRewards = () => {
 
   return (
     <div className="page">
-      <PageHeader title="Rewards" subtitle="Create rewards and manage redemptions." />
+      <PageHeader
+        title="Rewards"
+        subtitle="Create rewards and manage redemptions."
+        action={
+          <div className="button-row">
+            <button className="btn ghost" onClick={() => window.history.back()}>
+              Back
+            </button>
+            <a className="btn ghost" href="/parent/coupons">
+              Coupons
+            </a>
+          </div>
+        }
+      />
 
       <section className="card-list">
         {loading && <p className="muted">Loading rewards...</p>}
@@ -44,6 +57,15 @@ const ParentRewards = () => {
       </section>
 
       <button className="btn primary full-width">Add reward</button>
+
+      <BottomNav
+        items={[
+          { label: "Chores", to: "/parent/chores" },
+          { label: "Reports", to: "/parent/reviews" },
+          { label: "Children", to: "/parent/children" },
+          { label: "Coupons", to: "/parent/coupons" },
+        ]}
+      />
     </div>
   );
 };
