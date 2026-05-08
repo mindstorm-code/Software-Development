@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coupons — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;padding:1rem">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+      <h1 style="font-size:1.2rem;font-weight:700;margin:0">🎟️ Coupons</h1>
+    </div>
+    <button class="btn btn-primary btn-sm" id="btn-add" onclick="openAddCoupon()"></button>
+  </div>
+
+  <!-- Economy Rate Card -->
+  <div style="margin:0 1rem .75rem;padding:.75rem 1rem;background:linear-gradient(135deg,#16A34A,#22C55E);border-radius:var(--radius);color:#fff;display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-size:.75rem;opacity:.8;font-weight:600">Exchange Rate</div>
+      <div style="font-size:1.3rem;font-weight:800" id="rate-display">— pts = $1</div>
+    </div>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:none" onclick="openEditRate()">Edit Rate</button>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:2px solid var(--border);margin:0 1rem">
+    <button id="tab-mine" onclick="switchCouponTab('mine')" style="flex:1;padding:.6rem;background:none;border:none;font-weight:700;cursor:pointer;border-bottom:2px solid var(--primary);margin-bottom:-2px;color:var(--primary)">🎟️ My Coupons</button>
+    <button id="tab-ideas" onclick="switchCouponTab('ideas')" style="flex:1;padding:.6rem;background:none;border:none;font-weight:700;cursor:pointer;color:var(--text-2)">💡 Kids' Ideas</button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px">
+
+    <!-- My Coupons -->
+    <div id="pane-mine">
+      <div id="coupons-list">
+        <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- Kids' Ideas -->
+    <div id="pane-ideas" class="hidden">
+      <p class="text-sm text-muted mb-2">Tap <strong>Create →</strong> to add any of these to your coupon list.</p>
+      <div id="ideas-list"></div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="chores.html"    class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="children.html"  class="nav-item" id="nav-family"><span class="nav-icon"></span><span>Family</span></a>
+    <a href="reviews.html"   class="nav-item" id="nav-reviews"><span class="nav-icon"></span><span>Reviews</span></a>
+    <a href="rewards.html"   class="nav-item active" id="nav-rewards"><span class="nav-icon"></span><span>Rewards</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+(function(){
+  document.getElementById('btn-back').innerHTML = iconBack();
+  document.getElementById('btn-add').innerHTML  = iconPlus() + ' Add';
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconUsers,'nav-family'],[iconCheck,'nav-reviews'],[iconGift,'nav-rewards']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+const COUPON_IDEAS = [
+  { title:'Extra Screen Time',  usd: 0.50, desc:'30 extra minutes on any device',        repeatable: true  },
+  { title:'Pick Dinner',        usd: 0.75, desc:'You choose what the family eats',        repeatable: true  },
+  { title:'Stay Up Late',       usd: 0.60, desc:'30 extra minutes past bedtime',          repeatable: true  },
+  { title:'Movie Night',        usd: 0.80, desc:'You pick the movie for family night',    repeatable: true  },
+  { title:'$5 Cash Out',        usd: 5.00, desc:'Convert coins to $5 real cash',          repeatable: false },
+  { title:'$10 Cash Out',       usd: 10.00,desc:'Convert coins to $10 real cash',         repeatable: false },
+  { title:'Skip a Chore',       usd: 1.00, desc:'Skip one chore of your choice',          repeatable: true  },
+  { title:'Ice Cream Outing',   usd: 5.00, desc:'Trip to get ice cream',                  repeatable: true  },
+  { title:'Sleepover Night',    usd: 2.00, desc:'Have a friend stay the night',            repeatable: true  },
+  { title:'Ride Anywhere',      usd: 1.50, desc:'Get a ride to anywhere you want',         repeatable: true  },
+  { title:'No Chores Day',      usd: 2.50, desc:'One full day off from all chores',        repeatable: false },
+  { title:'Mystery Prize',      usd: 10.00,desc:'A surprise $10 prize chosen by parent',  repeatable: false },
+];
+
+function switchCouponTab(name) {
+  document.getElementById('pane-mine').classList.toggle('hidden',   name !== 'mine');
+  document.getElementById('pane-ideas').classList.toggle('hidden',  name !== 'ideas');
+  document.getElementById('btn-add').classList.toggle('hidden',     name !== 'mine');
+  ['tab-mine','tab-ideas'].forEach(id => {
+    const el     = document.getElementById(id);
+    const active = (id === 'tab-' + name);
+    el.style.borderBottom = active ? '2px solid var(--primary)' : 'none';
+    el.style.color        = active ? 'var(--primary)' : 'var(--text-2)';
+    el.style.marginBottom = active ? '-2px' : '0';
+  });
+  if (name === 'ideas') renderIdeas();
+}
+
+function renderIdeas() {
+  const coin = getCoinConfig();
+  document.getElementById('ideas-list').innerHTML = COUPON_IDEAS.map((s, i) => `
+    <div class="card mb-2" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700">${s.title}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0">
+          <span class="badge badge-success">$${s.usd.toFixed(2)}</span>
+          ${ptsBadge(coin.usdToFC(s.usd))}
+          <span class="badge badge-neutral">${s.repeatable ? '🔄 Repeatable' : '1× Only'}</span>
+        </div>
+        <div class="text-sm text-muted">${s.desc}</div>
+      </div>
+      <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="createFromSuggestion(${i})">Create →</button>
+    </div>
+  `).join('');
+}
+
+async function createFromSuggestion(idx) {
+  const s    = COUPON_IDEAS[idx];
+  const coin = getCoinConfig();
+  try {
+    await CouponsAPI.create({
+      title:             s.title,
+      description:       s.desc,
+      usd_value:         s.usd,
+      points_cost:       coin.usdToFC(s.usd),
+      is_repeatable:     s.repeatable,
+      daily_limit:       1,
+      requires_approval: true,
+      assigned_to:       null,
+    });
+    Toast.success('"' + s.title + '" coupon created!');
+    switchCouponTab('mine');
+    loadCoupons();
+  } catch(e) { Toast.error(e.message); }
+}
+
+async function loadCoupons() {
+  try {
+    const fam = Auth.getFamily() || {};
+    const rate = fam.point_rate ? Math.round(1 / fam.point_rate) : 100;
+    const _coin = getCoinConfig();
+    document.getElementById('rate-display').textContent = rate + ' ' + _coin.symbol + ' = $1';
+
+    const res     = await CouponsAPI.list();
+    const coupons = Array.isArray(res) ? res : (res?.data || res?.coupons || []);
+    const kids    = await ChildrenAPI.list().then(r => Array.isArray(r) ? r : (r?.data || r?.children || [])).catch(() => []);
+    const kidMap  = Object.fromEntries(kids.map(k => [k.id, k.display_name]));
+
+    const el = document.getElementById('coupons-list');
+    if (!coupons.length) {
+      el.innerHTML = '<div class="empty-state">No coupons yet.<br><button class="btn btn-primary mt-2" onclick="openAddCoupon()">+ Add First Coupon</button></div>';
+      return;
+    }
+    const coin = getCoinConfig();
+    el.innerHTML = coupons.map(c => {
+      // Always derive FC from usd_value if present so it tracks rate changes
+      const fc  = c.usd_value ? coin.usdToFC(c.usd_value) : c.points_cost;
+      const usd = c.usd_value ? `<span class="badge badge-success">$${parseFloat(c.usd_value).toFixed(2)}</span>` : '';
+      return `
+        <div class="card mb-2">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:1rem;margin-bottom:.25rem">🎟️ ${c.title}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.25rem">
+                ${usd}${ptsBadge(fc)}
+                <span class="badge badge-neutral">${c.is_repeatable ? '🔄 Repeatable' : '1× Only'}</span>
+                ${c.assigned_to ? `<span class="badge badge-info">👤 ${kidMap[c.assigned_to] || c.assigned_to}</span>` : ''}
+              </div>
+              ${c.description ? `<div class="text-sm text-muted">${c.description}</div>` : ''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.3rem;flex-shrink:0">
+              <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick='openEditCoupon(${JSON.stringify(c).replace(/'/g,"&#39;")})'>${iconEdit()}</button>
+              <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteCoupon('${c.id}','${c.title.replace(/'/g,"\\'")}' )">${iconTrash()}</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('coupons-list').innerHTML = '<div class="empty-state text-danger">Failed to load coupons.</div>';
+    Toast.error(e.message);
+  }
+}
+
+function couponForm(c) {
+  const coin   = getCoinConfig();
+  const usdVal = c?.usd_value ?? '';
+  const fcVal  = c ? (c.usd_value ? coin.usdToFC(c.usd_value) : c.points_cost) : '';
+  return `
+    <div class="form-group">
+      <label class="form-label">Title *</label>
+      <input class="form-control" id="cp-title" value="${c?.title || ''}" placeholder="e.g. $5 Cash Out">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" id="cp-desc" rows="2">${c?.description || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dollar Value (USD $) *</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-weight:700;color:var(--text-2)">$</span>
+        <input class="form-control" id="cp-usd" type="number" min="0.01" step="0.01"
+          placeholder="e.g. 5.00" value="${usdVal}"
+          style="padding-left:1.75rem"
+          oninput="syncCouponUsd()" onchange="syncCouponUsd()">
+      </div>
+      <div class="form-hint">Source of truth — FC cost adjusts automatically when rate changes</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">${coin.icon} ${coin.name} (${coin.symbol}) Cost</label>
+      <input class="form-control" id="cp-pts" type="number" min="1" value="${fcVal}" readonly
+        style="background:var(--bg-2);color:var(--text-2);font-weight:700">
+      <div class="form-hint">Auto-calculated from $ ÷ exchange rate</div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+        <input type="checkbox" id="cp-repeat" ${c?.is_repeatable ? 'checked' : ''} style="width:18px;height:18px">
+        <span class="form-label" style="margin:0">🔄 Repeatable</span>
+      </label>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+        <input type="checkbox" id="cp-approval" ${c?.requires_approval !== false ? 'checked' : ''} style="width:18px;height:18px">
+        <span class="form-label" style="margin:0">Requires parent approval</span>
+      </label>
+    </div>
+  `;
+}
+
+function syncCouponUsd() {
+  const coin = getCoinConfig();
+  const usd  = parseFloat(document.getElementById('cp-usd')?.value);
+  const el   = document.getElementById('cp-pts');
+  if (el) el.value = (!isNaN(usd) && usd > 0) ? coin.usdToFC(usd) : '';
+}
+
+function openAddCoupon() {
+  openModal(`
+    <h2 style="margin-bottom:1rem">🎟️ Add Coupon</h2>
+    ${couponForm(null)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveCoupon(null, this)">Add Coupon</button>
+    </div>
+  `);
+  setTimeout(syncCouponUsd, 0);
+}
+
+function openEditCoupon(c) {
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit Coupon</h2>
+    ${couponForm(c)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveCoupon('${c.id}', this)">Save</button>
+    </div>
+  `);
+  setTimeout(syncCouponUsd, 0);
+}
+
+async function saveCoupon(id, btn) {
+  const title    = document.getElementById('cp-title').value.trim();
+  const desc     = document.getElementById('cp-desc').value.trim();
+  const usd      = parseFloat(document.getElementById('cp-usd').value) || null;
+  const pts      = parseInt(document.getElementById('cp-pts').value) || 0;
+  const repeat   = document.getElementById('cp-repeat').checked;
+  const approval = document.getElementById('cp-approval').checked;
+  if (!title) { Toast.error('Title is required.'); return; }
+  if (!usd)   { Toast.error('Enter a dollar value first.'); return; }
+  setLoading(btn, true);
+  // usd_value is source of truth; points_cost is current FC snapshot
+  const payload = { title, description: desc, usd_value: usd, points_cost: pts, is_repeatable: repeat, daily_limit: 1, requires_approval: approval };
+  try {
+    if (id) {
+      await api.patch('/coupons/index.php?id=' + id, payload);
+    } else {
+      await CouponsAPI.create(payload);
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success(id ? 'Coupon updated!' : 'Coupon added!');
+    loadCoupons();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function deleteCoupon(id, title) {
+  if (!await typeConfirm(`Delete coupon "${title}"?`)) return;
+  try {
+    await api.delete('/coupons/index.php?id=' + id);
+    Toast.success('Coupon deleted.');
+    loadCoupons();
+  } catch(e) { Toast.error(e.message); }
+}
+
+function openEditRate() {
+  const fam  = Auth.getFamily() || {};
+  const rate = fam.point_rate ? Math.round(1 / fam.point_rate) : 100;
+  openModal(`
+    <h2 style="margin-bottom:1rem">💱 Edit Exchange Rate</h2>
+    <div class="form-group">
+      <label class="form-label">Points per $1</label>
+      <input class="form-control" id="er-rate" type="number" value="${rate}">
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveRate(this)">Save</button>
+    </div>
+  `);
+}
+
+async function saveRate(btn) {
+  const rate = parseInt(document.getElementById('er-rate').value) || 100;
+  setLoading(btn, true);
+  try {
+    await FamilyAPI.update({ point_rate: 1 / rate });
+    const fam = Auth.getFamily() || {};
+    Auth.save(Auth.getToken(), Auth.getUser(), { ...fam, point_rate: 1 / rate });
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success('Rate updated!');
+    loadCoupons();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+loadCoupons();
+</script>
+</body>
+</html>
+

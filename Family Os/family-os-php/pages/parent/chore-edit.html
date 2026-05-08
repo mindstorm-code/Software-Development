@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Chore — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+  <style>
+    .day-chip { display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .65rem;border:2px solid var(--border);border-radius:20px;cursor:pointer;font-size:.85rem;font-weight:600;transition:border-color .15s,background .15s;user-select:none; }
+    .day-chip input { display:none; }
+    .day-chip:has(input:checked) { border-color:var(--primary);background:var(--primary-soft,#EFF6FF);color:var(--primary); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:1rem">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <a href="chores.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+      <h1 style="font-size:1.2rem;font-weight:700;margin:0">Edit Chore</h1>
+    </div>
+    <button class="btn btn-sm" style="color:var(--danger);border-color:var(--danger)" id="btn-delete">🗑️ Delete</button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:40px">
+    <div id="loading" style="text-align:center;padding:3rem"><span class="spinner"></span></div>
+
+    <form id="chore-form" onsubmit="submitChore(event)" class="hidden">
+
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input class="form-control" id="f-title" placeholder="e.g. Make Your Bed" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" id="f-desc" rows="2" placeholder="What needs to be done?"></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-control" id="f-cat">
+            <option value="general">🗂️ General</option>
+            <option value="bedroom">🛏️ Bedroom</option>
+            <option value="kitchen">🍽️ Kitchen</option>
+            <option value="cleaning">🧹 Cleaning</option>
+            <option value="yard">🌿 Yard</option>
+            <option value="laundry">👕 Laundry</option>
+            <option value="pets">🐾 Pets</option>
+            <option value="cooking">👨‍🍳 Cooking</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Difficulty</label>
+          <select class="form-control" id="f-diff" onchange="onDifficultyChange()">
+            <option value="easy">⚡ Easy</option>
+            <option value="medium" selected>🔥 Medium</option>
+            <option value="hard">💀 Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Reward Value (USD → FC auto-calc) -->
+      <div class="form-group">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem">
+          <label class="form-label" style="margin:0">Reward Value ($)</label>
+          <label style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;cursor:pointer">
+            <span style="color:var(--text-2)">AUTO</span>
+            <span class="toggle-switch" id="auto-toggle" onclick="toggleAutoPoints()" style="position:relative;display:inline-block;width:36px;height:20px;background:var(--primary);border-radius:10px;cursor:pointer;transition:background .2s">
+              <span id="auto-knob" style="position:absolute;top:2px;left:18px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s"></span>
+            </span>
+          </label>
+        </div>
+        <div style="position:relative">
+          <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-weight:700;color:var(--text-2)">$</span>
+          <input class="form-control" id="f-usd" type="number" min="0.01" step="0.01"
+            placeholder="e.g. 0.15" style="padding-left:1.75rem" oninput="syncChoreUsd()">
+        </div>
+        <div class="form-hint" id="pts-hint">Auto: $0.15 for Medium</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="lbl-points">FC Cost</label>
+        <input class="form-control" id="f-pts" type="number" min="1" readonly
+          style="background:var(--bg-2);color:var(--primary);font-size:1.1rem;font-weight:700;text-align:center">
+        <div class="form-hint">Auto-calculated from $ value ÷ exchange rate</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group">
+          <label class="form-label">Recurrence</label>
+          <select class="form-control" id="f-recur" onchange="updateRecurrenceFields()">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+            <option value="once">Once</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign To</label>
+          <select class="form-control" id="f-assign">
+            <option value="">🌟 All Kids</option>
+            <option value="any">🎯 Free For All (anyone)</option>
+            <optgroup label="── Kids ──" id="opt-kids"></optgroup>
+            <optgroup label="── Parents ──" id="opt-parents"></optgroup>
+          </select>
+        </div>
+      </div>
+
+      <!-- Weekly: day-of-week picker -->
+      <div class="form-group hidden" id="recur-weekly">
+        <label class="form-label">Days of Week</label>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <label class="day-chip"><input type="checkbox" name="dow" value="0"> Sun</label>
+          <label class="day-chip"><input type="checkbox" name="dow" value="1"> Mon</label>
+          <label class="day-chip"><input type="checkbox" name="dow" value="2"> Tue</label>
+          <label class="day-chip"><input type="checkbox" name="dow" value="3"> Wed</label>
+          <label class="day-chip"><input type="checkbox" name="dow" value="4"> Thu</label>
+          <label class="day-chip"><input type="checkbox" name="dow" value="5"> Fri</label>
+          <label class="day-chip"><input type="checkbox" name="dow" value="6"> Sat</label>
+        </div>
+      </div>
+
+      <!-- Monthly: day-of-month picker -->
+      <div class="form-group hidden" id="recur-monthly">
+        <label class="form-label">Day of Month</label>
+        <input class="form-control" id="f-dom" type="number" min="1" max="31" placeholder="e.g. 1 for the 1st">
+        <div class="form-hint">Chore will appear on this day each month</div>
+      </div>
+
+      <!-- Yearly: month + day picker -->
+      <div class="form-group hidden" id="recur-yearly">
+        <label class="form-label">Date of Year</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+          <select class="form-control" id="f-yearly-month">
+            <option value="1">January</option><option value="2">February</option>
+            <option value="3">March</option><option value="4">April</option>
+            <option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option>
+            <option value="9">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+          <input class="form-control" id="f-yearly-day" type="number" min="1" max="31" placeholder="Day (e.g. 15)">
+        </div>
+        <div class="form-hint">Chore will appear once on this date each year</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">⏱️ Suggested Timer (minutes)</label>
+        <input class="form-control" id="f-timer" type="number" min="1" max="120" placeholder="e.g. 10 — leave blank for no timer">
+        <div class="form-hint">Pre-fills the timer on the kid's chore screen. They can still adjust it.</div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+          <input type="checkbox" id="f-photo" style="width:18px;height:18px;accent-color:var(--primary)">
+          <span class="form-label" style="margin:0">📷 Require Photo Proof</span>
+        </label>
+        <div class="form-hint">Proof type is set automatically — photo if checked, checklist if items added, both if both</div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+          <input type="checkbox" id="f-ai" style="width:18px;height:18px;accent-color:var(--primary)">
+          <span class="form-label" style="margin:0">🤖 AI Photo Verification</span>
+        </label>
+        <div class="form-hint">AI will score the photo submission 1-5 stars</div>
+      </div>
+
+      <!-- Unified Steps -->
+      <div class="form-group">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem">
+          <label class="form-label" style="margin:0">📋 Steps / Checklist</label>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="addStep()">+ Add Step</button>
+        </div>
+        <div class="form-hint" style="margin-bottom:.5rem">Kids check off each step as they go</div>
+        <div id="steps-list"></div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+          <input type="checkbox" id="f-photo-per-step" style="width:18px;height:18px;accent-color:var(--primary)">
+          <span class="form-label" style="margin:0">📸 Require photo proof per step</span>
+        </label>
+        <div class="form-hint">Kid must photograph each step individually — use when you need extra verification</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" id="btn-submit" style="margin-top:1rem">
+        Save Changes
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+document.getElementById('btn-back').innerHTML = iconBack();
+
+// Dynamic coin label
+(function(){ const c = getCoinConfig(); const el = document.getElementById('lbl-points'); if(el) el.textContent = c.name + ' (' + c.symbol + ')'; })();
+
+const choreId = new URLSearchParams(location.search).get('id');
+if (!choreId) { location.href = 'chores.html'; throw 0; }
+
+function updateRecurrenceFields() {
+  const val = document.getElementById('f-recur').value;
+  document.getElementById('recur-weekly').classList.toggle('hidden', val !== 'weekly');
+  document.getElementById('recur-monthly').classList.toggle('hidden', val !== 'monthly');
+  document.getElementById('recur-yearly').classList.toggle('hidden', val !== 'yearly');
+}
+
+let _autoPoints = true;
+const AUTO_USD = { easy: 0.05, medium: 0.15, hard: 0.30 };
+
+function syncChoreUsd() {
+  const coin = getCoinConfig();
+  const usd  = parseFloat(document.getElementById('f-usd')?.value) || 0;
+  const el   = document.getElementById('f-pts');
+  if (el) el.value = usd > 0 ? coin.usdToFC(usd) : '';
+}
+
+function toggleAutoPoints() {
+  _autoPoints = !_autoPoints;
+  const knob   = document.getElementById('auto-knob');
+  const toggle = document.getElementById('auto-toggle');
+  knob.style.left             = _autoPoints ? '18px' : '2px';
+  toggle.style.background     = _autoPoints ? 'var(--primary)' : 'var(--border)';
+  document.getElementById('f-usd').readOnly         = _autoPoints;
+  document.getElementById('pts-hint').style.display = _autoPoints ? '' : 'none';
+  if (_autoPoints) onDifficultyChange();
+}
+
+function onDifficultyChange() {
+  const diff = document.getElementById('f-diff').value;
+  if (_autoPoints) {
+    const usd  = AUTO_USD[diff] || 0.10;
+    const coin = getCoinConfig();
+    document.getElementById('f-usd').value = usd;
+    document.getElementById('f-pts').value = coin.usdToFC(usd);
+    const label = diff.charAt(0).toUpperCase() + diff.slice(1);
+    document.getElementById('pts-hint').textContent = `Auto: $${usd} for ${label} → ${coin.usdToFC(usd)} ${coin.symbol}`;
+  }
+}
+
+// Load kids + parents for assign dropdown
+Promise.all([
+  ChildrenAPI.list().catch(() => []),
+  ParentsAPI.list().catch(() => []),
+]).then(([kRes, pRes]) => {
+  const kids    = Array.isArray(kRes) ? kRes : (kRes?.data || []);
+  const parents = Array.isArray(pRes) ? pRes : (pRes?.data || []);
+  const kGroup  = document.getElementById('opt-kids');
+  const pGroup  = document.getElementById('opt-parents');
+  kids.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k.id; opt.textContent = (k.emoji || '👤') + ' ' + k.display_name;
+    kGroup.appendChild(opt);
+  });
+  parents.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = (p.emoji || '👨') + ' ' + p.display_name + ' (parent)';
+    pGroup.appendChild(opt);
+  });
+});
+
+// Unified steps
+let _stepCount = 0;
+function addStep(title = '', desc = '') {
+  _stepCount++;
+  const n   = _stepCount;
+  const div = document.createElement('div');
+  div.dataset.stepRoot = n;
+  div.style.cssText = 'display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.5rem;padding:.6rem .75rem;background:var(--bg-2);border-radius:var(--radius)';
+  div.innerHTML = `
+    <span style="min-width:22px;height:22px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;margin-top:.55rem;flex-shrink:0">${n}</span>
+    <div style="flex:1;display:flex;flex-direction:column;gap:.25rem">
+      <input class="form-control" data-step-title placeholder="What to do…" value="${title.replace(/"/g,'&quot;')}">
+      <input class="form-control" data-step-desc placeholder="Detail (optional)" value="${desc.replace(/"/g,'&quot;')}" style="font-size:.83rem">
+    </div>
+    <button type="button" class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger);margin-top:.25rem" onclick="this.closest('[data-step-root]').remove()">${iconTrash()}</button>
+  `;
+  document.getElementById('steps-list').appendChild(div);
+}
+
+// Load chore
+async function loadChore() {
+  try {
+    const res   = await ChoresAPI.get(choreId);
+    const chore = res?.data || res;
+
+    document.getElementById('f-title').value     = chore.title || '';
+    document.getElementById('f-desc').value      = chore.description || '';
+    document.getElementById('f-cat').value       = chore.category || 'general';
+    document.getElementById('f-diff').value      = chore.difficulty || 'medium';
+    document.getElementById('f-recur').value     = chore.recurrence || 'daily';
+    document.getElementById('f-photo').checked          = chore.proof_type === 'photo' || chore.proof_type === 'photo_checklist';
+    document.getElementById('f-ai').checked             = !!chore.ai_verify;
+    document.getElementById('f-photo-per-step').checked = !!chore.photo_per_step;
+    if (chore.suggested_timer_min) document.getElementById('f-timer').value = chore.suggested_timer_min;
+
+    // USD value — prefer stored usd_value, fall back to back-calc from points
+    const coin    = getCoinConfig();
+    const choreUsd = chore.usd_value
+      ? parseFloat(chore.usd_value)
+      : parseFloat((chore.points || 0) * 0.01);
+    const autoUsd  = AUTO_USD[chore.difficulty || 'medium'];
+    if (Math.abs(choreUsd - autoUsd) < 0.001) {
+      _autoPoints = true;
+      document.getElementById('f-usd').readOnly = true;
+      onDifficultyChange();
+    } else {
+      _autoPoints = false;
+      document.getElementById('f-usd').value    = choreUsd;
+      document.getElementById('f-usd').readOnly = false;
+      document.getElementById('f-pts').value    = coin.usdToFC(choreUsd);
+      document.getElementById('auto-knob').style.left      = '2px';
+      document.getElementById('auto-toggle').style.background = 'var(--border)';
+      document.getElementById('pts-hint').style.display   = 'none';
+    }
+
+    // Assign
+    if (chore.assigned_to) {
+      setTimeout(() => { document.getElementById('f-assign').value = chore.assigned_to; }, 300);
+    }
+
+    // Recurrence sub-fields
+    updateRecurrenceFields();
+    if (chore.recurrence === 'weekly' && chore.recurrence_days) {
+      chore.recurrence_days.forEach(d => {
+        const cb = document.querySelector(`input[name="dow"][value="${d}"]`);
+        if (cb) cb.checked = true;
+      });
+    }
+    if (chore.recurrence === 'monthly' && chore.recurrence_date) {
+      document.getElementById('f-dom').value = chore.recurrence_date;
+    }
+    if (chore.recurrence === 'yearly') {
+      if (chore.recurrence_month) document.getElementById('f-yearly-month').value = chore.recurrence_month;
+      if (chore.recurrence_yearly_day) document.getElementById('f-yearly-day').value = chore.recurrence_yearly_day;
+    }
+
+    // Load unified steps — prefer game_plan, fall back to checklist text
+    const steps = (chore.game_plan || []).length
+      ? chore.game_plan
+      : (chore.checklist || []).map(i => ({ title: i.text || i.title || '', description: '' }));
+    steps.forEach(s => addStep(s.title || '', s.description || ''));
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('chore-form').classList.remove('hidden');
+  } catch(e) {
+    document.getElementById('loading').innerHTML = `<div class="empty-state text-danger">Failed to load chore: ${e.message}</div>`;
+  }
+}
+
+// Delete
+document.getElementById('btn-delete').onclick = async () => {
+  if (!await typeConfirm('Delete this chore? This cannot be undone.')) return;
+  try {
+    await ChoresAPI.delete(choreId);
+    Toast.success('Chore deleted.');
+    location.href = 'chores.html';
+  } catch(e) { Toast.error(e.message); }
+};
+
+async function submitChore(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit');
+  setLoading(btn, true);
+
+  const checklist = [], game_plan = [];
+  let n = 1;
+  document.querySelectorAll('[data-step-root]').forEach(row => {
+    const title = row.querySelector('[data-step-title]')?.value.trim();
+    const desc  = row.querySelector('[data-step-desc]')?.value.trim() || '';
+    if (!title) return;
+    const id = 'step-' + n;
+    checklist.push({ id, text: title, required: true });
+    game_plan.push({ step: n, title, description: desc, id });
+    n++;
+  });
+
+  const payload = {
+    title:       document.getElementById('f-title').value.trim(),
+    description: document.getElementById('f-desc').value.trim(),
+    category:    document.getElementById('f-cat').value,
+    difficulty:  document.getElementById('f-diff').value,
+    usd_value:   parseFloat(document.getElementById('f-usd').value) || null,
+    points:      parseInt(document.getElementById('f-pts').value) || 10,
+    recurrence:  document.getElementById('f-recur').value,
+    assigned_to: document.getElementById('f-assign').value || null,
+    recurrence_days: [...document.querySelectorAll('input[name="dow"]:checked')].map(c => +c.value),
+    recurrence_date: parseInt(document.getElementById('f-dom')?.value) || null,
+    recurrence_month: parseInt(document.getElementById('f-yearly-month')?.value) || null,
+    recurrence_yearly_day: parseInt(document.getElementById('f-yearly-day')?.value) || null,
+    proof_type: (() => {
+      const hasPhoto = document.getElementById('f-photo').checked;
+      const hasList  = checklist.length > 0;
+      if (hasPhoto && hasList) return 'photo_checklist';
+      if (hasPhoto) return 'photo';
+      if (hasList)  return 'checklist';
+      return 'none';
+    })(),
+    ai_verify:      document.getElementById('f-ai').checked,
+    photo_per_step:      document.getElementById('f-photo-per-step').checked,
+    suggested_timer_min: parseInt(document.getElementById('f-timer').value) || null,
+    checklist,
+    game_plan,
+  };
+
+  try {
+    await ChoresAPI.update(choreId, payload);
+    Toast.success('Chore saved!');
+    location.href = 'chores.html';
+  } catch(e) {
+    Toast.error('Failed: ' + e.message);
+    setLoading(btn, false);
+  }
+}
+
+loadChore();
+</script>
+</body>
+</html>
+

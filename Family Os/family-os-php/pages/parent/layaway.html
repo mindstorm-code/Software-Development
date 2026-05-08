@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layaway Goals — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;padding:1rem">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+      <h1 style="font-size:1.2rem;font-weight:700;margin:0">🎯 Layaway Goals</h1>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="openAddGoal()" id="btn-add"></button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px">
+
+    <!-- Explainer -->
+    <div class="card mb-2" style="background:var(--primary-soft,#EFF6FF);border:1.5px solid var(--primary)">
+      <div style="font-size:.85rem;color:var(--primary-dark,#2563EB)">
+        🎯 <strong>How it works:</strong> Kids chip in coins from their Save bucket toward a shared family goal. Once fully funded, you mark it as redeemed!
+      </div>
+    </div>
+
+    <div id="goals-list">
+      <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="chores.html"    class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="children.html"  class="nav-item" id="nav-family"><span class="nav-icon"></span><span>Family</span></a>
+    <a href="reviews.html"   class="nav-item" id="nav-reviews"><span class="nav-icon"></span><span>Reviews</span></a>
+    <a href="rewards.html"   class="nav-item active" id="nav-rewards"><span class="nav-icon"></span><span>Rewards</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+(function(){
+  document.getElementById('btn-back').innerHTML = iconBack();
+  document.getElementById('btn-add').innerHTML  = iconPlus() + ' New';
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconUsers,'nav-family'],[iconCheck,'nav-reviews'],[iconGift,'nav-rewards']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+async function loadGoals() {
+  try {
+    const res   = await LayawayAPI.list();
+    const goals = Array.isArray(res) ? res : (res?.data || res?.goals || []);
+    const el    = document.getElementById('goals-list');
+    if (!goals.length) {
+      el.innerHTML = '<div class="empty-state">No goals yet.<br><button class="btn btn-primary mt-2" onclick="openAddGoal()">+ Create First Goal</button></div>';
+      return;
+    }
+    const coin = getCoinConfig();
+    el.innerHTML = goals.map(g => {
+      const contribs  = g.contributions || [];
+      const raised    = contribs.reduce((s, c) => s + (c.amount || 0), 0);
+      // usd_value is source of truth — recalculate FC from current rate every time
+      const totalUsd  = g.usd_value ? parseFloat(g.usd_value) : parseFloat(coin.fcToUsd(g.total_cost || 0));
+      const total     = coin.usdToFC(totalUsd) || 1;
+      const pct       = Math.min(100, Math.round(raised / total * 100));
+      const funded    = g.status === 'funded' || pct >= 100;
+      const raisedUsd = coin.fcToUsd(raised);
+      return `
+        <div class="card mb-2">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.5rem">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+                <span style="font-weight:700;font-size:1rem">${g.title}</span>
+                <span class="badge ${funded ? 'badge-success' : 'badge-info'}">${pct}% funded</span>
+                ${funded ? '<span class="badge badge-success">🎉 Fully Funded!</span>' : ''}
+              </div>
+              ${g.description ? `<div class="text-sm text-muted mt-1">${g.description}</div>` : ''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.3rem;flex-shrink:0">
+              <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick='openEditGoal(${JSON.stringify(g).replace(/'/g,"&#39;")})'>${iconEdit()}</button>
+              <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteGoal('${g.id}','${g.title.replace(/'/g,"\\'")}' )">${iconTrash()}</button>
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.25rem">
+            <span class="text-sm text-muted">Raised: <strong>$${raisedUsd}</strong> <span style="opacity:.6">(${raised} ${coin.symbol})</span></span>
+            <span class="text-sm text-muted">Goal: <strong>$${totalUsd}</strong> <span style="opacity:.6">(${total} ${coin.symbol})</span></span>
+          </div>
+          <div class="progress mb-2">
+            <div class="progress-bar" style="width:${pct}%;background:${funded ? 'var(--success)' : 'var(--primary)'};transition:width .5s"></div>
+          </div>
+
+          <!-- Contributions -->
+          ${contribs.length ? `
+            <div class="text-sm text-muted mb-1" style="font-weight:600">Contributions:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem">
+              ${contribs.map(c => `<span class="badge badge-neutral">👤 ${c.name}: ${coin.icon} ${c.amount} ${coin.symbol}</span>`).join('')}
+            </div>
+          ` : '<div class="text-sm text-muted mb-1">No contributions yet.</div>'}
+
+          ${funded ? `<button class="btn btn-success btn-full btn-sm" onclick="markRedeemed('${g.id}')">🎉 Mark as Redeemed</button>` : ''}
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    document.getElementById('goals-list').innerHTML = '<div class="empty-state text-danger">Failed to load goals.</div>';
+    Toast.error(e.message);
+  }
+}
+
+function getPointRate() {
+  try {
+    const f    = JSON.parse(localStorage.getItem('fos_family') || '{}');
+    const rate = parseFloat(f.point_rate);
+    return (isNaN(rate) || rate <= 0) ? 0.01 : rate;
+  } catch { return 0.01; }
+}
+
+function usdToFC(usd) {
+  const rate = getPointRate();
+  return Math.round(parseFloat(usd) / rate);
+}
+
+function fcToUsd(fc) {
+  return (fc * getPointRate()).toFixed(2);
+}
+
+function goalForm(g) {
+  const coin   = getCoinConfig();
+  const rate   = getPointRate();
+  const cents  = Math.round(rate * 100);
+  const usdVal = g ? fcToUsd(g.total_cost) : '';
+  const fcVal  = g ? g.total_cost : '';
+  return `
+    <div class="form-group">
+      <label class="form-label">Title *</label>
+      <input class="form-control" id="gl-title" placeholder="e.g. Nintendo Switch Game" value="${g?.title || ''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" id="gl-desc" rows="2" placeholder="What is this goal for?">${g?.description || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Total Cost (USD $) *</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-weight:700;color:var(--text-2)">$</span>
+        <input class="form-control" id="gl-usd" type="number" min="0.01" step="0.01"
+          placeholder="e.g. 60.00" value="${usdVal}"
+          style="padding-left:1.75rem"
+          oninput="syncGoalUsd()" onchange="syncGoalUsd()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">${coin.icon} ${coin.name} (${coin.symbol}) needed</label>
+      <input class="form-control" id="gl-fc" type="number" min="1" value="${fcVal}" readonly
+        style="background:var(--bg-2);color:var(--text-2);font-size:1.1rem;font-weight:700">
+      <div class="form-hint">1 ${coin.symbol} = ${cents}¢ · Auto-calculated from the dollar amount</div>
+    </div>
+  `;
+}
+
+function syncGoalUsd() {
+  const usd = parseFloat(document.getElementById('gl-usd')?.value);
+  const el  = document.getElementById('gl-fc');
+  if (!el) return;
+  el.value = (!isNaN(usd) && usd > 0) ? usdToFC(usd) : '';
+}
+
+function openAddGoal() {
+  openModal(`
+    <h2 style="margin-bottom:1rem">🎯 New Layaway Goal</h2>
+    ${goalForm(null)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveGoal(null, this)">Create Goal</button>
+    </div>
+  `);
+  setTimeout(syncGoalUsd, 0);
+}
+
+function openEditGoal(g) {
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit Goal</h2>
+    ${goalForm(g)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveGoal('${g.id}', this)">Save</button>
+    </div>
+  `);
+  setTimeout(syncGoalUsd, 0);
+}
+
+async function saveGoal(id, btn) {
+  const title   = document.getElementById('gl-title').value.trim();
+  const desc    = document.getElementById('gl-desc').value.trim();
+  const usdVal  = parseFloat(document.getElementById('gl-usd')?.value) || 0;
+  const fc      = parseInt(document.getElementById('gl-fc').value) || 0;
+  if (!title)  { Toast.error('Title is required.'); return; }
+  if (!usdVal) { Toast.error('Enter a dollar amount first.'); return; }
+  setLoading(btn, true);
+  // Store usd_value as source of truth; total_cost is current FC snapshot
+  const data = { title, description: desc, usd_value: usdVal, total_cost: fc };
+  try {
+    if (id) {
+      await LayawayAPI.update(id, data);
+    } else {
+      await LayawayAPI.create(data);
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success(id ? 'Goal updated!' : 'Goal created!');
+    loadGoals();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function markRedeemed(id) {
+  if (!await typeConfirm('Type "yes" to mark this goal as redeemed')) return;
+  try {
+    await LayawayAPI.update(id, { status: 'redeemed' });
+    Toast.success('Goal marked as redeemed! 🎉');
+    loadGoals();
+  } catch(e) { Toast.error(e.message); }
+}
+
+async function deleteGoal(id, title) {
+  if (!await typeConfirm(`Delete goal "${title}"?`)) return;
+  try {
+    await LayawayAPI.delete(id);
+    Toast.success('Goal deleted.');
+    loadGoals();
+  } catch(e) { Toast.error(e.message); }
+}
+
+loadGoals();
+</script>
+</body>
+</html>
+

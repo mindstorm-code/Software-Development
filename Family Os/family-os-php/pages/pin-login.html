@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <style>
+    .login-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; background:var(--bg); }
+    .login-card { width:100%; max-width:380px; }
+    .step { display:none; }
+    .step.active { display:block; }
+    .role-card { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.25rem .75rem; border:2.5px solid var(--border); cursor:pointer; border-radius:var(--radius); transition:border-color .15s, background .15s; text-align:center; }
+    .role-card:hover { border-color:var(--primary); background:var(--primary-soft,#EFF6FF); }
+    .role-card.selected { border-color:var(--primary); background:var(--primary-soft,#EFF6FF); }
+    .char-card { display:flex; flex-direction:column; align-items:center; padding:.75rem .5rem; border:2px solid var(--border); border-radius:var(--radius); cursor:pointer; text-align:center; transition:border-color .15s; }
+    .char-card:hover, .char-card.selected { border-color:var(--primary); background:var(--primary-soft,#EFF6FF); }
+    .pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--primary); background:transparent; transition:background .15s; }
+    .pin-dot.filled { background:var(--primary); }
+    .pin-btn { width:72px; height:72px; border-radius:50%; border:none; background:var(--bg-2); font-size:1.4rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+    .pin-btn:active { background:var(--primary); color:#fff; }
+    .pin-btn.del { font-size:1.1rem; background:transparent; color:var(--text-2); }
+    .pin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; justify-items:center; margin:1rem auto; max-width:260px; }
+  </style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:2.5rem">🏠</div>
+      <div style="font-size:1.5rem;font-weight:800;margin-top:.25rem">Family OS</div>
+      <div class="text-sm text-muted">Your family, organized.</div>
+    </div>
+
+    <!-- Step 1: Email + Password -->
+    <div class="step active" id="step-account">
+      <h2 style="text-align:center;margin-bottom:1.25rem">Sign In</h2>
+      <div class="form-group">
+        <label class="form-label">Family Email</label>
+        <input class="form-control" id="input-email" type="email" placeholder="family@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-control" id="input-password" type="password" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div class="form-hint text-danger hidden" id="login-error"></div>
+      <button class="btn btn-primary btn-full mt-2" id="btn-login" onclick="doLogin()">Sign In →</button>
+      <div style="text-align:center;margin-top:1.25rem">
+        <a href="signup.html" style="color:var(--primary);font-size:.9rem;font-weight:600">✨ Create a new family →</a>
+      </div>
+    </div>
+
+    <!-- Step 2: Role selection -->
+    <div class="step" id="step-role">
+      <button class="btn btn-ghost btn-sm mb-2" onclick="goStep('step-account')" style="display:flex;align-items:center;gap:.25rem" id="role-back"></button>
+      <h2 style="text-align:center;margin-bottom:1.25rem">Who are you?</h2>
+      <div style="display:flex;gap:.75rem">
+        <div class="role-card" onclick="selectRole('child')">
+          <div style="font-size:2.5rem;margin-bottom:.35rem">👧</div>
+          <div style="font-weight:700">I'm a Child</div>
+          <div class="text-sm text-muted">Complete missions, earn coins</div>
+        </div>
+        <div class="role-card" onclick="selectRole('parent')">
+          <div style="font-size:2.5rem;margin-bottom:.35rem">👨</div>
+          <div style="font-weight:700">I'm a Parent</div>
+          <div class="text-sm text-muted">Manage chores & rewards</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Pick character / parent -->
+    <div class="step" id="step-pick">
+      <button class="btn btn-ghost btn-sm mb-2" onclick="goStep('step-role')" style="display:flex;align-items:center;gap:.25rem" id="pick-back"></button>
+      <h2 style="text-align:center;margin-bottom:1rem" id="pick-title">Choose Your Character</h2>
+      <div id="pick-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem"></div>
+    </div>
+
+    <!-- Step 4: PIN entry -->
+    <div class="step" id="step-pin">
+      <button class="btn btn-ghost btn-sm mb-2" onclick="goStep('step-pick')" style="display:flex;align-items:center;gap:.25rem" id="pin-back"></button>
+      <h2 style="text-align:center;margin-bottom:.25rem">Enter PIN</h2>
+      <div style="text-align:center;margin-bottom:1.5rem" id="pin-user-name" class="text-muted text-sm"></div>
+      <!-- 4 dots -->
+      <div style="display:flex;justify-content:center;gap:.75rem;margin-bottom:1.25rem" id="pin-dots">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+      </div>
+      <div class="form-hint text-danger hidden text-center" id="pin-error"></div>
+      <!-- PIN Pad -->
+      <div class="pin-grid">
+        <button class="pin-btn" onclick="pinPress('1')">1</button>
+        <button class="pin-btn" onclick="pinPress('2')">2</button>
+        <button class="pin-btn" onclick="pinPress('3')">3</button>
+        <button class="pin-btn" onclick="pinPress('4')">4</button>
+        <button class="pin-btn" onclick="pinPress('5')">5</button>
+        <button class="pin-btn" onclick="pinPress('6')">6</button>
+        <button class="pin-btn" onclick="pinPress('7')">7</button>
+        <button class="pin-btn" onclick="pinPress('8')">8</button>
+        <button class="pin-btn" onclick="pinPress('9')">9</button>
+        <button class="pin-btn" style="visibility:hidden"></button>
+        <button class="pin-btn" onclick="pinPress('0')">0</button>
+        <button class="pin-btn del" onclick="pinPress('⌫')">⌫</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+// Render back-button icons after ui.js loads
+document.getElementById('role-back').innerHTML = iconBack() + ' Back';
+document.getElementById('pick-back').innerHTML = iconBack() + ' Back';
+document.getElementById('pin-back').innerHTML  = iconBack() + ' Back';
+
+const params   = new URLSearchParams(location.search);
+const familyId = params.get('family') || localStorage.getItem('fos_last_family') || '';
+
+let _role       = '';
+let _selectedId = '';
+let _selectedName = '';
+let _children   = [];
+let _parents    = [];
+
+// Pre-fill email if saved
+const savedEmail = localStorage.getItem('fos_family_email');
+if (savedEmail) document.getElementById('input-email').value = savedEmail;
+
+function goStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function doLogin() {
+  const email    = document.getElementById('input-email').value.trim();
+  const password = document.getElementById('input-password').value;
+
+  if (!email)    { showLoginError('Please enter your family email.'); return; }
+  if (!password) { showLoginError('Please enter your password.'); return; }
+
+  const btn = document.getElementById('btn-login');
+  setLoading(btn, true);
+
+  // Check against stored credentials
+  const storedEmail    = localStorage.getItem('fos_family_email');
+  const storedPassword = localStorage.getItem('fos_family_password');
+  const storedFamily   = localStorage.getItem('fos_real_family');
+
+  const emailMatch    = storedEmail    && storedEmail.toLowerCase()    === email.toLowerCase();
+  const passwordMatch = storedPassword && storedPassword === password;
+  const hasFamily     = !!storedFamily;
+
+  if (emailMatch && passwordMatch && hasFamily) {
+    loadPeople();
+    setLoading(btn, false);
+    goStep('step-role');
+    return;
+  }
+
+  // Demo mode fallback — any email + any password works if demo data present
+  if (DEMO_MODE) {
+    loadPeople();
+    setLoading(btn, false);
+    goStep('step-role');
+    return;
+  }
+
+  showLoginError('Email or password not recognized. Try creating a family first.');
+  setLoading(btn, false);
+}
+
+function loadPeople() {
+  _children = JSON.parse(localStorage.getItem('fos_real_children') || '[]');
+  _parents  = JSON.parse(localStorage.getItem('fos_real_parents')  || '[]');
+
+  // Fall back to demo people only if no real people found
+  if (!_children.length && typeof DEMO_CHILDREN !== 'undefined') _children = [...DEMO_CHILDREN];
+  if (!_parents.length  && typeof DEMO_PARENTS  !== 'undefined') _parents  = [...DEMO_PARENTS];
+}
+
+function selectRole(role) {
+  _role = role;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  if (role === 'child') {
+    document.getElementById('pick-title').textContent = 'Choose Your Character';
+    renderChildPicker();
+  } else {
+    document.getElementById('pick-title').textContent = 'Choose Your Profile';
+    renderParentPicker();
+  }
+
+  setTimeout(() => goStep('step-pick'), 200);
+}
+
+function renderChildPicker() {
+  const grid = document.getElementById('pick-grid');
+  if (!_children.length) {
+    grid.innerHTML = '<div class="text-muted text-sm text-center" style="grid-column:1/-1;padding:1rem">No children found. Ask a parent to add you!</div>';
+    return;
+  }
+  grid.innerHTML = _children.map(c => `
+    <div class="char-card" onclick="selectPerson('${c.id}','${(c.display_name||'').replace(/'/g,"\\'")}')">
+      <div style="font-size:1.6rem;margin-bottom:.25rem">${avatarEmoji(c)}</div>
+      <div style="font-weight:700;font-size:.85rem">${c.display_name || 'Kid'}</div>
+      <div style="font-size:.7rem;color:var(--text-3)">Lv.${c.level || 1}</div>
+    </div>
+  `).join('');
+}
+
+function renderParentPicker() {
+  const grid = document.getElementById('pick-grid');
+  if (!_parents.length) {
+    grid.innerHTML = '<div class="text-muted text-sm text-center" style="grid-column:1/-1;padding:1rem">No parents found.</div>';
+    return;
+  }
+  grid.innerHTML = _parents.map(p => `
+    <div class="char-card" onclick="selectPerson('${p.id}','${(p.display_name||'').replace(/'/g,"\\'")}')">
+      <div style="font-size:1.8rem;margin-bottom:.25rem">${p.emoji || '👤'}</div>
+      <div style="font-weight:700;font-size:.85rem">${p.display_name || 'Parent'}</div>
+    </div>
+  `).join('');
+}
+
+function avatarEmoji(child) {
+  const AVATAR_EMOJIS = { cat:'🐱', frog:'🐸', fox:'🦊', penguin:'🐧', lion:'🦁', tiger:'🐯', unicorn:'🦄', dragon:'🐉', robot:'🤖', wizard:'🧙', hero:'🦸', crown:'👑' };
+  return AVATAR_EMOJIS[child.avatar_key] || child.emoji || '👧';
+}
+
+function selectPerson(id, name) {
+  _selectedId   = id;
+  _selectedName = name;
+
+  // Highlight selection
+  document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  // Reset PIN state
+  _pinValue = '';
+  updatePinDots();
+  document.getElementById('pin-user-name').textContent = 'Hi, ' + name + '!';
+  document.getElementById('pin-error').classList.add('hidden');
+
+  setTimeout(() => goStep('step-pin'), 200);
+}
+
+// ── PIN pad ──────────────────────────────────────────────
+let _pinValue = '';
+
+// Keyboard / numpad support — only active when PIN step is visible
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('step-pin').classList.contains('active')) return;
+  if (e.key >= '0' && e.key <= '9') { pinPress(e.key); e.preventDefault(); }
+  else if (e.key === 'Backspace')    { pinPress('⌫');   e.preventDefault(); }
+});
+
+function pinPress(key) {
+  if (key === '⌫' || key === '') {
+    if (key === '⌫') _pinValue = _pinValue.slice(0, -1);
+    updatePinDots();
+    return;
+  }
+  if (_pinValue.length >= 4) return;
+  _pinValue += String(key);
+  updatePinDots();
+  if (_pinValue.length === 4) {
+    setTimeout(submitPin, 120);
+  }
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('filled', i < _pinValue.length);
+  }
+}
+
+async function submitPin() {
+  const errEl = document.getElementById('pin-error');
+  errEl.classList.add('hidden');
+
+  // Verify PIN directly from local data — no API/PHP needed
+  const person = [..._parents, ..._children].find(p => p.id === _selectedId);
+  if (!person) {
+    errEl.textContent = 'User not found. Please go back and try again.';
+    errEl.classList.remove('hidden');
+    _pinValue = ''; updatePinDots();
+    return;
+  }
+
+  const expectedPin = person.pin || person.pin_hash || '';
+  if (!expectedPin || expectedPin !== _pinValue) {
+    errEl.textContent = 'Wrong PIN. Try again.';
+    errEl.classList.remove('hidden');
+    _pinValue = ''; updatePinDots();
+    return;
+  }
+
+  // PIN matched — build session
+  const family = JSON.parse(localStorage.getItem('fos_real_family') || 'null') || (typeof DEMO_FAMILY !== 'undefined' ? DEMO_FAMILY : { id:'demo-family-001' });
+  const token  = 'local-' + person.id + '-' + Date.now();
+  Auth.save(token, person, family);
+  if (family?.id) localStorage.setItem('fos_last_family', family.id);
+
+  Toast.success('Welcome back, ' + _selectedName + '! 👋');
+
+  const role = person.role || (_role === 'parent' ? 'parent' : 'child');
+  if (role === 'parent') {
+    location.href = '/family-os/pages/parent/dashboard.html';
+  } else {
+    location.href = '/family-os/pages/child/dashboard.html';
+  }
+}
+</script>
+</body>
+</html>

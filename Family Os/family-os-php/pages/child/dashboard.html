@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dashboard — Family OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/family-os/assets/css/main.css">
+<link rel="stylesheet" href="/family-os/assets/css/child-theme.css">
+<script>
+/* Apply saved display mode ASAP to avoid flash */
+(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var m=localStorage.getItem('fos_child_theme_'+(u.id||'guest'))||'dark';document.documentElement.setAttribute('data-theme',m);}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="ct-app">
+
+  <!-- TOP BAR -->
+  <div class="ct-topbar">
+    <div class="ct-brand">
+      <div class="ct-brand-mark">F</div>
+      <div class="ct-brand-text">FAMILY · OS</div>
+    </div>
+    <div class="ct-topbar-right">
+      <a href="profile.html" class="ct-icon-btn" title="Profile">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+      </a>
+      <button class="ct-icon-btn" title="Switch User" onclick="openSwitchUser()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- HERO CARD -->
+  <div class="ct-hero">
+    <div class="ct-hero-row">
+      <div class="ct-avatar-wrap">
+        <div class="ct-avatar" id="hero-avatar" onclick="location.href='profile.html'" style="cursor:pointer;background:linear-gradient(135deg,#ff7aa6,#c76bff)">A</div>
+        <div class="ct-lvl-badge" id="hero-level">LV.1</div>
+      </div>
+      <div class="ct-hero-info">
+        <div class="ct-greet" id="hero-greet">Good morning</div>
+        <div class="ct-name" id="hero-name">Loading…</div>
+        <div class="ct-class-tag" id="hero-class">⚔ Apprentice</div>
+      </div>
+    </div>
+
+    <div class="ct-xp-block">
+      <div class="ct-xp-meta">
+        <span class="ct-xp-label">Experience</span>
+        <span class="ct-xp-num"><b id="xp-cur">0</b> / <span id="xp-max">100</span> XP</span>
+      </div>
+      <div class="ct-xp-track"><div class="ct-xp-fill" id="xp-fill"></div></div>
+      <div class="ct-xp-next" id="xp-next">Keep completing quests to level up!</div>
+    </div>
+
+    <div class="ct-stat-row">
+      <div class="ct-stat gold">
+        <div class="ct-stat-ico">🪙</div>
+        <div class="ct-stat-meta">
+          <div class="ct-stat-val" id="stat-coins">0</div>
+          <div class="ct-stat-cap" id="stat-coins-label">Coins</div>
+        </div>
+      </div>
+      <div class="ct-stat fire">
+        <div class="ct-stat-ico">🔥</div>
+        <div class="ct-stat-meta">
+          <div class="ct-stat-val" id="stat-streak">0</div>
+          <div class="ct-stat-cap">Day Streak</div>
+        </div>
+      </div>
+      <div class="ct-stat rank">
+        <div class="ct-stat-ico">🏅</div>
+        <div class="ct-stat-meta">
+          <div class="ct-stat-val" id="stat-rank">—</div>
+          <div class="ct-stat-cap">PR Streak</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY WIN CONDITION -->
+  <div class="ct-daily-win">
+    <div class="ct-dw-top">
+      <div class="ct-dw-title">⚡ DAILY <span>WIN CONDITION</span></div>
+      <div class="ct-dw-prize">Bonus: <b id="dw-bonus">+25 coins</b></div>
+    </div>
+    <div class="ct-dw-bar" id="dw-bar">
+      <div class="ct-dw-seg"></div>
+      <div class="ct-dw-seg"></div>
+      <div class="ct-dw-seg"></div>
+      <div class="ct-dw-seg"></div>
+      <div class="ct-dw-seg"></div>
+    </div>
+    <div class="ct-dw-foot">
+      <span><b id="dw-done">0</b> of <b id="dw-total">5</b> quests done</span>
+      <span id="dw-remaining">Complete all to win 🎯</span>
+    </div>
+  </div>
+
+  <!-- STREAK CALENDAR -->
+  <div class="ct-streak-card">
+    <div class="ct-streak-head">
+      <h3>🔥 STREAK <span>TRACKER</span></h3>
+      <div class="ct-streak-count">Run: <b id="streak-cur">0</b> days</div>
+    </div>
+    <div class="ct-streak-grid" id="streak-grid">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- QUICK WIN -->
+  <div class="ct-qw-card" onclick="openQuickWin()">
+    <div class="ct-qw-ico">⚡</div>
+    <div class="ct-qw-body">
+      <div class="ct-qw-tag">FAST FAVOR · 60 SECONDS</div>
+      <div class="ct-qw-title">1-Minute Quick Win</div>
+      <div class="ct-qw-sub">+5 coins · beat the clock for <b>+8</b> · <b id="qw-done-count" style="color:var(--ct-mint)"></b></div>
+    </div>
+    <div class="ct-qw-cta">GO
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </div>
+  </div>
+
+  <!-- BOSS QUEST -->
+  <div class="ct-section-head" id="boss-section" style="display:none">
+    <h2><span class="ct-dot" style="background:var(--ct-boss);box-shadow:0 0 8px var(--ct-boss)"></span> FEATURED QUEST</h2>
+    <span class="ct-filter">Epic reward</span>
+  </div>
+  <div id="boss-card"></div>
+
+  <!-- TODAY'S QUESTS -->
+  <div class="ct-section-head">
+    <h2><span class="ct-dot"></span> TODAY'S QUESTS</h2>
+    <span class="ct-filter" id="quest-count">Loading…</span>
+  </div>
+  <div class="ct-quest-list" id="quest-list">
+    <div class="ct-empty"><span class="ct-spinner"></span></div>
+  </div>
+
+  <!-- LEADERBOARD + STORE PEEK -->
+  <div class="ct-section-head">
+    <h2><span class="ct-dot" style="background:var(--ct-mint);box-shadow:0 0 8px var(--ct-mint)"></span> THIS WEEK</h2>
+    <span class="ct-filter">Resets Sunday</span>
+  </div>
+  <div class="ct-split-row">
+    <div class="ct-leaderboard">
+      <div class="ct-card-title" style="margin-bottom:8px">🏆 FAMILY BOARD <span id="lb-prize-label"></span></div>
+      <div id="lb-rows"><div class="ct-empty"><span class="ct-spinner"></span></div></div>
+      <div class="ct-lb-prize" id="lb-prize" style="display:none"></div>
+    </div>
+    <div class="ct-store-peek">
+      <div class="ct-card-title" style="margin-bottom:0">🎁 STORE <span>PEEK</span></div>
+      <div class="ct-sp-items" id="store-peek-items">
+        <div class="ct-empty" style="grid-column:1/-1"><span class="ct-spinner"></span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- QUICK WIN MODAL -->
+<div class="ct-qw-overlay" id="qwOverlay" onclick="if(event.target===this)closeQuickWin()">
+  <div class="ct-qw-modal" style="max-height:90vh;display:flex;flex-direction:column">
+    <button class="ct-qw-close" onclick="closeQuickWin()">×</button>
+
+    <!-- Header (always visible) -->
+    <div class="ct-qw-modal-head" style="flex-shrink:0">
+      <div class="ct-qw-modal-ico">⚡</div>
+      <div>
+        <div class="ct-qw-modal-title">1-MIN <span>QUICK WIN</span></div>
+        <div id="qwDoneToday" style="font-size:10px;color:var(--ct-ink-3);font-weight:600;margin-top:1px"></div>
+      </div>
+    </div>
+
+    <!-- ── PANE: MAIN ── -->
+    <div id="qwPaneMain" style="display:flex;flex-direction:column;gap:0;overflow:hidden">
+      <div class="ct-qw-task-card" style="cursor:pointer" onclick="qwShowSuggestions()" title="Pick a different task">
+        <span class="ct-qw-emoji" id="qwEmoji">🛏</span>
+        <div class="ct-qw-task-text" id="qwText">Make your bed</div>
+        <div class="ct-qw-task-pts">Reward: 🪙 <b>+5</b> coins &nbsp;·&nbsp; Beat the clock: <span class="bonus">+3 more</span></div>
+        <div style="font-size:9px;color:var(--ct-ink-3);margin-top:6px;letter-spacing:.08em">TAP CARD TO PICK A DIFFERENT TASK ›</div>
+      </div>
+      <div class="ct-qw-timer-box">
+        <div class="ct-qw-clock" id="qwClock">60s</div>
+        <div class="ct-qw-clock-label" id="qwLabel">Tap Start when ready</div>
+      </div>
+      <div class="ct-qw-btns" style="margin-bottom:10px">
+        <button class="ct-qw-btn ct-qw-btn-sec" id="qwLeft"  onclick="qwLeftClick()">🎲 REROLL</button>
+        <button class="ct-qw-btn ct-qw-btn-go"  id="qwRight" onclick="qwRightClick()">START TIMER</button>
+      </div>
+      <!-- Secondary row -->
+      <div style="display:flex;gap:8px">
+        <button onclick="qwShowSuggestions()" style="flex:1;padding:9px;border-radius:10px;border:1px solid var(--ct-line);background:var(--ct-bg-1);color:var(--ct-ink-2);font-weight:700;font-size:11px;cursor:pointer;letter-spacing:.04em;transition:.2s" onmouseover="this.style.borderColor='#2dd4bf'" onmouseout="this.style.borderColor='var(--ct-line)'">
+          💡 SUGGESTIONS
+        </button>
+        <button onclick="qwShowHistory()" style="flex:1;padding:9px;border-radius:10px;border:1px solid var(--ct-line);background:var(--ct-bg-1);color:var(--ct-ink-2);font-weight:700;font-size:11px;cursor:pointer;letter-spacing:.04em;transition:.2s" onmouseover="this.style.borderColor='var(--ct-gold)'" onmouseout="this.style.borderColor='var(--ct-line)'">
+          🕐 HISTORY
+        </button>
+      </div>
+    </div>
+
+    <!-- ── PANE: SUGGESTIONS ── -->
+    <div id="qwPaneSuggestions" style="display:none;flex-direction:column;overflow:hidden;flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-shrink:0">
+        <button onclick="qwShowMain()" style="background:var(--ct-bg-1);border:1px solid var(--ct-line);color:var(--ct-ink-2);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:700">← Back</button>
+        <div style="font-family:'Bungee',cursive;font-size:12px;letter-spacing:.08em;color:var(--ct-ink)">PICK A TASK</div>
+      </div>
+      <div id="qwSuggestionsList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;padding-right:2px"></div>
+    </div>
+
+    <!-- ── PANE: HISTORY ── -->
+    <div id="qwPaneHistory" style="display:none;flex-direction:column;overflow:hidden;flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-shrink:0">
+        <button onclick="qwShowMain()" style="background:var(--ct-bg-1);border:1px solid var(--ct-line);color:var(--ct-ink-2);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:700">← Back</button>
+        <div style="font-family:'Bungee',cursive;font-size:12px;letter-spacing:.08em;color:var(--ct-ink)">TODAY'S <span style="color:var(--ct-gold)">WINS</span></div>
+      </div>
+      <div id="qwHistoryList" style="overflow-y:auto;flex:1"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="ct-bottom-nav">
+  <a href="dashboard.html" class="ct-nav-item active">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4h-2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg></div>
+    <span class="ct-nav-label">Quests</span>
+  </a>
+  <a href="rewards.html" class="ct-nav-item">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a1 1 0 00-1 1v3a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1zM5 12v8a1 1 0 001 1h12a1 1 0 001-1v-8M12 7V3m0 0l-3 4m3-4l3 4"/></svg></div>
+    <span class="ct-nav-label">Store</span>
+  </a>
+  <a href="profile.html" class="ct-nav-item">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+    <span class="ct-nav-label">Profile</span>
+  </a>
+</nav>
+
+<!-- FLOAT NOTIF -->
+<div class="ct-float-notif" id="ctNotif">
+  <span id="ctNotifEmoji">🪙</span>
+  <span id="ctNotifText">+15 coins!</span>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireChild();
+const user = Auth.getUser();
+
+// ── Greet ──────────────────────────────────────────────────────
+const h = new Date().getHours();
+document.getElementById('hero-greet').textContent =
+  h < 12 ? 'Good morning,' : h < 17 ? 'Good afternoon,' : 'Good evening,';
+
+// ── Classes by level ──────────────────────────────────────────
+function classForLevel(lv) {
+  if (lv >= 10) return '👑 Legend';
+  if (lv >= 7)  return '⚡ Champion';
+  if (lv >= 5)  return '🛡 Guardian';
+  if (lv >= 3)  return '⚔ Warrior';
+  return '🌱 Apprentice';
+}
+
+// ── Avatar colors by theme ─────────────────────────────────────
+const AVATAR_GRADIENTS = {
+  pink:   'linear-gradient(135deg,#ff7aa6,#c76bff)',
+  blue:   'linear-gradient(135deg,#60a5fa,#818cf8)',
+  green:  'linear-gradient(135deg,#34d399,#059669)',
+  red:    'linear-gradient(135deg,#f87171,#ef4444)',
+  orange: 'linear-gradient(135deg,#fb923c,#f59e0b)',
+  purple: 'linear-gradient(135deg,#a78bfa,#7c3aed)',
+};
+
+// ── XP thresholds ─────────────────────────────────────────────
+function xpForLevel(lv) { return Math.round(100 * Math.pow(lv, 1.5)); }
+
+// ── Update hero card ──────────────────────────────────────────
+function applyHero(u) {
+  const coin  = getCoinConfig();
+  const lv    = u.level || 1;
+  const bal   = u.balance || 0;
+  const streak= u.streak || 0;
+  const xpCur = bal;
+  const xpMax = xpForLevel(lv + 1);
+  const pct   = Math.min(100, Math.round(xpCur / xpMax * 100));
+  const initial = (u.display_name || 'K')[0].toUpperCase();
+  const grad  = AVATAR_GRADIENTS[u.theme] || AVATAR_GRADIENTS.pink;
+
+  document.getElementById('hero-avatar').textContent = initial;
+  document.getElementById('hero-avatar').style.background = grad;
+  document.getElementById('hero-name').textContent   = u.display_name || 'Champion';
+  document.getElementById('hero-level').textContent  = 'LV.' + lv;
+  document.getElementById('hero-class').textContent  = classForLevel(lv);
+  document.getElementById('stat-coins').textContent  = bal;
+  document.getElementById('stat-coins-label').textContent = coin.symbol + ' Coins';
+  document.getElementById('stat-streak').textContent = streak;
+  // PR = personal record streak — best ever, at least current
+  const pr = Math.max(u.best_streak || 0, streak);
+  document.getElementById('stat-rank').textContent = pr + (pr === 1 ? ' day' : ' days');
+  document.getElementById('xp-cur').textContent      = xpCur;
+  document.getElementById('xp-max').textContent      = xpMax;
+  document.getElementById('xp-next').innerHTML       = `Next level: <b>Lv.${lv+1} — ${classForLevel(lv+1)}</b>`;
+  setTimeout(() => { document.getElementById('xp-fill').style.width = pct + '%'; }, 120);
+}
+applyHero(user);
+
+// ── Streak calendar ───────────────────────────────────────────
+function renderStreakCalendar(streak) {
+  const days  = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const today = new Date().getDay();
+  const grid  = document.getElementById('streak-grid');
+  document.getElementById('streak-cur').textContent = streak;
+  grid.innerHTML = days.map((d, i) => {
+    const offset   = (i - today + 7) % 7;
+    const daysAgo  = offset === 0 ? 0 : 7 - offset;
+    const isToday  = i === today;
+    const isDone   = !isToday && daysAgo < streak;
+    return `<div class="ct-streak-day${isDone ? ' done' : isToday ? ' today' : ''}"><span>${d}</span></div>`;
+  }).join('');
+}
+renderStreakCalendar(user.streak || 0);
+
+// ── Daily Win ─────────────────────────────────────────────────
+let _dayWon = false;
+function updateDailyWin(done, total) {
+  const WIN_TARGET = Math.min(5, total || 5);
+  const segs = document.querySelectorAll('.ct-dw-seg');
+  segs.forEach((s, i) => s.classList.toggle('fill', i < Math.min(WIN_TARGET, done)));
+  document.getElementById('dw-done').textContent    = Math.min(WIN_TARGET, done);
+  document.getElementById('dw-total').textContent   = WIN_TARGET;
+  const left = Math.max(0, WIN_TARGET - done);
+  document.getElementById('dw-remaining').textContent =
+    left === 0 ? '🎉 You won today!' : `${left} more to win the day 🎯`;
+
+  if (done >= WIN_TARGET && !_dayWon) {
+    _dayWon = true;
+    const coin = getCoinConfig();
+    setTimeout(() => showNotif(`DAY COMPLETE! +25 ${coin.symbol} bonus!`, '🎯'), 600);
+  }
+}
+
+// ── Float notif ───────────────────────────────────────────────
+function showNotif(text, emoji = '🪙') {
+  document.getElementById('ctNotifText').textContent  = text;
+  document.getElementById('ctNotifEmoji').textContent = emoji;
+  const el = document.getElementById('ctNotif');
+  el.classList.add('show');
+  clearTimeout(window._notifT);
+  window._notifT = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── Diff helpers ──────────────────────────────────────────────
+function diffLabel(d) {
+  return { easy:'🌱 Easy', medium:'⚡ Medium', hard:'🔥 Hard', epic:'💫 Epic' }[d] || '⚡ Medium';
+}
+const CHORE_EMOJI = { bedroom:'🛏️', kitchen:'🍽️', cleaning:'🧹', yard:'🌿', laundry:'👕', pets:'🐾', cooking:'👨‍🍳', bathroom:'🚿' };
+
+// ── Render missions ───────────────────────────────────────────
+function renderMissions(instances) {
+  const coin    = getCoinConfig();
+  const total   = instances.length;
+  const done    = instances.filter(i => i.status !== 'pending').length;
+  const pending = instances.filter(i => i.status === 'pending');
+  const doneArr = instances.filter(i => i.status !== 'pending');
+
+  document.getElementById('quest-count').textContent = `${total - done} active · ${done} done`;
+  updateDailyWin(done, total);
+
+  if (!instances.length) {
+    document.getElementById('quest-list').innerHTML = '<div class="ct-empty">🎉 All quests complete for today!</div>';
+    return;
+  }
+
+  // Boss quest — pick hardest pending
+  const boss = pending.find(i => i.chore?.difficulty === 'hard' || i.chore?.difficulty === 'epic')
+            || pending.find(i => i.chore?.difficulty === 'medium');
+  if (boss) {
+    document.getElementById('boss-section').style.display = '';
+    const bc = boss.chore || {};
+    const bfc = bc.usd_value ? coin.usdToFC(bc.usd_value) : (bc.points || 0);
+    document.getElementById('boss-card').innerHTML = `
+      <a href="chore-detail.html?id=${boss.id}" class="ct-boss">
+        <div class="ct-boss-tag">⚔ FEATURED · ${(bc.difficulty||'medium').toUpperCase()}</div>
+        <div class="ct-boss-title">${bc.title || 'Big Quest'}</div>
+        ${bc.description ? `<div class="ct-boss-sub">${bc.description}</div>` : ''}
+        <div class="ct-boss-stats">
+          <div class="ct-boss-stat">🪙 <b>+${bfc} ${coin.symbol}</b></div>
+          ${bc.suggested_timer_min ? `<div class="ct-boss-stat">⏱ <b>${bc.suggested_timer_min} min</b></div>` : ''}
+        </div>
+        <div class="ct-boss-cta">
+          <div class="ct-boss-prog">Tap to start quest</div>
+          <div class="ct-boss-go">START QUEST</div>
+        </div>
+      </a>`;
+  }
+
+  const renderQuest = (inst) => {
+    const c   = inst.chore || {};
+    const diff = c.difficulty || 'easy';
+    const fc  = c.usd_value ? coin.usdToFC(c.usd_value) : (c.points || 0);
+    const isDone = inst.status !== 'pending';
+    const isSubmit = inst.status === 'submitted';
+    const isReject = inst.status === 'rejected';
+    const stateClass = isDone ? (isSubmit ? 'review' : isReject ? 'rejected' : 'done') : 'pending';
+    const stateText  = isDone ? (isSubmit ? '⏳ Review' : isReject ? '✗ Redo' : '✓ Done') : 'Pending';
+    const emoji = CHORE_EMOJI[c.category] || '📋';
+
+    return `
+      <a href="chore-detail.html?id=${inst.id}" class="ct-quest ${diff}${isDone ? ' done' : ''}">
+        <div class="ct-q-icon">${emoji}</div>
+        <div class="ct-q-body">
+          <div class="ct-q-title-row">
+            <h4>${c.title || 'Quest'}</h4>
+            ${diff === 'hard' || diff === 'epic' ? '<span class="ct-q-bonus">✨ BONUS XP</span>' : ''}
+          </div>
+          <div class="ct-q-meta">
+            <span class="ct-q-diff">${diffLabel(diff)}</span>
+            <span class="ct-q-points">🪙 <b>+${fc}</b></span>
+            ${c.suggested_timer_min ? `<span class="ct-q-time">⏱ ${c.suggested_timer_min}min</span>` : ''}
+          </div>
+        </div>
+        <div class="ct-q-state ${stateClass}">${stateText}</div>
+      </a>`;
+  };
+
+  const pendingToShow = pending.filter(i => i !== boss);
+  document.getElementById('quest-list').innerHTML =
+    (boss ? renderQuest(boss) : '') +
+    pendingToShow.map(renderQuest).join('') +
+    (doneArr.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ct-ink-3);padding:.5rem 4px .25rem">Completed</div>` + doneArr.map(renderQuest).join('') : '');
+}
+
+// ── Render leaderboard ────────────────────────────────────────
+function renderLeaderboard(board) {
+  const top3 = board.slice(0, 3);
+  const ranks = ['r1','r2','r3'];
+  if (!top3.length) {
+    document.getElementById('lb-rows').innerHTML = '<div class="ct-empty">No data yet.</div>';
+    return;
+  }
+  // Show family board position in the leaderboard section (not stat card — that shows PR streak)
+  const myRank = board.findIndex(e => e.name === user.display_name) + 1;
+  const myEntry = board.find(e => e.name === user.display_name);
+  if (myEntry) {
+    // Update PR streak if leaderboard has a higher streak value for this user
+    const lbStreak = myEntry.streak || 0;
+    const curPR = Math.max(user.best_streak || 0, user.streak || 0, lbStreak);
+    document.getElementById('stat-rank').textContent = curPR + (curPR === 1 ? ' day' : ' days');
+  }
+
+  document.getElementById('lb-rows').innerHTML = top3.map((e, i) => `
+    <div class="ct-lb-row">
+      <div class="ct-lb-rank ${ranks[i]}">${i + 1}</div>
+      <div class="ct-lb-name">${e.name}${i === 0 ? ' 👑' : ''}${e.name === user.display_name ? '<span class="ct-lb-me">YOU</span>' : ''}</div>
+      <div class="ct-lb-score">${e.balance || e.points || 0}</div>
+    </div>`).join('');
+
+  if (board[0]) {
+    document.getElementById('lb-prize').style.display = '';
+    document.getElementById('lb-prize').innerHTML = `🏆 Weekly champ picks <b>family activity</b>`;
+  }
+}
+
+// ── Store peek ────────────────────────────────────────────────
+async function loadStorePeek() {
+  try {
+    const res     = await RewardsAPI.list();
+    const rewards = (Array.isArray(res) ? res : (res?.data || [])).slice(0, 4);
+    if (!rewards.length) { document.getElementById('store-peek-items').innerHTML = ''; return; }
+    const coin = getCoinConfig();
+    document.getElementById('store-peek-items').innerHTML = rewards.map(r => {
+      const fc = r.usd_value ? coin.usdToFC(r.usd_value) : r.points_cost;
+      const emoji = r.title.match(/screen|tv/i) ? '📺' : r.title.match(/sleep|late/i) ? '🌙' : r.title.match(/movie/i) ? '🎬' : r.title.match(/skip/i) ? '⏭' : r.title.match(/food|dinner|pizza/i) ? '🍕' : '🎁';
+      return `<a href="rewards.html" class="ct-sp-item">
+        <span class="ct-sp-emoji">${emoji}</span>
+        <div class="ct-sp-name">${r.title}</div>
+        <div class="ct-sp-cost">${fc} 🪙</div>
+      </a>`;
+    }).join('');
+  } catch {}
+}
+
+// ── Quick Win ─────────────────────────────────────────────────
+const QW_TASKS = [
+  {e:'🛏',t:'Make your bed'},
+  {e:'👟',t:'Put shoes in their spot'},
+  {e:'🪞',t:'Wipe one mirror clean'},
+  {e:'🧺',t:'Put dirty clothes in the hamper'},
+  {e:'🗑',t:'Throw away 3 pieces of trash'},
+  {e:'📚',t:'Straighten one shelf'},
+  {e:'🪑',t:'Push in every chair in the room'},
+  {e:'🧴',t:'Wipe one bathroom counter'},
+  {e:'✨',t:'Clear one surface completely'},
+  {e:'🛁',t:'Hang up your towel properly'},
+  {e:'🪥',t:'Rinse the sink and put toothbrush away'},
+  {e:'🍽',t:'Put away 5 dishes from the rack'},
+  {e:'🧹',t:'Sweep one small area'},
+  {e:'🛋',t:'Fluff and arrange couch pillows'},
+  {e:'🚪',t:'Close every cabinet in the kitchen'},
+  {e:'🪟',t:'Wipe one window or glass surface'},
+  {e:'🌿',t:'Water one plant'},
+  {e:'📖',t:'Put 5 books back where they belong'},
+  {e:'🧦',t:'Match and fold 3 pairs of socks'},
+  {e:'🗂',t:'Clear and wipe the kitchen table'},
+];
+
+let qwTimer = null, qwSecs = 60, qwState = 'idle';
+let _qwCurrentTask = QW_TASKS[0];
+
+// ── History (localStorage, resets each day) ───────────────────
+function qwHistKey() {
+  return 'fos_qw_hist_' + new Date().toISOString().slice(0, 10) + '_' + (user?.id || 'kid');
+}
+function qwLoadHistory() {
+  try { return JSON.parse(localStorage.getItem(qwHistKey()) || '[]'); } catch { return []; }
+}
+function qwSaveHistory(hist) {
+  try { localStorage.setItem(qwHistKey(), JSON.stringify(hist)); } catch {}
+}
+function qwAddToHistory(task, beat) {
+  const hist = qwLoadHistory();
+  hist.unshift({
+    e: task.e, t: task.t, beat,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  qwSaveHistory(hist.slice(0, 20)); // keep last 20
+}
+
+// ── Done-today badge ──────────────────────────────────────────
+function qwUpdateDoneBadge() {
+  const hist  = qwLoadHistory();
+  const el    = document.getElementById('qwDoneToday');
+  const count = hist.length;
+  if (count === 0) { el.textContent = 'No quick wins yet today'; return; }
+  const beats = hist.filter(h => h.beat).length;
+  el.innerHTML = `<span style="color:var(--ct-mint)">✅ ${count} done today</span>${beats ? ` &nbsp;·&nbsp; <span style="color:var(--ct-gold)">⚡ ${beats} beat the clock</span>` : ''}`;
+
+  // Also update the card on the dashboard
+  const card = document.getElementById('qw-done-count');
+  if (card) card.textContent = count > 0 ? `${count} done today` : '';
+}
+
+// ── Pane switching ────────────────────────────────────────────
+function qwShowMain() {
+  document.getElementById('qwPaneMain').style.display        = 'flex';
+  document.getElementById('qwPaneSuggestions').style.display = 'none';
+  document.getElementById('qwPaneHistory').style.display     = 'none';
+}
+function qwShowSuggestions() {
+  if (qwState === 'running') return; // don't allow switching mid-timer
+  document.getElementById('qwPaneMain').style.display        = 'none';
+  document.getElementById('qwPaneSuggestions').style.display = 'flex';
+  document.getElementById('qwPaneHistory').style.display     = 'none';
+  renderSuggestions();
+}
+function qwShowHistory() {
+  document.getElementById('qwPaneMain').style.display        = 'none';
+  document.getElementById('qwPaneSuggestions').style.display = 'none';
+  document.getElementById('qwPaneHistory').style.display     = 'flex';
+  renderHistory();
+}
+
+// ── Suggestions list ──────────────────────────────────────────
+function renderSuggestions() {
+  const hist     = qwLoadHistory();
+  const doneSet  = new Set(hist.map(h => h.t));
+  const el       = document.getElementById('qwSuggestionsList');
+
+  el.innerHTML = QW_TASKS.map((task, idx) => {
+    const isDone = doneSet.has(task.t);
+    return `
+      <div onclick="qwPickTask(${idx})"
+           style="display:flex;align-items:center;gap:12px;padding:11px 14px;
+                  border-radius:12px;cursor:pointer;transition:.15s;
+                  background:${task.t === _qwCurrentTask.t ? 'rgba(45,212,191,.12)' : 'var(--ct-bg-1)'};
+                  border:1.5px solid ${task.t === _qwCurrentTask.t ? '#2dd4bf' : 'var(--ct-line-soft)'}"
+           onmouseover="if(this.style.borderColor!=='rgb(45, 212, 191)')this.style.background='var(--ct-bg-3)'"
+           onmouseout="if(this.style.borderColor!=='rgb(45, 212, 191)')this.style.background='var(--ct-bg-1)'">
+        <span style="font-size:22px;width:32px;text-align:center;flex-shrink:0">${task.e}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:${isDone ? 'var(--ct-mint)' : 'var(--ct-ink)'}">${task.t}</div>
+          ${isDone ? '<div style="font-size:10px;color:var(--ct-mint);font-weight:600">✅ Done today already!</div>' : ''}
+        </div>
+        ${task.t === _qwCurrentTask.t
+          ? '<span style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.06em">SELECTED</span>'
+          : '<span style="color:var(--ct-ink-3);font-size:18px">›</span>'}
+      </div>`;
+  }).join('');
+}
+
+function qwPickTask(idx) {
+  _qwCurrentTask = QW_TASKS[idx];
+  document.getElementById('qwEmoji').textContent = _qwCurrentTask.e;
+  document.getElementById('qwText').textContent  = _qwCurrentTask.t;
+  qwShowMain();
+}
+
+// ── History list ──────────────────────────────────────────────
+function renderHistory() {
+  const hist = qwLoadHistory();
+  const el   = document.getElementById('qwHistoryList');
+
+  if (!hist.length) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:2rem;color:var(--ct-ink-3)">
+        <div style="font-size:40px;margin-bottom:8px">⚡</div>
+        <div style="font-weight:700;margin-bottom:4px">No quick wins yet today!</div>
+        <div style="font-size:12px">Complete your first one and it'll show up here.</div>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--ct-ink-3);font-weight:600;margin-bottom:10px;letter-spacing:.08em">
+      ${hist.length} QUICK WIN${hist.length > 1 ? 'S' : ''} COMPLETED TODAY
+    </div>` +
+    hist.map(h => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;
+                  background:var(--ct-bg-1);border:1px solid var(--ct-line-soft);
+                  border-radius:12px;margin-bottom:6px">
+        <span style="font-size:22px;width:30px;text-align:center;flex-shrink:0">${h.e}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--ct-ink)">${h.t}</div>
+          <div style="font-size:10px;margin-top:2px">
+            ${h.beat
+              ? '<span style="color:var(--ct-gold);font-weight:700">⚡ Beat the clock! +8 🪙</span>'
+              : '<span style="color:var(--ct-ink-3);font-weight:600">+5 🪙</span>'}
+            <span style="color:var(--ct-ink-3);margin-left:6px">· ${h.time}</span>
+          </div>
+        </div>
+        <span style="color:var(--ct-mint);font-size:18px">✓</span>
+      </div>`).join('');
+}
+
+// ── Core QW logic ─────────────────────────────────────────────
+function pickQwTask() {
+  _qwCurrentTask = QW_TASKS[Math.floor(Math.random() * QW_TASKS.length)];
+  document.getElementById('qwEmoji').textContent = _qwCurrentTask.e;
+  document.getElementById('qwText').textContent  = _qwCurrentTask.t;
+}
+function renderQwClock() {
+  const el  = document.getElementById('qwClock');
+  const lbl = document.getElementById('qwLabel');
+  el.textContent = qwSecs + 's';
+  const urgent = qwSecs <= 10 && qwState === 'running';
+  el.classList.toggle('urgent', urgent);
+  lbl.classList.toggle('urgent', urgent);
+}
+function openQuickWin() {
+  if (qwTimer) { clearInterval(qwTimer); qwTimer = null; }
+  qwState = 'idle'; qwSecs = 60;
+  pickQwTask();
+  renderQwClock();
+  document.getElementById('qwLabel').textContent  = 'Tap Start when ready';
+  document.getElementById('qwLeft').textContent   = '🎲 REROLL';
+  document.getElementById('qwRight').textContent  = 'START TIMER';
+  document.getElementById('qwRight').className    = 'ct-qw-btn ct-qw-btn-go';
+  qwShowMain();
+  qwUpdateDoneBadge();
+  document.getElementById('qwOverlay').classList.add('active');
+}
+function closeQuickWin() {
+  document.getElementById('qwOverlay').classList.remove('active');
+  if (qwTimer) { clearInterval(qwTimer); qwTimer = null; }
+  qwState = 'idle';
+}
+function qwLeftClick() {
+  if (qwState === 'idle') pickQwTask();
+  else { closeQuickWin(); }
+}
+function qwRightClick() {
+  if (qwState === 'idle') {
+    qwState = 'running';
+    document.getElementById('qwLabel').textContent = '⏱ GO GO GO!';
+    document.getElementById('qwLeft').textContent  = '✋ GIVE UP';
+    document.getElementById('qwRight').textContent = '✓ I DID IT!';
+    document.getElementById('qwRight').className   = 'ct-qw-btn ct-qw-btn-done';
+    qwTimer = setInterval(() => {
+      qwSecs--;
+      renderQwClock();
+      if (qwSecs <= 0) {
+        clearInterval(qwTimer); qwTimer = null;
+        document.getElementById('qwLabel').textContent = "⏰ TIME'S UP — tap Done for base reward";
+        document.getElementById('qwClock').classList.remove('urgent');
+      }
+    }, 1000);
+  } else {
+    // Claim reward
+    const coin = getCoinConfig();
+    const beat = qwSecs > 0 && qwState === 'running';
+    const earned = beat ? 8 : 5;
+    qwAddToHistory(_qwCurrentTask, beat);
+    qwUpdateDoneBadge();
+    showNotif(beat ? `⚡ BEAT THE CLOCK! +${earned} ${coin.symbol}!` : `✅ QUICK WIN! +${earned} ${coin.symbol}!`, beat ? '⚡' : '✅');
+    closeQuickWin();
+  }
+}
+
+// Init done badge on page load
+qwUpdateDoneBadge();
+
+// ── Main load ─────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [instancesRes, meRes, lbRes] = await Promise.all([
+      ChoresAPI.instances(),
+      AuthAPI.me(),
+      PointsAPI.leaderboard('week'),
+    ]);
+
+    const instances = Array.isArray(instancesRes) ? instancesRes : (instancesRes?.data || instancesRes?.chores || []);
+    const _me       = meRes?.data || meRes;
+    const freshUser = _me?.user || user;
+    const lb        = (_me?.leaderboard || (lbRes?.data || lbRes)?.leaderboard || []);
+
+    applyHero(freshUser);
+    renderStreakCalendar(freshUser.streak || 0);
+    renderMissions(instances);
+    renderLeaderboard(lb);
+
+  } catch(e) {
+    document.getElementById('quest-list').innerHTML = '<div class="ct-empty">Could not load quests. Pull to refresh.</div>';
+  }
+}
+
+loadDashboard();
+loadStorePeek();
+</script>
+</body>
+</html>

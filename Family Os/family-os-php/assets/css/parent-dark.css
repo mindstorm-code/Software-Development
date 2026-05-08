@@ -1,0 +1,188 @@
+/*
+ * parent-dark.css
+ * Dark-mode overrides for parent pages that use main.css.
+ * Applied when <html data-theme="dark"> is set.
+ * Activated by the inline theme-init script in each page's <head>.
+ */
+
+[data-theme="dark"] {
+  --bg:           #0f1528;
+  --surface:      #161d33;
+  --surface-2:    #1a2138;
+  --border:       #2a3354;
+  --text:         #f6f4ee;
+  --text-2:       #c7cce0;
+  --text-3:       #7f87a8;
+  --primary:      #8b7bff;
+  --primary-dark: #6c5cdd;
+  --primary-soft: #1e1b42;
+  --secondary:    #ff5577;
+  --success:      #22d39a;
+  --warning:      #ffc943;
+  --danger:       #ff5577;
+  --shadow:       0 2px 16px rgba(0,0,0,.35);
+  --shadow-md:    0 4px 24px rgba(0,0,0,.45);
+  --bg-2:         #1f2742;
+}
+
+/* ── Body & page shell ── */
+[data-theme="dark"] body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(176,116,255,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(255,201,67,.06), transparent 55%),
+    #0a0e1a;
+  background-attachment: fixed;
+  color: var(--text);
+}
+[data-theme="dark"] .page { background: transparent; }
+
+/* ── Page header ── */
+[data-theme="dark"] .page-header {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text);
+}
+[data-theme="dark"] .page-header h1,
+[data-theme="dark"] .page-header h2 { color: var(--text); }
+
+/* ── Cards ── */
+[data-theme="dark"] .card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  color: var(--text);
+}
+[data-theme="dark"] .card .text-muted,
+[data-theme="dark"] .card small { color: var(--text-3) !important; }
+
+/* ── Bottom nav ── */
+[data-theme="dark"] .bottom-nav {
+  background: rgba(15,21,40,.92) !important;
+  border-top: 1px solid var(--border) !important;
+  backdrop-filter: blur(16px);
+}
+[data-theme="dark"] .nav-item { color: var(--text-3); }
+[data-theme="dark"] .nav-item.active { color: var(--primary); }
+
+/* ── Tab bars ── */
+[data-theme="dark"] .tab-bar {
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .r-tab { color: var(--text-3); background: none; border: none; }
+[data-theme="dark"] .r-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ── Form controls ── */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] textarea.form-control,
+[data-theme="dark"] select.form-control {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] textarea.form-control:focus {
+  border-color: var(--primary) !important;
+  background: var(--surface) !important;
+  outline: none;
+}
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] textarea.form-control::placeholder { color: var(--text-3); }
+[data-theme="dark"] .form-label { color: var(--text-2); }
+[data-theme="dark"] .form-hint { color: var(--text-3); }
+
+/* ── Buttons ── */
+[data-theme="dark"] .btn-ghost {
+  color: var(--text-2);
+  border-color: var(--border);
+  background: transparent;
+}
+[data-theme="dark"] .btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+[data-theme="dark"] .btn-secondary {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-2);
+}
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--bg-2);
+  color: var(--text);
+}
+[data-theme="dark"] .btn-icon { color: var(--text-2); }
+
+/* ── Badges ── */
+[data-theme="dark"] .badge { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+[data-theme="dark"] .badge-warning { background: rgba(255,190,59,.18); color: var(--warning); border-color: rgba(255,190,59,.3); }
+[data-theme="dark"] .badge-success { background: rgba(34,211,154,.16); color: var(--success); border-color: rgba(34,211,154,.3); }
+[data-theme="dark"] .badge-danger  { background: rgba(255,82,82,.16);   color: var(--danger);  border-color: rgba(255,82,82,.3);  }
+[data-theme="dark"] .badge-info    { background: rgba(79,195,247,.16);  color: var(--info,#4FC3F7); border-color: rgba(79,195,247,.3); }
+
+/* ── Progress bars ── */
+[data-theme="dark"] .progress { background: rgba(255,255,255,.08); }
+
+/* ── Empty states & spinners ── */
+[data-theme="dark"] .empty-state { color: var(--text-3); }
+
+/* ── Modals ── */
+[data-theme="dark"] .modal-overlay {
+  background: rgba(5,8,18,.85) !important;
+  backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .modal {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text);
+}
+[data-theme="dark"] .modal h2,
+[data-theme="dark"] .modal h3 { color: var(--text); }
+
+/* ── Tables / lists ── */
+[data-theme="dark"] table th { color: var(--text-3); border-color: var(--border); }
+[data-theme="dark"] table td { border-color: var(--border); color: var(--text-2); }
+[data-theme="dark"] tr:hover td { background: var(--surface-2); }
+
+/* ── Utility text ── */
+[data-theme="dark"] .text-muted { color: var(--text-3) !important; }
+[data-theme="dark"] p { color: var(--text-2); }
+[data-theme="dark"] small { color: var(--text-3); }
+[data-theme="dark"] h1, [data-theme="dark"] h2,
+[data-theme="dark"] h3, [data-theme="dark"] h4 { color: var(--text); }
+
+/* ── Stat values ── */
+[data-theme="dark"] .stat-value { color: var(--text); }
+[data-theme="dark"] .stat-label { color: var(--text-3); }
+
+/* ── Input groups / inline elements ── */
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"] {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* ── Day chips (chore-new, chore-edit) ── */
+[data-theme="dark"] .day-chip {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-3);
+}
+[data-theme="dark"] .day-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ── Reviews page tabs ── */
+[data-theme="dark"] .tab-bar { border-bottom: 2px solid var(--border); }
+
+/* ── Activity log / list rows ── */
+[data-theme="dark"] [style*="border-bottom"],
+[data-theme="dark"] [style*="border-top"] { border-color: var(--border) !important; }
+
+/* ── Inline-bg overrides (cards with inline background styles) ── */
+[data-theme="dark"] .card[style*="background:linear-gradient"],
+[data-theme="dark"] .card[style*="background: linear-gradient"] {
+  /* leave gradient cards as-is — they're intentionally colored */
+}

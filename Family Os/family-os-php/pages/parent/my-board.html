@@ -1,0 +1,454 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Board — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+  <style>
+    .recur-chip { display:inline-flex;align-items:center;gap:.2rem;padding:.15rem .5rem;border-radius:20px;font-size:.72rem;font-weight:700;background:var(--primary-soft,#EFF6FF);color:var(--primary) }
+    .due-chip   { display:inline-flex;align-items:center;gap:.2rem;padding:.15rem .5rem;border-radius:20px;font-size:.72rem;font-weight:700;background:#FFF7ED;color:#F97316 }
+    .due-chip.overdue { background:#FEF2F2;color:#EF4444 }
+    .priority-badge { display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0 }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;padding:1rem">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+      <h1 style="font-size:1.2rem;font-weight:700;margin:0">📋 My Board</h1>
+    </div>
+    <a href="activity-log.html" class="btn btn-ghost btn-sm">📊 Activity Log</a>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:2px solid var(--border);margin:0 1rem">
+    <button id="tab-chores" onclick="switchTab('chores')" style="flex:1;padding:.6rem;background:none;border:none;font-weight:700;cursor:pointer;border-bottom:2px solid var(--primary);margin-bottom:-2px;color:var(--primary)">🏠 My Chores</button>
+    <button id="tab-tasks"  onclick="switchTab('tasks')"  style="flex:1;padding:.6rem;background:none;border:none;font-weight:700;cursor:pointer;color:var(--text-2)">📝 My Tasks</button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px">
+
+    <!-- My Chores -->
+    <div id="pane-chores">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+        <button class="btn btn-primary btn-sm" onclick="openAddChore()" id="btn-add-chore"></button>
+      </div>
+      <div id="chores-list">
+        <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- My Tasks -->
+    <div id="pane-tasks" class="hidden">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+        <button class="btn btn-primary btn-sm" onclick="openAddTask()" id="btn-add-task"></button>
+      </div>
+      <div id="tasks-list">
+        <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="chores.html"    class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="children.html"  class="nav-item" id="nav-family"><span class="nav-icon"></span><span>Family</span></a>
+    <a href="reviews.html"   class="nav-item" id="nav-reviews"><span class="nav-icon"></span><span>Reviews</span></a>
+    <a href="rewards.html"   class="nav-item" id="nav-rewards"><span class="nav-icon"></span><span>Rewards</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+(function(){
+  document.getElementById('btn-back').innerHTML      = iconBack();
+  document.getElementById('btn-add-chore').innerHTML = iconPlus() + ' Add Chore';
+  document.getElementById('btn-add-task').innerHTML  = iconPlus() + ' Add Task';
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconUsers,'nav-family'],[iconCheck,'nav-reviews'],[iconGift,'nav-rewards']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+const TREAT_PRESETS = [
+  '📺 20 min TV', '🍦 Ice cream', '☕ Coffee break', '🛁 Relaxing bath',
+  '📱 30 min phone', '🎮 Gaming session', '🍫 Chocolate treat', '😴 Nap time',
+  '📚 Reading time', '🍕 Takeout night',
+];
+
+function switchTab(name) {
+  document.getElementById('pane-chores').classList.toggle('hidden', name !== 'chores');
+  document.getElementById('pane-tasks').classList.toggle('hidden',  name !== 'tasks');
+  ['tab-chores','tab-tasks'].forEach(id => {
+    const el     = document.getElementById(id);
+    const active = (id === 'tab-' + name);
+    el.style.borderBottom = active ? '2px solid var(--primary)' : 'none';
+    el.style.color        = active ? 'var(--primary)' : 'var(--text-2)';
+    el.style.marginBottom = active ? '-2px' : '0';
+  });
+  if (name === 'tasks' && document.getElementById('tasks-list').querySelector('.spinner')) loadTasks();
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function recurLabel(r) {
+  if (!r || r === 'none') return '';
+  return { daily:'🔁 Daily', weekly:'🔁 Weekly', monthly:'🔁 Monthly', yearly:'🔁 Yearly', once:'1× Once' }[r] || r;
+}
+
+function dueLabel(dateStr) {
+  if (!dateStr) return '';
+  const d    = new Date(dateStr + 'T00:00:00');
+  const now  = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((d - now) / 86400000);
+  if (diff < 0)  return { text: `Overdue ${Math.abs(diff)}d`, overdue: true };
+  if (diff === 0) return { text: 'Due Today', overdue: false };
+  if (diff === 1) return { text: 'Due Tomorrow', overdue: false };
+  return { text: `Due ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`, overdue: false };
+}
+
+const PRIORITY_COLORS = { high:'#EF4444', medium:'#F59E0B', low:'#22C55E' };
+
+// ── CHORES ────────────────────────────────────────────────────
+async function loadChores() {
+  try {
+    const res    = await api.get('/parent/chores.php');
+    const chores = Array.isArray(res) ? res : (res?.data || res?.chores || []);
+    renderChores(chores);
+  } catch(e) {
+    document.getElementById('chores-list').innerHTML = '<div class="empty-state text-danger">Failed to load.</div>';
+  }
+}
+
+function renderChores(chores) {
+  const el = document.getElementById('chores-list');
+  if (!chores.length) {
+    el.innerHTML = '<div class="empty-state">No chores yet. Add one for yourself!</div>';
+    return;
+  }
+  el.innerHTML = chores.map(c => {
+    const rl  = recurLabel(c.recurrence);
+    const dl  = c.due_date ? dueLabel(c.due_date) : null;
+    return `
+    <div class="card mb-2" style="display:flex;align-items:flex-start;gap:.75rem;${c.done ? 'opacity:.55' : ''}">
+      <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleChore('${c.id}', this.checked, ${JSON.stringify(c).replace(/"/g,'&quot;')})"
+        style="width:22px;height:22px;flex-shrink:0;cursor:pointer;accent-color:var(--primary);margin-top:.25rem">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+          ${c.priority ? `<span class="priority-badge" style="background:${PRIORITY_COLORS[c.priority]||'#94A3B8'}" title="${c.priority} priority"></span>` : ''}
+          <span style="font-weight:600;${c.done ? 'text-decoration:line-through;color:var(--text-3)' : ''}">${c.title}</span>
+        </div>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.25rem">
+          ${rl ? `<span class="recur-chip">${rl}</span>` : ''}
+          ${dl ? `<span class="due-chip${dl.overdue ? ' overdue' : ''}">📅 ${dl.text}</span>` : ''}
+        </div>
+        ${c.reward ? `<div class="text-sm" style="color:var(--warning);margin-top:.2rem">🎁 ${c.reward}</div>` : ''}
+        ${c.notes  ? `<div class="text-sm text-muted truncate">${c.notes}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:.3rem;flex-shrink:0">
+        <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick='openEditChore(${JSON.stringify(c).replace(/'/g,"&#39;")})'>${iconEdit()}</button>
+        <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteChore('${c.id}','${c.title.replace(/'/g,"\\'")}' )">${iconTrash()}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleChore(id, done, chore) {
+  try {
+    await api.patch('/parent/chores.php?id=' + id, { done });
+    if (done && chore.reward) showRewardCelebration(chore.reward);
+    loadChores();
+  } catch(e) { Toast.error(e.message); }
+}
+
+function treatPickerHtml(selected) {
+  return `
+    <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem" id="treat-chips">
+      ${TREAT_PRESETS.map(t => `
+        <button type="button" class="btn btn-sm ${selected === t ? 'btn-primary' : 'btn-secondary'}"
+          style="font-size:.8rem;padding:.3rem .6rem" onclick="selectTreat('${t.replace(/'/g,"\\'")}', this)">${t}</button>
+      `).join('')}
+    </div>
+    <input class="form-control" id="treat-custom" placeholder="Or type a custom treat…" value="${TREAT_PRESETS.includes(selected) ? '' : (selected || '')}" style="font-size:.85rem">
+  `;
+}
+
+let _selectedTreat = '';
+function selectTreat(treat, btn) {
+  _selectedTreat = treat;
+  document.getElementById('treat-custom').value = '';
+  document.querySelectorAll('#treat-chips .btn').forEach(b => {
+    b.className = b === btn ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+    b.style.fontSize = '.8rem'; b.style.padding = '.3rem .6rem';
+  });
+}
+
+function choreFormHtml(c = {}) {
+  return `
+    <div class="form-group">
+      <label class="form-label">Title *</label>
+      <input class="form-control" id="mc-title" placeholder="e.g. Mow the lawn" value="${c.title || ''}">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      <div class="form-group">
+        <label class="form-label">Recurrence</label>
+        <select class="form-control" id="mc-recur">
+          <option value="none"    ${!c.recurrence||c.recurrence==='none'  ?'selected':''}>None</option>
+          <option value="daily"   ${c.recurrence==='daily'   ?'selected':''}>🔁 Daily</option>
+          <option value="weekly"  ${c.recurrence==='weekly'  ?'selected':''}>🔁 Weekly</option>
+          <option value="monthly" ${c.recurrence==='monthly' ?'selected':''}>🔁 Monthly</option>
+          <option value="yearly"  ${c.recurrence==='yearly'  ?'selected':''}>🔁 Yearly</option>
+          <option value="once"    ${c.recurrence==='once'    ?'selected':''}>1× Once</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-control" id="mc-priority">
+          <option value=""       ${!c.priority            ?'selected':''}>None</option>
+          <option value="high"   ${c.priority==='high'    ?'selected':''}>🔴 High</option>
+          <option value="medium" ${c.priority==='medium'  ?'selected':''}>🟡 Medium</option>
+          <option value="low"    ${c.priority==='low'     ?'selected':''}>🟢 Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Due Date <span class="text-muted" style="font-weight:400">(optional)</span></label>
+      <input class="form-control" id="mc-due" type="date" value="${c.due_date || ''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-control" id="mc-notes" placeholder="Optional notes…" value="${c.notes || ''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">🎁 Treat Yourself (optional)</label>
+      <div class="form-hint mb-1">Pick a reward for when you finish!</div>
+      ${treatPickerHtml(c.reward || '')}
+    </div>
+  `;
+}
+
+function openAddChore() {
+  _selectedTreat = '';
+  openModal(`
+    <h2 style="margin-bottom:1rem">🏠 Add My Chore</h2>
+    ${choreFormHtml()}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveChore(null, this)">Add</button>
+    </div>
+  `);
+}
+
+function openEditChore(c) {
+  _selectedTreat = c.reward || '';
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit Chore</h2>
+    ${choreFormHtml(c)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveChore('${c.id}', this)">Save</button>
+    </div>
+  `);
+}
+
+async function saveChore(id, btn) {
+  const title     = document.getElementById('mc-title').value.trim();
+  const recur     = document.getElementById('mc-recur').value;
+  const priority  = document.getElementById('mc-priority').value;
+  const due_date  = document.getElementById('mc-due').value || null;
+  const notes     = document.getElementById('mc-notes').value.trim();
+  const custom    = document.getElementById('treat-custom')?.value.trim();
+  const reward    = custom || _selectedTreat || null;
+  if (!title) { Toast.error('Title is required.'); return; }
+  setLoading(btn, true);
+  try {
+    const payload = { title, notes, reward, recurrence: recur, priority, due_date, done: false };
+    if (id) {
+      await api.patch('/parent/chores.php?id=' + id, payload);
+    } else {
+      await api.post('/parent/chores.php', payload);
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success(id ? 'Updated!' : 'Chore added!');
+    loadChores();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function deleteChore(id, title) {
+  if (!await typeConfirm(`Delete chore "${title}"?`)) return;
+  try {
+    await api.delete('/parent/chores.php?id=' + id);
+    Toast.success('Deleted.');
+    loadChores();
+  } catch(e) { Toast.error(e.message); }
+}
+
+function showRewardCelebration(reward) {
+  openModal(`
+    <div style="text-align:center;padding:1rem">
+      <div style="font-size:3rem;margin-bottom:.5rem">🎉</div>
+      <h2 style="margin-bottom:.5rem">You earned it!</h2>
+      <p style="font-size:1.1rem;font-weight:600;color:var(--primary);margin-bottom:1.5rem">${reward}</p>
+      <button class="btn btn-primary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Awesome! 🙌</button>
+    </div>
+  `);
+}
+
+// ── TASKS ─────────────────────────────────────────────────────
+async function loadTasks() {
+  try {
+    const res   = await api.get('/parent/tasks.php');
+    const tasks = Array.isArray(res) ? res : (res?.data || res?.tasks || []);
+    renderTasks(tasks);
+  } catch(e) {
+    document.getElementById('tasks-list').innerHTML = '<div class="empty-state text-danger">Failed to load.</div>';
+  }
+}
+
+function renderTasks(tasks) {
+  const el = document.getElementById('tasks-list');
+  if (!tasks.length) {
+    el.innerHTML = '<div class="empty-state">No tasks yet. Add one!</div>';
+    return;
+  }
+  const sorted = [...tasks].sort((a, b) => {
+    const pOrder = { high: 0, medium: 1, low: 2, '': 3 };
+    return (pOrder[a.priority||''] ?? 3) - (pOrder[b.priority||''] ?? 3);
+  });
+  el.innerHTML = sorted.map(t => {
+    const rl = recurLabel(t.recurrence);
+    const dl = t.due_date ? dueLabel(t.due_date) : null;
+    return `
+    <div class="card mb-2" style="display:flex;align-items:flex-start;gap:.75rem;${t.done ? 'opacity:.55' : ''}">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)"
+        style="width:22px;height:22px;flex-shrink:0;cursor:pointer;accent-color:var(--primary);margin-top:.25rem">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+          ${t.priority ? `<span class="priority-badge" style="background:${PRIORITY_COLORS[t.priority]||'#94A3B8'}" title="${t.priority}"></span>` : ''}
+          <span style="font-weight:600;${t.done ? 'text-decoration:line-through;color:var(--text-3)' : ''}">${t.title}</span>
+        </div>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.25rem">
+          ${rl ? `<span class="recur-chip">${rl}</span>` : ''}
+          ${dl ? `<span class="due-chip${dl.overdue ? ' overdue' : ''}">📅 ${dl.text}</span>` : ''}
+        </div>
+        ${t.notes ? `<div class="text-sm text-muted truncate">${t.notes}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:.3rem;flex-shrink:0">
+        <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick='openEditTask(${JSON.stringify(t).replace(/'/g,"&#39;")})'>${iconEdit()}</button>
+        <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteTask('${t.id}','${t.title.replace(/'/g,"\\'")}' )">${iconTrash()}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleTask(id, done) {
+  try {
+    await api.patch('/parent/tasks.php?id=' + id, { done });
+    loadTasks();
+  } catch(e) { Toast.error(e.message); }
+}
+
+function taskFormHtml(t = {}) {
+  const today = new Date().toISOString().slice(0, 10);
+  return `
+    <div class="form-group">
+      <label class="form-label">Title *</label>
+      <input class="form-control" id="mt-title" placeholder="e.g. Pay utility bills" value="${t.title || ''}">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      <div class="form-group">
+        <label class="form-label">Repeat</label>
+        <select class="form-control" id="mt-recur">
+          <option value="none"    ${!t.recurrence||t.recurrence==='none'  ?'selected':''}>None</option>
+          <option value="daily"   ${t.recurrence==='daily'   ?'selected':''}>🔁 Daily</option>
+          <option value="weekly"  ${t.recurrence==='weekly'  ?'selected':''}>🔁 Weekly</option>
+          <option value="monthly" ${t.recurrence==='monthly' ?'selected':''}>🔁 Monthly</option>
+          <option value="yearly"  ${t.recurrence==='yearly'  ?'selected':''}>🔁 Yearly</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-control" id="mt-priority">
+          <option value=""       ${!t.priority           ?'selected':''}>None</option>
+          <option value="high"   ${t.priority==='high'   ?'selected':''}>🔴 High</option>
+          <option value="medium" ${t.priority==='medium' ?'selected':''}>🟡 Medium</option>
+          <option value="low"    ${t.priority==='low'    ?'selected':''}>🟢 Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Due Date <span class="text-muted" style="font-weight:400">(optional)</span></label>
+      <input class="form-control" id="mt-due" type="date" value="${t.due_date || ''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-control" id="mt-notes" placeholder="Optional notes…" value="${t.notes || ''}">
+    </div>
+  `;
+}
+
+function openAddTask() {
+  openModal(`
+    <h2 style="margin-bottom:1rem">📝 Add Task</h2>
+    ${taskFormHtml()}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveTask(null, this)">Add</button>
+    </div>
+  `);
+}
+
+function openEditTask(t) {
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit Task</h2>
+    ${taskFormHtml(t)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveTask('${t.id}', this)">Save</button>
+    </div>
+  `);
+}
+
+async function saveTask(id, btn) {
+  const title    = document.getElementById('mt-title').value.trim();
+  const recur    = document.getElementById('mt-recur').value;
+  const priority = document.getElementById('mt-priority').value;
+  const due_date = document.getElementById('mt-due').value || null;
+  const notes    = document.getElementById('mt-notes').value.trim();
+  if (!title) { Toast.error('Title is required.'); return; }
+  setLoading(btn, true);
+  try {
+    const payload = { title, notes, recurrence: recur, priority, due_date, done: false };
+    if (id) {
+      await api.patch('/parent/tasks.php?id=' + id, payload);
+    } else {
+      await api.post('/parent/tasks.php', payload);
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success(id ? 'Updated!' : 'Task added!');
+    loadTasks();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function deleteTask(id, title) {
+  if (!await typeConfirm(`Delete task "${title}"?`)) return;
+  try {
+    await api.delete('/parent/tasks.php?id=' + id);
+    Toast.success('Deleted.');
+    loadTasks();
+  } catch(e) { Toast.error(e.message); }
+}
+
+loadChores();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rewards — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;padding:1rem">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+      <h1 style="font-size:1.2rem;font-weight:700;margin:0">🎁 Rewards</h1>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="openAddReward()" id="btn-add"></button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px">
+
+    <!-- Quick links -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.75rem">
+      <a href="coupons.html" style="text-decoration:none">
+        <div class="card" style="text-align:center;padding:.75rem .5rem">
+          <div style="font-size:1.4rem">🎟️</div>
+          <div style="font-weight:700;font-size:.85rem;margin-top:.25rem">Coupons</div>
+          <div style="font-size:.75rem;color:var(--text-3)">Cash-out rewards</div>
+        </div>
+      </a>
+      <a href="layaway.html" style="text-decoration:none">
+        <div class="card" style="text-align:center;padding:.75rem .5rem">
+          <div style="font-size:1.4rem">🎯</div>
+          <div style="font-weight:700;font-size:.85rem;margin-top:.25rem">Group Goals</div>
+          <div style="font-size:.75rem;color:var(--text-3)">Kids save together</div>
+        </div>
+      </a>
+    </div>
+
+    <div id="rewards-list">
+      <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="chores.html"    class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="children.html"  class="nav-item" id="nav-family"><span class="nav-icon"></span><span>Family</span></a>
+    <a href="reviews.html"   class="nav-item" id="nav-reviews" style="position:relative"><span class="nav-icon"></span><span>Reviews</span><span id="nav-reviews-badge" style="display:none;position:absolute;top:6px;right:10px;background:#EF4444;color:#fff;font-size:.6rem;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:1.5"></span></a>
+    <a href="rewards.html"   class="nav-item active" id="nav-rewards"><span class="nav-icon"></span><span>Rewards</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+(function(){
+  document.getElementById('btn-back').innerHTML = iconBack();
+  document.getElementById('btn-add').innerHTML  = iconPlus() + ' Add';
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconUsers,'nav-family'],[iconCheck,'nav-reviews'],[iconGift,'nav-rewards']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+async function loadRewards() {
+  try {
+    const coin    = getCoinConfig();
+    const res     = await RewardsAPI.list();
+    const rewards = Array.isArray(res) ? res : (res?.data || res?.rewards || []);
+    const el      = document.getElementById('rewards-list');
+    if (!rewards.length) {
+      el.innerHTML = '<div class="empty-state">No rewards yet.<br><button class="btn btn-primary mt-2" onclick="openAddReward()">+ Add First Reward</button></div>';
+      return;
+    }
+    el.innerHTML = rewards.map(r => {
+      // Always compute FC from usd_value if available so it adjusts with rate changes
+      const fc  = r.usd_value ? coin.usdToFC(r.usd_value) : r.points_cost;
+      const usd = r.usd_value ? `<span class="badge badge-success">$${parseFloat(r.usd_value).toFixed(2)}</span>` : '';
+      return `
+        <div class="card mb-2">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:1rem;margin-bottom:.25rem">🎁 ${r.title}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.25rem">
+                ${usd}${ptsBadge(fc)}
+                ${r.requires_approval ? '<span class="badge badge-warning">⏳ Needs Approval</span>' : '<span class="badge badge-success">✅ Auto</span>'}
+              </div>
+              ${r.description ? `<div class="text-sm text-muted">${r.description}</div>` : ''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.3rem;flex-shrink:0">
+              <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick='openEditReward(${JSON.stringify(r).replace(/'/g,"&#39;")})'>${iconEdit()}</button>
+              <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteReward('${r.id}','${r.title.replace(/'/g,"\\'")}' )">${iconTrash()}</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('rewards-list').innerHTML = '<div class="empty-state text-danger">Failed to load rewards.</div>';
+    Toast.error(e.message);
+  }
+}
+
+// USD value per reward type — AUTO converts to FC using family point_rate
+const REWARD_PRESETS = {
+  screen_sm:  { label:'📱 Screen Time (30 min)', usd: 0.50 },
+  screen_lg:  { label:'📱 Screen Time (1 hr)',   usd: 1.00 },
+  skip_chore: { label:'🚫 Skip a Chore',         usd: 0.75 },
+  treat:      { label:'🍦 Small Treat',           usd: 1.00 },
+  outing:     { label:'🎉 Outing / Activity',     usd: 5.00 },
+  movie:      { label:'🎬 Movie Night Pick',      usd: 2.00 },
+  sleepover:  { label:'🌙 Sleepover Night',       usd: 5.00 },
+  no_chores:  { label:'🏖️ No Chores Day',         usd: 3.00 },
+  big_prize:  { label:'🏆 Big Prize',             usd: 10.00 },
+  custom:     { label:'✏️ Custom',                usd: null  },
+};
+
+function rewardForm(r) {
+  const coin      = getCoinConfig();
+  const presetKey = r?.preset_key || 'screen_sm';
+  const autoOn    = !r;
+  const existingPts = r?.points_cost ?? null;
+  // Prefer stored usd_value, fall back to back-calculating from FC, then preset default
+  const existingUsd = r?.usd_value ?? (existingPts ? coin.fcToUsd(existingPts) : (REWARD_PRESETS[presetKey]?.usd ?? ''));
+  const initPts   = autoOn
+    ? coin.usdToFC(REWARD_PRESETS[presetKey]?.usd || 0)
+    : (existingPts ?? coin.usdToFC(existingUsd));
+
+  return `
+    <div class="form-group">
+      <label class="form-label">Reward Type</label>
+      <select class="form-control" id="rw-preset" onchange="onRewardPreset()">
+        ${Object.entries(REWARD_PRESETS).map(([k,v]) => `<option value="${k}" ${k===presetKey?'selected':''}>${v.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Title *</label>
+      <input class="form-control" id="rw-title" placeholder="e.g. 30 Min Extra Screen Time" value="${r?.title||''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" id="rw-desc" rows="2" placeholder="What do they get?">${r?.description||''}</textarea>
+    </div>
+
+    <!-- USD value (always visible, drives AUTO) -->
+    <div class="form-group">
+      <label class="form-label">Dollar Value (USD $)</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-weight:700;color:var(--text-2)">$</span>
+        <input class="form-control" id="rw-usd" type="number" min="0.01" step="0.01"
+          placeholder="e.g. 1.00"
+          value="${autoOn ? (REWARD_PRESETS[presetKey]?.usd ?? '') : existingUsd}"
+          style="padding-left:1.75rem"
+          oninput="if(_rwAuto) syncUsdToFC()">
+      </div>
+      <div class="form-hint">What this reward is worth in real dollars</div>
+    </div>
+
+    <!-- FC cost (auto-calculated or manual) -->
+    <div class="form-group">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem">
+        <label class="form-label" style="margin:0">${coin.icon} ${coin.name} (${coin.symbol}) Cost *</label>
+        <label style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;cursor:pointer">
+          <span style="color:var(--text-2)">AUTO</span>
+          <span id="rw-auto-toggle" onclick="toggleRewardAuto()" style="position:relative;display:inline-block;width:36px;height:20px;background:${autoOn?'var(--primary)':'var(--border)'};border-radius:10px;cursor:pointer;transition:background .2s">
+            <span id="rw-auto-knob" style="position:absolute;top:2px;left:${autoOn?'18':'2'}px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s"></span>
+          </span>
+        </label>
+      </div>
+      <input class="form-control" id="rw-pts" type="number" min="1" value="${initPts}" ${autoOn?'readonly':''}>
+      <div class="form-hint" id="rw-pts-hint" style="${autoOn?'':'display:none'}">Auto-calculated from $ value ÷ exchange rate</div>
+    </div>
+
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+        <input type="checkbox" id="rw-approval" ${r?.requires_approval!==false?'checked':''} style="width:18px;height:18px;accent-color:var(--primary)">
+        <span class="form-label" style="margin:0">⏳ Requires parent approval</span>
+      </label>
+    </div>`;
+}
+
+let _rwAuto = true;
+
+function syncUsdToFC() {
+  const coin = getCoinConfig();
+  const usd  = parseFloat(document.getElementById('rw-usd')?.value) || 0;
+  const fc   = usd > 0 ? coin.usdToFC(usd) : 0;
+  const el   = document.getElementById('rw-pts');
+  if (el) el.value = fc;
+}
+
+function toggleRewardAuto() {
+  _rwAuto = !_rwAuto;
+  document.getElementById('rw-auto-knob').style.left        = _rwAuto ? '18px' : '2px';
+  document.getElementById('rw-auto-toggle').style.background = _rwAuto ? 'var(--primary)' : 'var(--border)';
+  document.getElementById('rw-pts').readOnly                 = _rwAuto;
+  document.getElementById('rw-pts-hint').style.display       = _rwAuto ? '' : 'none';
+  if (_rwAuto) syncUsdToFC();
+}
+
+function onRewardPreset() {
+  const key    = document.getElementById('rw-preset')?.value;
+  const preset = REWARD_PRESETS[key];
+  const coin   = getCoinConfig();
+
+  // Fill USD value from preset
+  const usdEl = document.getElementById('rw-usd');
+  if (usdEl && preset?.usd != null) usdEl.value = preset.usd;
+
+  // Always auto-convert to FC
+  if (_rwAuto) syncUsdToFC();
+
+  // Auto-fill title if blank
+  const titleEl = document.getElementById('rw-title');
+  if (titleEl && !titleEl.value && preset?.label && key !== 'custom') {
+    titleEl.value = preset.label.replace(/^[^\s]+\s/, '');
+  }
+}
+
+function openAddReward() {
+  _rwAuto = true;
+  openModal(`
+    <h2 style="margin-bottom:1rem">🎁 Add Reward</h2>
+    ${rewardForm(null)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveReward(null, this)">Add Reward</button>
+    </div>
+  `);
+}
+
+function openEditReward(r) {
+  _rwAuto = false;
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit Reward</h2>
+    ${rewardForm(r)}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveReward('${r.id}', this)">Save</button>
+    </div>
+  `);
+}
+
+async function saveReward(id, btn) {
+  const title    = document.getElementById('rw-title').value.trim();
+  const desc     = document.getElementById('rw-desc').value.trim();
+  const usd      = parseFloat(document.getElementById('rw-usd')?.value) || null;
+  const pts      = parseInt(document.getElementById('rw-pts').value) || 0;
+  const approval = document.getElementById('rw-approval').checked;
+  const preset   = document.getElementById('rw-preset')?.value || 'custom';
+  if (!title) { Toast.error('Title is required.'); return; }
+  if (!pts || pts < 1) { Toast.error('Enter a dollar value first.'); return; }
+  setLoading(btn, true);
+  // Store both — usd_value is source of truth, points_cost is current FC snapshot
+  const payload = { title, description: desc, usd_value: usd, points_cost: pts, requires_approval: approval, preset_key: preset };
+  try {
+    if (id) {
+      await api.patch('/rewards/index.php?id=' + id, payload);
+    } else {
+      await RewardsAPI.create(payload);
+    }
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success(id ? 'Reward updated!' : 'Reward added!');
+    loadRewards();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function deleteReward(id, title) {
+  if (!await typeConfirm(`Delete reward "${title}"?`)) return;
+  try {
+    await api.delete('/rewards/index.php?id=' + id);
+    Toast.success('Reward deleted.');
+    loadRewards();
+  } catch(e) { Toast.error(e.message); }
+}
+
+loadRewards();
+loadReviewsBadge();
+</script>
+</body>
+</html>
+

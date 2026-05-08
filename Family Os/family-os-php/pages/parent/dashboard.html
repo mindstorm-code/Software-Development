@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Steward Console · Family OS</title>
+<script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Cinzel:wght@500;700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#0a0e1a;--bg-1:#0f1528;--bg-2:#161d33;--bg-3:#1f2742;
+  --line:#2a3354;--line-soft:#1c2440;
+  --ink:#f6f4ee;--ink-2:#c7cce0;--ink-3:#7f87a8;
+  --gold:#ffc943;--gold-deep:#e09f1a;
+  --mint:#22d39a;--mint-deep:#0e9d6e;
+  --rose:#ff5577;--rose-deep:#c5314f;
+  --boss:#b074ff;--boss-deep:#7b3fd9;
+  --cyan:#22b8d4;
+  --steward:#d4b66a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg-0);color:var(--ink);font-family:'Outfit',system-ui,sans-serif;min-height:100vh;}
+body{
+  background:
+    radial-gradient(1200px 600px at 80% -10%,rgba(176,116,255,.10),transparent 60%),
+    radial-gradient(900px 500px at -10% 30%,rgba(255,201,67,.08),transparent 55%),
+    radial-gradient(700px 400px at 50% 110%,rgba(34,211,154,.05),transparent 60%),
+    var(--bg-0);
+  background-attachment:fixed;
+  padding-bottom:90px;
+  font-feature-settings:"ss01","cv11";
+  letter-spacing:-0.005em;
+}
+.app{max-width:560px;margin:0 auto;padding:18px 16px 30px;}
+@media(min-width:980px){.app{max-width:1100px;padding:28px 28px 40px;}}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold) 0%,var(--rose) 60%,var(--boss) 100%);display:grid;place-items:center;font-family:'Bungee';font-size:13px;color:#1a1308;box-shadow:0 6px 18px -8px rgba(255,201,67,.6);}
+.brand-text{font-family:'Bungee';font-size:11px;letter-spacing:.18em;color:var(--ink-2);}
+.brand-text small{display:block;font-size:9px;color:var(--ink-3);letter-spacing:.16em;margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.switch-btn{display:flex;align-items:center;gap:6px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;}
+.switch-btn:hover{background:var(--bg-3);color:var(--ink);}
+.switch-btn svg{width:14px;height:14px;}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--bg-2);border:1px solid var(--line-soft);color:var(--ink-2);display:grid;place-items:center;cursor:pointer;transition:.2s;position:relative;}
+.icon-btn:hover{background:var(--bg-3);color:var(--ink);}
+.icon-btn svg{width:18px;height:18px;}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg-0);}
+
+/* ── STEWARD HERO ── */
+.steward-hero{position:relative;background:radial-gradient(circle at 88% 10%,rgba(212,182,106,.18),transparent 55%),radial-gradient(circle at 10% 90%,rgba(176,116,255,.12),transparent 55%),linear-gradient(160deg,#181433 0%,#0f1528 100%);border:1px solid rgba(212,182,106,.3);border-radius:22px;padding:22px;overflow:hidden;margin-bottom:14px;box-shadow:0 20px 50px -25px rgba(212,182,106,.25);}
+.steward-hero::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(212,182,106,.025) 0 1px,transparent 1px 12px);pointer-events:none;}
+.sh-row{display:flex;align-items:center;gap:18px;position:relative;flex-wrap:wrap;}
+.sh-avatar-wrap{position:relative;flex-shrink:0;}
+.sh-avatar{width:84px;height:84px;border-radius:20px;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#3d2e62 0%,#221a3e 100%);display:grid;place-items:center;font-family:'Cinzel';font-weight:700;font-size:36px;color:var(--steward);text-shadow:0 2px 8px rgba(0,0,0,.4);box-shadow:0 14px 30px -10px rgba(34,18,68,.8),inset 0 -6px 0 rgba(0,0,0,.3),inset 0 0 0 1px rgba(212,182,106,.4);position:relative;}
+.sh-avatar::after{content:"";position:absolute;inset:-2px;border-radius:22px;background:linear-gradient(135deg,var(--steward),transparent 50%,var(--boss));z-index:-1;opacity:.6;}
+.sh-lvl-badge{position:absolute;bottom:-7px;right:-7px;background:linear-gradient(135deg,var(--steward),#a5862e);color:#1a1308;font-family:'Bungee';font-size:11px;padding:4px 9px;border-radius:8px;border:3px solid #181433;letter-spacing:.04em;box-shadow:0 4px 12px -3px rgba(212,182,106,.6);}
+.sh-info{flex:1;min-width:200px;}
+.sh-eyebrow{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.16em;font-weight:600;margin-bottom:2px;}
+.sh-name{font-family:'Cinzel';font-weight:700;font-size:26px;line-height:1.05;color:var(--ink);margin-bottom:7px;letter-spacing:.01em;}
+.sh-name span{color:var(--steward);}
+.sh-class-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.sh-class{display:inline-flex;align-items:center;gap:5px;background:rgba(212,182,106,.14);color:var(--steward);padding:4px 10px;border-radius:7px;font-family:'Bungee';font-size:10px;letter-spacing:.08em;border:1px solid rgba(212,182,106,.35);}
+.sh-title-tag{font-size:10.5px;color:var(--ink-3);font-weight:600;letter-spacing:.04em;}
+.sh-title-tag b{color:var(--ink-2);font-style:italic;}
+.sh-xp{margin-top:18px;position:relative;}
+.sh-xp-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.sh-xp-label{font-family:'Bungee';font-size:10px;color:var(--steward);letter-spacing:.12em;}
+.sh-xp-num{font-family:'JetBrains Mono';font-size:12px;color:var(--ink-2);font-weight:700;}
+.sh-xp-num b{color:var(--steward);}
+.sh-xp-track{height:12px;background:rgba(0,0,0,.4);border-radius:99px;overflow:hidden;border:1px solid rgba(212,182,106,.18);position:relative;}
+.sh-xp-fill{height:100%;background:linear-gradient(90deg,var(--steward) 0%,#f0d785 70%,#fff5cc 100%);border-radius:99px;box-shadow:0 0 16px rgba(212,182,106,.55);position:relative;transition:width .6s;}
+.sh-xp-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 2.4s linear infinite;}
+@keyframes shine{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+.sh-xp-next{font-size:10.5px;color:var(--ink-3);margin-top:6px;font-style:italic;}
+.sh-xp-next b{color:#f0d785;font-style:normal;}
+.sh-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.sh-stat{background:rgba(0,0,0,.25);border:1px solid rgba(212,182,106,.15);border-radius:11px;padding:9px 11px;display:flex;align-items:center;gap:9px;}
+.sh-stat-ico{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0;}
+.sh-stat-ico.trophy{background:rgba(212,182,106,.16);}
+.sh-stat-ico.streak{background:rgba(255,85,119,.14);}
+.sh-stat-ico.coin{background:rgba(255,201,67,.14);}
+.sh-stat-meta{display:flex;flex-direction:column;min-width:0;}
+.sh-stat-val{font-family:'Bungee';font-size:14px;line-height:1;color:var(--ink);}
+.sh-stat-val.steward{color:var(--steward);}
+.sh-stat-val.fire{color:#ff8aa6;}
+.sh-stat-val.gold{color:var(--gold);}
+.sh-stat-cap{font-size:9px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-top:2px;}
+.sh-buff{margin-top:14px;background:linear-gradient(90deg,rgba(176,116,255,.18),rgba(34,211,154,.10));border:1px solid rgba(176,116,255,.35);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden;}
+.sh-buff::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--boss),var(--mint));}
+.sh-buff-ico{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--boss),var(--mint));display:grid;place-items:center;font-size:14px;color:#fff;flex-shrink:0;animation:glowPulse 2s ease infinite;}
+@keyframes glowPulse{50%{box-shadow:0 0 16px rgba(176,116,255,.5);}}
+.sh-buff-body{flex:1;min-width:0;}
+.sh-buff-title{font-family:'Bungee';font-size:10px;letter-spacing:.08em;color:#dcc4ff;margin-bottom:1px;}
+.sh-buff-desc{font-size:11.5px;color:var(--ink-2);font-weight:500;line-height:1.3;}
+.sh-buff-desc b{color:var(--mint);}
+
+/* ── REALM HEALTH ── */
+.realm-card{background:radial-gradient(circle at 90% 0%,rgba(34,211,154,.14),transparent 60%),linear-gradient(135deg,var(--bg-2) 0%,var(--bg-1) 100%);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;overflow:hidden;margin-bottom:14px;}
+.rh-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:center;}
+@media(min-width:600px){.rh-grid{grid-template-columns:.9fr 1.1fr;}}
+.rh-left{display:flex;align-items:center;gap:16px;}
+.rh-num{font-family:'Bungee';font-size:54px;line-height:.9;background:linear-gradient(180deg,#fff 0%,var(--mint) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.rh-label{font-family:'Bungee';font-size:10px;letter-spacing:.16em;color:var(--ink-3);margin-bottom:3px;}
+.rh-desc{font-size:13px;color:var(--ink);font-weight:600;}
+.rh-status{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-family:'Bungee';font-size:9px;letter-spacing:.08em;margin-top:5px;}
+.rh-status.thriving{background:rgba(34,211,154,.16);border:1px solid rgba(34,211,154,.4);color:var(--mint);}
+.rh-status.good{background:rgba(255,201,67,.16);border:1px solid rgba(255,201,67,.4);color:var(--gold);}
+.rh-status.struggling{background:rgba(255,85,119,.16);border:1px solid rgba(255,85,119,.4);color:var(--rose);}
+.rh-trend{font-size:10.5px;color:var(--ink-3);margin-top:6px;font-weight:500;}
+.rh-trend b{color:var(--mint);font-family:'JetBrains Mono';}
+.rh-spark-wrap{display:flex;flex-direction:column;gap:7px;}
+.rh-spark-label{display:flex;justify-content:space-between;font-size:9.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.12em;font-weight:600;}
+.rh-spark{width:100%;height:48px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:6px;}
+.rh-breakdown{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.rh-bd-item{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:8px;padding:7px 9px;}
+.rh-bd-label{font-size:8.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;}
+.rh-bd-val{font-family:'JetBrains Mono';font-size:12px;font-weight:700;color:var(--ink);margin-top:2px;}
+.rh-bd-val.up{color:var(--mint);}
+.rh-bd-val.down{color:var(--rose);}
+
+/* ── DAILY STEWARDSHIP ── */
+.stewardship{background:linear-gradient(135deg,rgba(212,182,106,.12),rgba(255,201,67,.06));border:1px solid rgba(212,182,106,.3);border-radius:18px;padding:16px 18px;position:relative;overflow:hidden;margin-bottom:14px;}
+.stewardship::after{content:"";position:absolute;top:-30px;right:-30px;width:140px;height:140px;background:radial-gradient(circle,rgba(212,182,106,.15),transparent 70%);}
+.stw-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:relative;}
+.stw-title{font-family:'Bungee';font-size:13px;letter-spacing:.06em;color:var(--ink);}
+.stw-title span{color:var(--steward);}
+.stw-prog{font-size:11px;color:var(--ink-2);font-weight:600;}
+.stw-prog b{color:var(--steward);font-family:'JetBrains Mono';}
+.stw-list{display:flex;flex-direction:column;gap:7px;position:relative;}
+.stw-item{display:flex;align-items:center;gap:11px;padding:10px 11px;background:rgba(0,0,0,.2);border:1px solid rgba(212,182,106,.12);border-radius:10px;cursor:pointer;transition:.2s;}
+.stw-item:hover{background:rgba(212,182,106,.08);border-color:rgba(212,182,106,.25);}
+.stw-check{width:22px;height:22px;border-radius:7px;border:1.5px solid rgba(212,182,106,.4);background:rgba(0,0,0,.3);display:grid;place-items:center;flex-shrink:0;transition:.2s;}
+.stw-check svg{width:0;height:0;opacity:0;transition:.2s;color:#1a1308;}
+.stw-item.done .stw-check{background:var(--steward);border-color:var(--steward);}
+.stw-item.done .stw-check svg{width:13px;height:13px;opacity:1;}
+.stw-item.done .stw-text{text-decoration:line-through;color:var(--ink-3);}
+.stw-text{flex:1;font-size:13px;font-weight:600;color:var(--ink);line-height:1.2;}
+.stw-text small{font-weight:500;color:var(--ink-3);font-size:11px;display:block;margin-top:1px;}
+.stw-xp{font-family:'Bungee';font-size:10px;color:var(--steward);background:rgba(212,182,106,.14);padding:3px 7px;border-radius:6px;letter-spacing:.04em;border:1px solid rgba(212,182,106,.25);flex-shrink:0;}
+.stw-foot{margin-top:10px;font-size:11px;color:var(--ink-2);text-align:center;font-weight:500;position:relative;}
+.stw-foot b{color:var(--steward);}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:14px;padding:14px;position:relative;overflow:hidden;}
+.stat-card.alert{border-color:rgba(255,85,119,.4);background:linear-gradient(135deg,rgba(255,85,119,.08),var(--bg-2));}
+.sc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.sc-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:14px;}
+.sc-icon.gold{background:rgba(255,201,67,.14);color:var(--gold);}
+.sc-icon.mint{background:rgba(34,211,154,.14);color:var(--mint);}
+.sc-icon.rose{background:rgba(255,85,119,.14);color:var(--rose);}
+.sc-trend{font-size:10px;font-weight:700;font-family:'JetBrains Mono';padding:2px 6px;border-radius:5px;}
+.sc-trend.up{color:var(--mint);background:rgba(34,211,154,.1);}
+.sc-trend.down{color:var(--rose);background:rgba(255,85,119,.1);}
+.sc-trend.flat{color:var(--ink-3);background:var(--bg-1);}
+.sc-val{font-family:'Bungee';font-size:22px;line-height:1;color:var(--ink);}
+.sc-val small{font-family:'JetBrains Mono';font-size:13px;color:var(--ink-3);font-weight:500;margin-left:2px;}
+.sc-label{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-top:4px;}
+
+/* ── QUICK ACTIONS ── */
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.act-btn{position:relative;overflow:hidden;border:none;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:'Bungee';font-size:13px;letter-spacing:.04em;transition:transform .2s,box-shadow .2s;text-align:left;}
+.act-btn:hover{transform:translateY(-2px);}
+.act-btn.award{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-deep) 100%);color:#1a1308;box-shadow:0 10px 24px -10px rgba(255,201,67,.5);}
+.act-btn.award:hover{box-shadow:0 14px 30px -10px rgba(255,201,67,.7);}
+.act-btn.demerit{background:linear-gradient(135deg,#2a1620 0%,#401a28 100%);color:var(--rose);border:1px solid rgba(255,85,119,.4);}
+.act-btn.demerit:hover{box-shadow:0 14px 30px -10px rgba(255,85,119,.4);}
+.act-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex-shrink:0;}
+.act-btn.award .act-icon{background:rgba(0,0,0,.18);}
+.act-btn.demerit .act-icon{background:rgba(255,85,119,.12);}
+.act-body{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.act-title{font-family:'Bungee';font-size:13px;letter-spacing:.04em;line-height:1;}
+.act-sub{font-family:'Outfit';font-size:10.5px;font-weight:500;letter-spacing:.02em;opacity:.75;text-transform:none;}
+.act-xp-badge{position:absolute;top:8px;right:8px;font-family:'Bungee';font-size:8.5px;letter-spacing:.06em;padding:2px 6px;border-radius:5px;}
+.act-btn.award .act-xp-badge{background:rgba(0,0,0,.25);color:#fff5d6;}
+.act-btn.demerit .act-xp-badge{background:rgba(255,85,119,.2);color:#ffa6b6;}
+
+/* ── SECTION HEAD ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:22px 0 12px;padding:0 4px;}
+.section-head h2{font-family:'Bungee';font-size:13px;letter-spacing:.08em;display:flex;align-items:center;gap:8px;}
+.section-head h2 .dot{width:6px;height:6px;border-radius:50%;}
+.section-head .filter{font-size:11px;color:var(--ink-3);font-weight:600;}
+.pill-btn{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(34,211,154,.12);color:var(--mint);padding:6px 11px;border-radius:8px;border:1px solid rgba(34,211,154,.3);cursor:pointer;transition:.2s;}
+.pill-btn:hover{background:rgba(34,211,154,.2);}
+
+/* ── FAMILY PROGRESS ── */
+.main-grid{display:grid;grid-template-columns:1fr;gap:0;}
+@media(min-width:980px){.main-grid{grid-template-columns:1.15fr 1fr;gap:24px;}}
+.family-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:18px;padding:8px;}
+.kid-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;cursor:pointer;transition:.2s;}
+.kid-row:hover{background:var(--bg-3);}
+.kid-row+.kid-row{border-top:1px solid var(--line-soft);}
+.kid-avatar{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-family:'Bungee';font-size:18px;color:#fff;flex-shrink:0;position:relative;}
+.kid-avatar.ca{background:linear-gradient(135deg,#ff7aa6,#c76bff);}
+.kid-avatar.cs{background:linear-gradient(135deg,#22b8d4,#4ad9b1);}
+.kid-avatar.ce{background:linear-gradient(135deg,#ffc943,#ff8a4c);}
+.kid-avatar.cd{background:linear-gradient(135deg,#b074ff,#7b3fd9);}
+.kid-lvl{position:absolute;bottom:-3px;right:-3px;background:var(--bg-1);font-family:'JetBrains Mono';font-size:9px;font-weight:700;padding:1px 4px;border-radius:5px;border:1.5px solid var(--bg-2);color:var(--gold);}
+.kid-info{flex:1;min-width:0;}
+.kid-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
+.kid-name{font-family:'Bungee';font-size:13px;letter-spacing:.02em;}
+.kid-class{font-size:9px;color:var(--ink-3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:var(--bg-1);padding:1px 5px;border-radius:4px;border:1px solid var(--line-soft);}
+.kid-status-dot{width:6px;height:6px;border-radius:50%;}
+.kid-status-dot.good{background:var(--mint);box-shadow:0 0 6px var(--mint);}
+.kid-status-dot.warn{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.kid-status-dot.lag{background:var(--rose);box-shadow:0 0 6px var(--rose);}
+.kid-meta{display:flex;align-items:center;gap:11px;font-size:11px;color:var(--ink-3);font-weight:500;}
+.kid-meta .km{display:flex;align-items:center;gap:3px;}
+.kid-meta b{color:var(--ink-2);font-family:'JetBrains Mono';}
+.kid-prog{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;min-width:90px;}
+.kid-prog-bar{width:80px;height:6px;background:rgba(0,0,0,.4);border-radius:99px;overflow:hidden;border:1px solid var(--line-soft);}
+.kid-prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),#4ee3b3);transition:width .4s;}
+.kid-prog-fill.warn{background:linear-gradient(90deg,var(--gold),#ffd982);}
+.kid-prog-fill.lag{background:linear-gradient(90deg,var(--rose),#ff8aa6);}
+.kid-prog-text{font-size:10px;color:var(--ink-3);font-weight:600;font-family:'JetBrains Mono';}
+
+/* ── PENDING REVIEWS ── */
+.reviews-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:18px;display:flex;flex-direction:column;max-height:440px;}
+.reviews-list{padding:6px;flex:1;overflow-y:auto;}
+.review-row{display:flex;align-items:center;gap:11px;padding:11px;border-radius:11px;transition:.2s;}
+.review-row+.review-row{border-top:1px solid var(--line-soft);}
+.review-row:hover{background:var(--bg-3);}
+.rev-avatar{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-family:'Bungee';font-size:13px;color:#fff;flex-shrink:0;}
+.rev-avatar.ca{background:linear-gradient(135deg,#ff7aa6,#c76bff);}
+.rev-avatar.cs{background:linear-gradient(135deg,#22b8d4,#4ad9b1);}
+.rev-avatar.ce{background:linear-gradient(135deg,#ffc943,#ff8a4c);}
+.rev-avatar.cd{background:linear-gradient(135deg,#b074ff,#7b3fd9);}
+.rev-body{flex:1;min-width:0;}
+.rev-quest{font-size:13px;font-weight:600;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rev-meta{display:flex;align-items:center;gap:8px;margin-top:3px;font-size:10.5px;color:var(--ink-3);font-weight:500;flex-wrap:wrap;}
+.rev-meta b{color:var(--gold);font-family:'JetBrains Mono';}
+.rev-meta .xp-tag{color:var(--steward);font-family:'Bungee';font-size:9px;background:rgba(212,182,106,.12);padding:1px 5px;border-radius:4px;letter-spacing:.04em;border:1px solid rgba(212,182,106,.2);}
+.rev-actions{display:flex;gap:5px;flex-shrink:0;}
+.rev-btn{width:32px;height:32px;border-radius:9px;border:none;cursor:pointer;display:grid;place-items:center;transition:.2s;}
+.rev-btn svg{width:16px;height:16px;}
+.rev-btn.approve{background:rgba(34,211,154,.14);color:var(--mint);border:1px solid rgba(34,211,154,.3);}
+.rev-btn.approve:hover{background:var(--mint);color:#0a1f17;}
+.rev-btn.deny{background:rgba(255,85,119,.14);color:var(--rose);border:1px solid rgba(255,85,119,.3);}
+.rev-btn.deny:hover{background:var(--rose);color:#fff;}
+.review-empty{padding:30px;text-align:center;color:var(--ink-3);font-size:12px;}
+
+/* ── ECONOMY / TREASURY ── */
+.economy{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:18px;padding:18px;margin-top:14px;}
+.eco-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.eco-head h3{font-family:'Bungee';font-size:13px;letter-spacing:.06em;display:flex;align-items:center;gap:7px;}
+.eco-head h3 span{color:var(--gold);}
+.eco-edit{background:var(--bg-1);border:1px solid var(--line);color:var(--ink-2);font-size:11px;font-weight:600;padding:6px 11px;border-radius:8px;display:flex;align-items:center;gap:5px;cursor:pointer;transition:.2s;}
+.eco-edit:hover{background:var(--bg-3);color:var(--ink);}
+.eco-edit svg{width:12px;height:12px;}
+.eco-figures{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.eco-fig{background:var(--bg-1);border:1px solid var(--line-soft);border-radius:11px;padding:12px;}
+.eco-fig-val{font-family:'Bungee';font-size:18px;color:var(--gold);line-height:1;}
+.eco-fig-val small{font-family:'Outfit';font-size:11px;color:var(--ink-3);font-weight:600;margin-left:2px;}
+.eco-fig-label{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-top:5px;}
+.eco-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.eco-nav-btn{display:flex;align-items:center;justify-content:center;gap:5px;background:var(--bg-1);border:1px solid var(--line-soft);color:var(--ink-2);padding:9px 8px;border-radius:9px;font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:.2s;text-decoration:none;}
+.eco-nav-btn:hover{background:var(--bg-3);color:var(--gold);border-color:var(--gold-deep);}
+.eco-split-label{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:8px;}
+.eco-split-bar{height:34px;border-radius:10px;overflow:hidden;display:flex;border:1px solid var(--line-soft);margin-bottom:10px;background:var(--bg-1);}
+.eco-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:'Bungee';font-size:11px;color:#fff;position:relative;transition:.2s;cursor:pointer;}
+.eco-seg span{font-size:8px;font-family:'Outfit';font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85;}
+.eco-seg.spend{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#1a1308;}
+.eco-seg.save{background:linear-gradient(135deg,var(--mint),var(--mint-deep));}
+.eco-seg.invest{background:linear-gradient(135deg,var(--cyan),#0e8aa3);}
+.eco-seg.charity{background:linear-gradient(135deg,var(--boss),var(--boss-deep));}
+.eco-seg:hover{filter:brightness(1.1);}
+.eco-config-btn{width:100%;background:transparent;border:1px solid var(--line);color:var(--ink-2);padding:10px;border-radius:10px;font-size:11.5px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.eco-config-btn:hover{background:var(--bg-3);color:var(--gold);border-color:var(--gold-deep);}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,21,40,.92);backdrop-filter:blur(16px);border-top:1px solid var(--line-soft);padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;z-index:50;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--ink-3);cursor:pointer;padding:6px 14px;border-radius:10px;transition:.2s;text-decoration:none;position:relative;}
+.nav-item.active{color:var(--steward);}
+.nav-item.active .nav-ico{background:rgba(212,182,106,.13);}
+.nav-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;transition:.2s;}
+.nav-ico svg{width:20px;height:20px;}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.nav-badge{position:absolute;top:2px;right:8px;background:var(--rose);color:#fff;font-size:9px;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:1.5;display:none;}
+
+/* ── FLOAT NOTIF ── */
+.float-notif{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-150%);background:linear-gradient(135deg,var(--steward),#a5862e);color:#1a1308;padding:12px 18px;border-radius:14px;font-family:'Bungee';font-size:13px;letter-spacing:.04em;box-shadow:0 16px 36px -10px rgba(212,182,106,.6);transition:transform .4s cubic-bezier(.2,.8,.2,1);z-index:400;display:flex;align-items:center;gap:8px;}
+.float-notif.show{transform:translateX(-50%) translateY(0);}
+.float-notif.gold{background:linear-gradient(135deg,var(--gold),#ffaa3c);color:#1a1308;}
+.float-notif.rose{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff;}
+.float-notif .emoji{font-size:20px;}
+
+/* ── MODAL (for legacy edit dialogs) ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,8,18,.82);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:300;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:22px;padding:24px;width:100%;max-width:420px;position:relative;animation:popIn .35s cubic-bezier(.2,.9,.3,1.2);max-height:90vh;overflow-y:auto;}
+@keyframes popIn{0%{opacity:0;transform:scale(.85) translateY(20px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+.modal-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;background:var(--bg-1);border:1px solid var(--line-soft);color:var(--ink-3);cursor:pointer;display:grid;place-items:center;font-size:16px;}
+.modal-close:hover{background:var(--bg-3);color:var(--ink);}
+
+/* ── ACTION MODAL ── */
+.act-modal-overlay{position:fixed;inset:0;background:rgba(5,8,18,.82);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:300;padding:20px;}
+.act-modal-overlay.open{display:flex;}
+.act-modal{background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:22px;padding:24px;width:100%;max-width:420px;position:relative;animation:popIn .35s cubic-bezier(.2,.9,.3,1.2);}
+.act-modal-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;background:var(--bg-1);border:1px solid var(--line-soft);color:var(--ink-3);cursor:pointer;display:grid;place-items:center;font-size:16px;}
+.act-modal-close:hover{background:var(--bg-3);color:var(--ink);}
+.modal-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.modal-ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:20px;}
+.modal-ico.award{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#1a1308;}
+.modal-ico.demerit{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff;}
+.modal-title{font-family:'Bungee';font-size:14px;letter-spacing:.05em;}
+.modal-title span.gold{color:var(--gold);}
+.modal-title span.rose{color:var(--rose);}
+.modal-xp-banner{border-radius:9px;padding:8px 11px;font-size:11px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.modal-xp-banner.award{background:rgba(212,182,106,.1);border:1px solid rgba(212,182,106,.25);color:var(--steward);}
+.modal-xp-banner.demerit{background:rgba(255,85,119,.08);border:1px solid rgba(255,85,119,.25);color:#ffa6b6;}
+.modal-section{margin-bottom:14px;}
+.modal-section-label{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin-bottom:8px;}
+.modal-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:var(--bg-1);border:1px solid var(--line);color:var(--ink-2);padding:8px 12px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;}
+.chip:hover{background:var(--bg-3);color:var(--ink);}
+.chip.selected{background:var(--bg-3);color:var(--gold);border-color:var(--gold-deep);}
+.chip.selected.rose{color:var(--rose);border-color:var(--rose-deep);}
+.chip-avatar{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-family:'Bungee';font-size:9px;color:#fff;}
+.chip-avatar.ca{background:linear-gradient(135deg,#ff7aa6,#c76bff);}
+.chip-avatar.cs{background:linear-gradient(135deg,#22b8d4,#4ad9b1);}
+.chip-avatar.ce{background:linear-gradient(135deg,#ffc943,#ff8a4c);}
+.chip-avatar.cd{background:linear-gradient(135deg,#b074ff,#7b3fd9);}
+.modal-input{width:100%;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);padding:11px 13px;border-radius:10px;font-family:'Outfit';font-size:13px;transition:.2s;}
+.modal-input:focus{outline:none;border-color:var(--gold);background:var(--bg-2);}
+.modal-input::placeholder{color:var(--ink-3);}
+.modal-buttons{display:flex;gap:8px;margin-top:18px;}
+.modal-btn{flex:1;padding:13px;border-radius:12px;font-family:'Bungee';font-size:11px;letter-spacing:.08em;cursor:pointer;border:none;transition:.2s;}
+.modal-btn-cancel{background:var(--bg-1);color:var(--ink-2);border:1px solid var(--line);}
+.modal-btn-cancel:hover{background:var(--bg-3);color:var(--ink);}
+.modal-btn-confirm{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#1a1308;box-shadow:0 8px 18px -6px rgba(255,201,67,.5);}
+.modal-btn-confirm.demerit{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff;box-shadow:0 8px 18px -6px rgba(255,85,119,.4);}
+.modal-btn-confirm:hover{transform:translateY(-1px);}
+
+/* ── LEGACY MODAL (behavior engine, economy) ── */
+.legacy-overlay{position:fixed;inset:0;background:rgba(5,8,18,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px;}
+.legacy-box{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:24px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;position:relative;animation:popIn .3s ease;}
+.legacy-label{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:6px;display:block;}
+.legacy-input{width:100%;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);padding:10px 13px;border-radius:10px;font-family:'Outfit';font-size:13px;margin-bottom:12px;}
+.legacy-input:focus{outline:none;border-color:var(--gold);}
+.legacy-select{width:100%;background:var(--bg-1);border:1px solid var(--line);color:var(--ink);padding:10px 13px;border-radius:10px;font-family:'Outfit';font-size:13px;margin-bottom:12px;appearance:none;}
+.legacy-row{display:flex;gap:8px;margin-top:4px;}
+.legacy-btn{flex:1;padding:11px;border-radius:10px;font-family:'Bungee';font-size:11px;letter-spacing:.06em;cursor:pointer;border:none;transition:.2s;}
+.legacy-btn.cancel{background:var(--bg-1);color:var(--ink-2);border:1px solid var(--line);}
+.legacy-btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#1a1308;}
+.legacy-btn.danger{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff;}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"]{
+  --bg-0:#f7f3e9;--bg-1:#ffffff;--bg-2:#fdfaf2;--bg-3:#f0e9d5;
+  --line:#d8cba8;--line-soft:#ece2c5;
+  --ink:#1c1f33;--ink-2:#4a5170;--ink-3:#8c91a6;
+  --gold:#d49019;--gold-deep:#a86e0d;
+  --mint:#0e9d6e;--mint-deep:#066b4a;
+  --rose:#dd3b5e;--rose-deep:#b02748;
+  --boss:#8b4fd9;--boss-deep:#6328c4;
+  --cyan:#0891b2;
+  --steward:#a8862a;
+}
+[data-theme="light"] body{
+  background:
+    radial-gradient(1100px 600px at 88% -8%,rgba(168,134,42,.10),transparent 55%),
+    radial-gradient(800px 500px at -8% 30%,rgba(139,79,217,.07),transparent 55%),
+    radial-gradient(700px 400px at 50% 110%,rgba(14,157,110,.06),transparent 60%),
+    var(--bg-0);
+}
+[data-theme="light"] .steward-hero{background:radial-gradient(circle at 88% 10%,rgba(168,134,42,.18),transparent 55%),radial-gradient(circle at 10% 90%,rgba(139,79,217,.10),transparent 55%),linear-gradient(160deg,#ffffff 0%,#fdfaf2 100%);border-color:rgba(168,134,42,.35);box-shadow:0 12px 30px -15px rgba(168,134,42,.25),0 4px 14px -6px rgba(28,31,51,.06);}
+[data-theme="light"] .steward-hero::before{background-image:repeating-linear-gradient(45deg,rgba(168,134,42,.04) 0 1px,transparent 1px 12px);}
+[data-theme="light"] .sh-lvl-badge{border-color:#fff;color:#fff;background:linear-gradient(135deg,#a8862a,#7a5f1a);}
+[data-theme="light"] .sh-name span{color:var(--steward);}
+[data-theme="light"] .sh-class{background:rgba(168,134,42,.12);color:#7a5f1a;border-color:rgba(168,134,42,.35);}
+[data-theme="light"] .sh-xp-label{color:#7a5f1a;}
+[data-theme="light"] .sh-xp-num b{color:#7a5f1a;}
+[data-theme="light"] .sh-xp-track{background:#f0e8d0;border-color:rgba(168,134,42,.25);}
+[data-theme="light"] .sh-xp-fill{background:linear-gradient(90deg,var(--steward) 0%,#c9a851 70%,#f0d785 100%);box-shadow:0 0 14px rgba(168,134,42,.4);}
+[data-theme="light"] .sh-xp-next b{color:#7a5f1a;}
+[data-theme="light"] .sh-stat{background:var(--bg-2);border-color:var(--line-soft);}
+[data-theme="light"] .sh-stat-val.steward{color:#7a5f1a;}
+[data-theme="light"] .sh-stat-val.fire{color:var(--rose-deep);}
+[data-theme="light"] .sh-stat-val.gold{color:var(--gold-deep);}
+[data-theme="light"] .sh-buff{background:linear-gradient(90deg,rgba(139,79,217,.10),rgba(14,157,110,.06));border-color:rgba(139,79,217,.3);}
+[data-theme="light"] .sh-buff-title{color:var(--boss-deep);}
+[data-theme="light"] .sh-buff-desc b{color:var(--mint-deep);}
+[data-theme="light"] .realm-card{background:radial-gradient(circle at 90% 0%,rgba(14,157,110,.10),transparent 60%),linear-gradient(135deg,#ffffff 0%,#fdfaf2 100%);border-color:var(--line);box-shadow:0 4px 16px -8px rgba(28,31,51,.08);}
+[data-theme="light"] .rh-num{background:linear-gradient(180deg,var(--ink) 0%,var(--mint-deep) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+[data-theme="light"] .rh-spark{background:rgba(28,31,51,.03);border-color:var(--line-soft);}
+[data-theme="light"] .rh-bd-item{background:var(--bg-2);border-color:var(--line-soft);}
+[data-theme="light"] .rh-bd-val.up{color:var(--mint-deep);}
+[data-theme="light"] .rh-bd-val.down{color:var(--rose-deep);}
+[data-theme="light"] .rh-status.thriving{background:rgba(14,157,110,.12);border-color:rgba(14,157,110,.4);color:var(--mint-deep);}
+[data-theme="light"] .rh-status.good{background:rgba(212,144,25,.12);border-color:rgba(212,144,25,.4);color:var(--gold-deep);}
+[data-theme="light"] .rh-status.struggling{background:rgba(221,59,94,.10);border-color:rgba(221,59,94,.4);color:var(--rose-deep);}
+[data-theme="light"] .stewardship{background:linear-gradient(135deg,rgba(168,134,42,.10),rgba(212,144,25,.05));border-color:rgba(168,134,42,.3);}
+[data-theme="light"] .stw-title span{color:#7a5f1a;}
+[data-theme="light"] .stw-prog b{color:#7a5f1a;}
+[data-theme="light"] .stw-item{background:var(--bg-1);border-color:rgba(168,134,42,.2);}
+[data-theme="light"] .stw-item:hover{background:rgba(168,134,42,.06);}
+[data-theme="light"] .stw-check{border-color:rgba(168,134,42,.45);background:var(--bg-2);}
+[data-theme="light"] .stw-item.done .stw-check{background:var(--steward);border-color:var(--steward);}
+[data-theme="light"] .stw-xp{color:#7a5f1a;background:rgba(168,134,42,.13);border-color:rgba(168,134,42,.3);}
+[data-theme="light"] .stw-foot b{color:#7a5f1a;}
+[data-theme="light"] .stat-card{background:var(--bg-1);border-color:var(--line);box-shadow:0 2px 6px -2px rgba(28,31,51,.06);}
+[data-theme="light"] .stat-card.alert{background:linear-gradient(135deg,rgba(221,59,94,.06),var(--bg-1));border-color:rgba(221,59,94,.4);}
+[data-theme="light"] .sc-trend.flat{background:var(--bg-2);}
+[data-theme="light"] .act-btn.award{color:#fff;}
+[data-theme="light"] .act-btn.demerit{background:#fff;color:var(--rose-deep);border:1.5px solid rgba(221,59,94,.4);}
+[data-theme="light"] .act-btn.demerit .act-xp-badge{background:rgba(221,59,94,.12);color:var(--rose-deep);}
+[data-theme="light"] .family-card{background:var(--bg-1);border-color:var(--line);box-shadow:0 2px 8px -4px rgba(28,31,51,.06);}
+[data-theme="light"] .reviews-card{background:var(--bg-1);border-color:var(--line);box-shadow:0 2px 8px -4px rgba(28,31,51,.06);}
+[data-theme="light"] .economy{background:var(--bg-1);border-color:var(--line);box-shadow:0 2px 8px -4px rgba(28,31,51,.06);}
+[data-theme="light"] .kid-row:hover{background:var(--bg-2);}
+[data-theme="light"] .kid-row+.kid-row{border-color:var(--line-soft);}
+[data-theme="light"] .kid-lvl{background:var(--bg-1);border-color:#fff;color:var(--gold-deep);}
+[data-theme="light"] .kid-class{background:var(--bg-2);border-color:var(--line-soft);}
+[data-theme="light"] .kid-prog-bar{background:#f0e8d0;border-color:var(--line-soft);}
+[data-theme="light"] .review-row:hover{background:var(--bg-2);}
+[data-theme="light"] .review-row+.review-row{border-color:var(--line-soft);}
+[data-theme="light"] .rev-meta b{color:var(--gold-deep);}
+[data-theme="light"] .rev-meta .xp-tag{color:#7a5f1a;background:rgba(168,134,42,.13);border-color:rgba(168,134,42,.3);}
+[data-theme="light"] .rev-btn.approve{background:rgba(14,157,110,.12);color:var(--mint-deep);border-color:rgba(14,157,110,.35);}
+[data-theme="light"] .rev-btn.deny{background:rgba(221,59,94,.10);color:var(--rose);border-color:rgba(221,59,94,.3);}
+[data-theme="light"] .eco-head h3 span{color:var(--gold-deep);}
+[data-theme="light"] .eco-edit{background:var(--bg-2);border-color:var(--line);}
+[data-theme="light"] .eco-fig{background:var(--bg-2);border-color:var(--line-soft);}
+[data-theme="light"] .eco-fig-val{color:var(--gold-deep);}
+[data-theme="light"] .eco-nav-btn{background:var(--bg-2);border-color:var(--line-soft);}
+[data-theme="light"] .eco-split-bar{border-color:var(--line-soft);background:var(--bg-2);}
+[data-theme="light"] .eco-config-btn{border-color:var(--line);}
+[data-theme="light"] .eco-config-btn:hover{background:var(--bg-2);color:var(--gold-deep);border-color:var(--gold);}
+[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.88);border-color:var(--line);box-shadow:0 -4px 20px -10px rgba(28,31,51,.1);}
+[data-theme="light"] .nav-item.active{color:#7a5f1a;}
+[data-theme="light"] .nav-item.active .nav-ico{background:rgba(168,134,42,.13);}
+[data-theme="light"] .switch-btn{background:var(--bg-1);border-color:var(--line);box-shadow:0 1px 0 rgba(28,31,51,.04);}
+[data-theme="light"] .icon-btn{background:var(--bg-1);border-color:var(--line);box-shadow:0 1px 0 rgba(28,31,51,.04);}
+[data-theme="light"] .switch-btn:hover,[data-theme="light"] .icon-btn:hover{background:var(--bg-3);}
+[data-theme="light"] .act-modal-overlay{background:rgba(28,20,8,.35);}
+[data-theme="light"] .act-modal{background:linear-gradient(160deg,#fff,var(--bg-2));border-color:var(--line);box-shadow:0 30px 60px -15px rgba(28,31,51,.3);}
+[data-theme="light"] .act-modal-close{background:var(--bg-2);border-color:var(--line);}
+[data-theme="light"] .modal-xp-banner.award{background:rgba(168,134,42,.1);border-color:rgba(168,134,42,.3);color:#7a5f1a;}
+[data-theme="light"] .modal-xp-banner.demerit{background:rgba(221,59,94,.06);border-color:rgba(221,59,94,.3);color:var(--rose-deep);}
+[data-theme="light"] .chip{background:var(--bg-2);border-color:var(--line);}
+[data-theme="light"] .chip.selected{background:rgba(212,144,25,.08);color:var(--gold-deep);border-color:var(--gold);}
+[data-theme="light"] .chip.selected.rose{color:var(--rose-deep);border-color:var(--rose);background:rgba(221,59,94,.06);}
+[data-theme="light"] .modal-input{background:var(--bg-2);border-color:var(--line);}
+[data-theme="light"] .modal-input:focus{background:#fff;border-color:var(--gold);}
+[data-theme="light"] .modal-btn-cancel{background:var(--bg-2);border-color:var(--line);}
+[data-theme="light"] .float-notif{background:linear-gradient(135deg,#a8862a,#7a5f1a);color:#fff;}
+[data-theme="light"] .float-notif.gold{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#fff;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">F</div>
+      <div class="brand-text">FAMILY · OS<small>STEWARD CONSOLE</small></div>
+    </div>
+    <div class="topbar-right">
+      <button class="switch-btn" onclick="openSwitchUser()" title="Switch user">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M16 3l4 4m0 0l-4 4m4-4H8m0 14l-4-4m0 0l4-4m-4 4h12"/></svg>
+        Switch
+      </button>
+      <button class="icon-btn" title="Reviews" onclick="location.href='reviews.html'" style="position:relative">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="notif-badge" id="topbar-badge" style="display:none"></span>
+      </button>
+      <button class="icon-btn" title="Settings" onclick="openSettings()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9c.3.6.9 1 1.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEWARD HERO -->
+  <div class="steward-hero">
+    <div class="sh-row">
+      <div class="sh-avatar-wrap">
+        <div class="sh-avatar" id="hero-initial">J</div>
+        <div class="sh-lvl-badge" id="hero-lvl">LV.1</div>
+      </div>
+      <div class="sh-info">
+        <div class="sh-eyebrow" id="hero-greeting">Good morning</div>
+        <div class="sh-name">House Steward <span id="hero-name">Parent</span></div>
+        <div class="sh-class-row">
+          <span class="sh-class">🏛 House Steward</span>
+          <span class="sh-title-tag">— Master of <b id="hero-family">the Family</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh-xp">
+      <div class="sh-xp-meta">
+        <span class="sh-xp-label">STEWARD EXPERIENCE</span>
+        <span class="sh-xp-num" id="xp-display"><b>0</b> / 1,000 XP</span>
+      </div>
+      <div class="sh-xp-track"><div class="sh-xp-fill" id="xp-bar" style="width:0%"></div></div>
+      <div class="sh-xp-next" id="xp-next">Keep reviewing quests to level up</div>
+    </div>
+
+    <div class="sh-stats">
+      <div class="sh-stat">
+        <div class="sh-stat-ico trophy">🏆</div>
+        <div class="sh-stat-meta">
+          <div class="sh-stat-val steward" id="stat-reviews-done">0</div>
+          <div class="sh-stat-cap">Reviews Done</div>
+        </div>
+      </div>
+      <div class="sh-stat">
+        <div class="sh-stat-ico streak">🔥</div>
+        <div class="sh-stat-meta">
+          <div class="sh-stat-val fire" id="stat-streak">0</div>
+          <div class="sh-stat-cap">Day Streak</div>
+        </div>
+      </div>
+      <div class="sh-stat">
+        <div class="sh-stat-ico coin">🪙</div>
+        <div class="sh-stat-meta">
+          <div class="sh-stat-val gold" id="stat-issued">0</div>
+          <div class="sh-stat-cap">FC Issued</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh-buff" id="streak-buff" style="display:none">
+      <div class="sh-buff-ico">✨</div>
+      <div class="sh-buff-body">
+        <div class="sh-buff-title" id="buff-title">ACTIVE BUFF</div>
+        <div class="sh-buff-desc" id="buff-desc">Your consistency boosts family XP!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REALM HEALTH -->
+  <div class="realm-card">
+    <div class="rh-grid">
+      <div class="rh-left">
+        <div class="rh-num" id="realm-score">—</div>
+        <div>
+          <div class="rh-label">REALM HEALTH</div>
+          <div class="rh-desc" id="realm-desc">Loading…</div>
+          <div class="rh-status" id="realm-status">⌛ LOADING</div>
+          <div class="rh-trend" id="realm-trend" style="display:none">📈 <b id="realm-trend-val"></b></div>
+        </div>
+      </div>
+      <div class="rh-spark-wrap">
+        <div class="rh-spark-label">
+          <span>Family metrics</span>
+          <span id="realm-spark-label" style="color:var(--mint)">Today</span>
+        </div>
+        <svg class="rh-spark" viewBox="0 0 280 36" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#22d39a" stop-opacity=".4"/>
+              <stop offset="100%" stop-color="#22d39a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="spark-fill-path" d="M0,30 L280,30 L280,36 L0,36 Z" fill="url(#sparkFill)"/>
+          <path id="spark-line" d="M0,30 L280,30" stroke="#22d39a" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle id="spark-dot" cx="280" cy="30" r="3.5" fill="#22d39a"/>
+          <circle id="spark-glow" cx="280" cy="30" r="6" fill="#22d39a" opacity=".25"/>
+        </svg>
+        <div class="rh-breakdown">
+          <div class="rh-bd-item">
+            <div class="rh-bd-label">Pending Reviews</div>
+            <div class="rh-bd-val" id="bd-reviews">—</div>
+          </div>
+          <div class="rh-bd-item">
+            <div class="rh-bd-label">Today Tasks</div>
+            <div class="rh-bd-val up" id="bd-tasks">—</div>
+          </div>
+          <div class="rh-bd-item">
+            <div class="rh-bd-label">Active Streaks</div>
+            <div class="rh-bd-val" id="bd-streaks">—</div>
+          </div>
+          <div class="rh-bd-item">
+            <div class="rh-bd-label">Family FC</div>
+            <div class="rh-bd-val up" id="bd-fc">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY STEWARDSHIP -->
+  <div class="stewardship">
+    <div class="stw-head">
+      <div class="stw-title">⚜ DAILY <span>STEWARDSHIP</span></div>
+      <div class="stw-prog"><b id="stwDone">0</b> of <b id="stwTotal">4</b> done</div>
+    </div>
+    <div class="stw-list" id="stwList">
+      <div class="stw-item done" data-xp="5">
+        <div class="stw-check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="stw-text">Open the Steward Console<small>Just by being here ✓</small></div>
+        <div class="stw-xp">+5 XP</div>
+      </div>
+      <div class="stw-item" data-xp="10" onclick="toggleStw(this)">
+        <div class="stw-check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="stw-text">Clear all pending reviews<small id="stw-review-sub">Quest judgments waiting</small></div>
+        <div class="stw-xp">+10 XP</div>
+      </div>
+      <div class="stw-item" data-xp="10" onclick="openQuickAward()">
+        <div class="stw-check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="stw-text">Award one positive interaction<small>Catch a kid doing something right</small></div>
+        <div class="stw-xp">+10 XP</div>
+      </div>
+      <div class="stw-item" data-xp="15" onclick="toggleStw(this)">
+        <div class="stw-check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="stw-text">Send a personal note to one kid<small>5-second message of praise or encouragement</small></div>
+        <div class="stw-xp">+15 XP</div>
+      </div>
+    </div>
+    <div class="stw-foot">Complete all 4 → unlock <b>Faithful Steward</b> daily badge + <b>+50 bonus XP</b></div>
+  </div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid">
+    <div class="stat-card" id="stat-card-reviews">
+      <div class="sc-head">
+        <div class="sc-icon rose">📋</div>
+        <div class="sc-trend flat" id="reviews-trend">0</div>
+      </div>
+      <div class="sc-val" id="reviewCount">—</div>
+      <div class="sc-label">Pending Reviews</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-head">
+        <div class="sc-icon mint">✓</div>
+        <div class="sc-trend flat" id="tasks-trend">—</div>
+      </div>
+      <div class="sc-val" id="tasksVal">—</div>
+      <div class="sc-label">Today's Tasks</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-head">
+        <div class="sc-icon gold">🪙</div>
+        <div class="sc-trend up">Total</div>
+      </div>
+      <div class="sc-val" id="fcVal">—</div>
+      <div class="sc-label" id="fcLabel">FC Balance</div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="action-row">
+    <button class="act-btn award" onclick="openQuickAward()">
+      <span class="act-xp-badge">+10 STEWARD XP</span>
+      <div class="act-icon">⭐</div>
+      <div class="act-body">
+        <div class="act-title">QUICK AWARD</div>
+        <div class="act-sub">Drop bonus coins instantly</div>
+      </div>
+    </button>
+    <button class="act-btn demerit" onclick="openDemerit()">
+      <span class="act-xp-badge">+5 STEWARD XP</span>
+      <div class="act-icon">⚠</div>
+      <div class="act-body">
+        <div class="act-title">DEMERIT</div>
+        <div class="act-sub">Issue penalty or deduct</div>
+      </div>
+    </button>
+  </div>
+
+  <!-- FAMILY + REVIEWS (two-col on desktop) -->
+  <div class="main-grid">
+    <div>
+      <div class="section-head">
+        <h2><span class="dot" style="background:var(--mint);box-shadow:0 0 8px var(--mint)"></span> FAMILY PROGRESS</h2>
+        <a href="children.html" class="filter" style="color:var(--ink-3);text-decoration:none">View all →</a>
+      </div>
+      <div class="family-card" id="family-list">
+        <div style="padding:30px;text-align:center;color:var(--ink-3);font-size:12px">Loading…</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-head">
+        <h2><span class="dot" style="background:var(--rose);box-shadow:0 0 8px var(--rose)"></span> PENDING JUDGMENTS</h2>
+        <button class="pill-btn" onclick="autoAwardAll()">⚡ Auto-Award All</button>
+      </div>
+      <div class="reviews-card">
+        <div class="reviews-list" id="reviewsList">
+          <div style="padding:30px;text-align:center;color:var(--ink-3);font-size:12px">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREASURY -->
+  <div class="section-head">
+    <h2><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></span> TREASURY</h2>
+    <span class="filter" id="coin-label-head">Family Economy</span>
+  </div>
+  <div class="economy">
+    <div class="eco-head">
+      <h3>💰 Budget <span>& Auto-Split</span></h3>
+      <button class="eco-edit" onclick="openEconomyEdit()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+    </div>
+    <div class="eco-figures">
+      <div class="eco-fig">
+        <div class="eco-fig-val" id="eco-budget">—</div>
+        <div class="eco-fig-label">Weekly Budget</div>
+      </div>
+      <div class="eco-fig">
+        <div class="eco-fig-val" id="eco-rate">—</div>
+        <div class="eco-fig-label" id="eco-rate-label">per $1</div>
+      </div>
+      <div class="eco-fig">
+        <div class="eco-fig-val" id="eco-score">—</div>
+        <div class="eco-fig-label">Family FC</div>
+      </div>
+    </div>
+    <div class="eco-nav">
+      <a href="rewards.html" class="eco-nav-btn">🎁 Rewards</a>
+      <a href="coupons.html" class="eco-nav-btn">🎫 Coupons</a>
+      <a href="layaway.html" class="eco-nav-btn">🎯 Goals</a>
+    </div>
+    <div class="eco-split-label">Auto-Split — % of every coin earned</div>
+    <div class="eco-split-bar" id="eco-split-bar">
+      <div class="eco-seg spend" style="flex:60" id="seg-spend">60%<span>Spend</span></div>
+      <div class="eco-seg save" style="flex:20" id="seg-save">20%<span>Save</span></div>
+      <div class="eco-seg invest" style="flex:10" id="seg-invest">10%<span>Invest</span></div>
+      <div class="eco-seg charity" style="flex:10" id="seg-charity">10%<span>Give</span></div>
+    </div>
+    <button class="eco-config-btn" onclick="openBucketConfig()">⚙ Configure Buckets &amp; Reward Catalog</button>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- AWARD MODAL -->
+<div class="act-modal-overlay" id="awardModal" onclick="if(event.target===this)closeActModal('awardModal')">
+  <div class="act-modal">
+    <button class="act-modal-close" onclick="closeActModal('awardModal')">×</button>
+    <div class="modal-head">
+      <div class="modal-ico award">⭐</div>
+      <div class="modal-title">QUICK <span class="gold">AWARD</span></div>
+    </div>
+    <div class="modal-xp-banner award">⚜ This action grants <b>+10 Steward XP</b></div>
+    <div class="modal-section">
+      <div class="modal-section-label">Who's getting it?</div>
+      <div class="modal-chips" id="awardKids"></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Reason (describe what happened)</div>
+      <textarea class="modal-input" id="award-desc" rows="3" placeholder="e.g. Did all chores without being asked, great attitude all day…" style="resize:none"></textarea>
+    </div>
+    <div class="modal-buttons">
+      <button class="modal-btn modal-btn-cancel" onclick="closeActModal('awardModal')">CANCEL</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmQuickAward()">EVALUATE & AWARD</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEMERIT MODAL -->
+<div class="act-modal-overlay" id="demeritModal" onclick="if(event.target===this)closeActModal('demeritModal')">
+  <div class="act-modal">
+    <button class="act-modal-close" onclick="closeActModal('demeritModal')">×</button>
+    <div class="modal-head">
+      <div class="modal-ico demerit">⚠</div>
+      <div class="modal-title">ISSUE <span class="rose">DEMERIT</span></div>
+    </div>
+    <div class="modal-xp-banner demerit">⚜ Fair rulings grant <b>+5 Steward XP</b></div>
+    <div class="modal-section">
+      <div class="modal-section-label">Who?</div>
+      <div class="modal-chips" id="demeritKids"></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">What happened?</div>
+      <textarea class="modal-input" id="demerit-desc" rows="3" placeholder="e.g. Argued and refused to clean room after being asked twice…" style="resize:none"></textarea>
+    </div>
+    <div class="modal-buttons">
+      <button class="modal-btn modal-btn-cancel" onclick="closeActModal('demeritModal')">CANCEL</button>
+      <button class="modal-btn modal-btn-confirm demerit" onclick="confirmQuickDemerit()">EVALUATE & DEDUCT</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="location.href='dashboard.html'">
+    <div class="nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div>
+    <span class="nav-label">Console</span>
+  </button>
+  <button class="nav-item" onclick="location.href='children.html'">
+    <div class="nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+    <span class="nav-label">Kids</span>
+  </button>
+  <button class="nav-item" onclick="location.href='chores.html'">
+    <div class="nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+    <span class="nav-label">Quests</span>
+  </button>
+  <button class="nav-item" onclick="location.href='reviews.html'" style="position:relative">
+    <div class="nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <span class="nav-label">Reviews</span>
+    <span class="nav-badge" id="nav-reviews-badge"></span>
+  </button>
+  <button class="nav-item" onclick="location.href='rewards.html'">
+    <div class="nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4z"/></svg></div>
+    <span class="nav-label">Rewards</span>
+  </button>
+</nav>
+
+<!-- FLOATING NOTIF -->
+<div class="float-notif" id="notif">
+  <span class="emoji">⚜</span>
+  <span id="notifText">Action complete</span>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+/* ── GLOBALS ── */
+const user   = Auth.getUser();
+const h      = new Date().getHours();
+let   _kids  = [];   // loaded children cache
+let   _subs  = [];   // pending submissions cache
+let   stewardXP = 0;
+let   stewardLvl = 1;
+let   reviewsDoneCount = 0;
+const XP_PER_LEVEL = 1000;
+
+// XP levels
+const LEVELS = [
+  {lvl:1,  title:'Apprentice Steward',   threshold:0},
+  {lvl:2,  title:'House Keeper',         threshold:200},
+  {lvl:3,  title:'Estate Manager',       threshold:500},
+  {lvl:4,  title:'Domain Warden',        threshold:900},
+  {lvl:5,  title:'Realm Guardian',       threshold:1400},
+  {lvl:6,  title:'Guild Master',         threshold:2000},
+  {lvl:7,  title:'Family Architect',     threshold:2700},
+  {lvl:8,  title:'Chronicle Keeper',     threshold:3500},
+  {lvl:9,  title:'Sovereign Steward',    threshold:4400},
+  {lvl:10, title:'Legendary Patriarch',  threshold:5500},
+];
+
+function getLevelData(xp) {
+  let cur = LEVELS[0], next = LEVELS[1];
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (xp >= LEVELS[i].threshold) { cur = LEVELS[i]; next = LEVELS[i+1] || null; }
+    else break;
+  }
+  return { cur, next };
+}
+
+/* ── STEWARD XP (localStorage-persisted, per user) ── */
+const XP_KEY       = 'fos_steward_xp_' + (user?.id || 'guest');
+const REVIEWS_KEY  = 'fos_steward_reviews_' + (user?.id || 'guest');
+const STW_KEY      = 'fos_stw_done_' + (user?.id || 'guest') + '_' + new Date().toDateString();
+
+stewardXP        = parseInt(localStorage.getItem(XP_KEY)) || 0;
+reviewsDoneCount = parseInt(localStorage.getItem(REVIEWS_KEY)) || 0;
+
+function saveXP() { localStorage.setItem(XP_KEY, stewardXP); localStorage.setItem(REVIEWS_KEY, reviewsDoneCount); }
+
+function awardXP(amount, silent=false) {
+  const wasLvl = getLevelData(stewardXP).cur.lvl;
+  stewardXP += amount;
+  saveXP();
+  const {cur, next} = getLevelData(stewardXP);
+  stewardLvl = cur.lvl;
+  // Update bar
+  const barPct = next
+    ? Math.min(100, ((stewardXP - cur.threshold) / (next.threshold - cur.threshold)) * 100)
+    : 100;
+  document.getElementById('xp-bar').style.width = barPct + '%';
+  const xpEl = document.getElementById('xp-display');
+  if (xpEl) xpEl.innerHTML = next
+    ? '<b>' + stewardXP.toLocaleString() + '</b> / ' + next.threshold.toLocaleString() + ' XP'
+    : '<b>' + stewardXP.toLocaleString() + '</b> XP · MAX';
+  document.getElementById('hero-lvl').textContent = 'LV.' + cur.lvl;
+  document.getElementById('xp-next').textContent = next
+    ? 'Next: ' + next.title + ' (' + (next.threshold - stewardXP).toLocaleString() + ' XP away)'
+    : '🏆 Maximum level reached!';
+  // Level up celebration
+  if (getLevelData(stewardXP).cur.lvl > wasLvl && !silent) {
+    showNotif('LEVEL UP! ' + getLevelData(stewardXP).cur.title, '🏆', 'gold');
+  }
+}
+
+/* ── DAILY STEWARDSHIP STATE ── */
+let stwDone = 0;
+function initStewardship() {
+  const saved = JSON.parse(localStorage.getItem(STW_KEY) || '[]');
+  const items = document.querySelectorAll('.stw-item');
+  items.forEach((item, i) => {
+    if (saved.includes(i)) { item.classList.add('done'); stwDone++; }
+  });
+  document.getElementById('stwDone').textContent = stwDone;
+  document.getElementById('stwTotal').textContent = items.length;
+}
+
+function toggleStw(el) {
+  if (el.classList.contains('done')) return;
+  const xp = parseInt(el.dataset.xp) || 0;
+  el.classList.add('done');
+  stwDone++;
+  document.getElementById('stwDone').textContent = stwDone;
+  awardXP(xp);
+  showNotif('+' + xp + ' Steward XP earned!', '⚜');
+  // Persist
+  const items = [...document.querySelectorAll('.stw-item')];
+  const doneIdx = items.filter(i => i.classList.contains('done')).map(i => items.indexOf(i));
+  localStorage.setItem(STW_KEY, JSON.stringify(doneIdx));
+  // Bonus
+  const total = document.querySelectorAll('.stw-item').length;
+  if (stwDone >= total) {
+    setTimeout(() => { awardXP(50); showNotif('FAITHFUL STEWARD! +50 bonus XP!', '🏆', 'gold'); }, 900);
+  }
+}
+
+/* ── HERO INIT ── */
+function initHero() {
+  const fam = Auth.getFamily() || {};
+  document.getElementById('hero-greeting').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const name = user?.display_name || 'Parent';
+  document.getElementById('hero-name').textContent = name;
+  document.getElementById('hero-initial').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('hero-family').textContent = fam.name ? 'the ' + fam.name : 'the Family';
+  document.getElementById('stat-streak').textContent = (user?.streak || 0) + 'd';
+  // Streak buff
+  const streak = user?.streak || 0;
+  if (streak >= 3) {
+    const buff = document.getElementById('streak-buff');
+    buff.style.display = '';
+    const bonus = streak >= 14 ? 25 : streak >= 7 ? 15 : 10;
+    document.getElementById('buff-title').textContent = 'ACTIVE BUFF · ' + streak + '-DAY STREAK';
+    document.getElementById('buff-desc').innerHTML = 'Your consistency boosts all kid XP earnings by <b>+' + bonus + '%</b>';
+  }
+  // XP
+  awardXP(0, true); // refresh display only
+}
+
+/* ── AVATAR COLOR CLASS ── */
+const AVATAR_CLASSES = ['ca','cs','ce','cd'];
+function kidColorClass(name, idx) {
+  const first = (name||'').charAt(0).toLowerCase();
+  const map = {a:'ca',s:'cs',e:'ce',b:'cs',j:'ca',m:'cd',l:'ce'};
+  return map[first] || AVATAR_CLASSES[idx % AVATAR_CLASSES.length];
+}
+
+/* ── NOTIFICATION ── */
+function showNotif(text, emoji='⚜', flavor='') {
+  const n = document.getElementById('notif');
+  document.getElementById('notifText').textContent = text;
+  n.querySelector('.emoji').textContent = emoji;
+  n.classList.remove('gold','rose');
+  if (flavor === 'gold') n.classList.add('gold');
+  if (flavor === 'demerit' || flavor === 'rose') n.classList.add('rose');
+  n.classList.add('show');
+  clearTimeout(window._notifT);
+  window._notifT = setTimeout(() => n.classList.remove('show'), 2600);
+}
+
+/* ── MAIN DATA LOAD ── */
+async function loadDashboard() {
+  try {
+    const [choresRes, subsRes, childrenRes, familyRes] = await Promise.all([
+      ChoresAPI.instances(),
+      SubmissionsAPI.list(),
+      ChildrenAPI.list(),
+      FamilyAPI.settings(),
+    ]);
+
+    const _apiFamily = familyRes?.data?.family || familyRes?.family || familyRes || {};
+    const fam      = { ...(Auth.getFamily() || {}), ..._apiFamily };
+    _kids          = Array.isArray(childrenRes) ? childrenRes : (childrenRes?.data || childrenRes?.children || []);
+    const chores   = Array.isArray(choresRes)   ? choresRes   : (choresRes?.data   || choresRes?.chores    || []);
+    const _allSubs = Array.isArray(subsRes)      ? subsRes     : (subsRes?.data     || subsRes?.submissions || []);
+    _subs          = _allSubs.filter(s => s.status === 'pending' || s.status === 'submitted');
+
+    // Stats
+    const totalFC    = _kids.reduce((s, c) => s + (c.balance || 0), 0);
+    const pendingTasks = chores.filter(c => c.status === 'pending').length;
+    const doneTasks    = chores.filter(c => c.status === 'done' || c.status === 'complete' || c.status === 'approved').length;
+    const totalTasks   = chores.length;
+    const taskPct      = totalTasks > 0 ? Math.round(doneTasks / totalTasks * 100) : 0;
+    const activeStreaks = _kids.filter(k => (k.streak || 0) > 0).length;
+
+    // Stats grid
+    document.getElementById('reviewCount').textContent  = _subs.length;
+    document.getElementById('tasksVal').textContent     = taskPct + '%';
+    document.getElementById('tasks-trend').textContent  = doneTasks + '/' + totalTasks;
+    document.getElementById('fcVal').textContent        = totalFC > 999 ? (totalFC/1000).toFixed(1) + 'k' : totalFC;
+    document.getElementById('reviews-trend').textContent = _subs.length;
+
+    // Alert styling on reviews card
+    const rc = document.getElementById('stat-card-reviews');
+    if (_subs.length > 0) rc.classList.add('alert'); else rc.classList.remove('alert');
+
+    // Realm health
+    const coin   = getCoinConfig();
+    const score  = fam.house_score || Math.min(100, Math.round(40 + taskPct * 0.4 + activeStreaks * 8));
+    document.getElementById('realm-score').textContent = score;
+    const desc   = score >= 90 ? 'Outstanding — family thriving!' : score >= 70 ? 'Strong week — momentum building' : score >= 50 ? 'Steady — room to grow' : 'Needs attention — let\'s push!';
+    const status = score >= 90 ? 'thriving' : score >= 70 ? 'thriving' : score >= 50 ? 'good' : 'struggling';
+    const statusTxt = score >= 90 ? '✦ THRIVING' : score >= 70 ? '✦ GOOD' : score >= 50 ? '⚡ BUILDING' : '⚠ NEEDS WORK';
+    document.getElementById('realm-desc').textContent = desc;
+    const st = document.getElementById('realm-status');
+    st.textContent = statusTxt;
+    st.className = 'rh-status ' + status;
+    document.getElementById('bd-reviews').textContent   = _subs.length;
+    document.getElementById('bd-tasks').textContent     = doneTasks + '/' + totalTasks;
+    document.getElementById('bd-streaks').textContent   = activeStreaks + '/' + _kids.length;
+    document.getElementById('bd-fc').textContent        = totalFC.toLocaleString();
+    document.getElementById('bd-reviews').className     = 'rh-bd-val ' + (_subs.length > 0 ? 'down' : 'up');
+
+    // Spark line (simple linear trend based on score)
+    updateSparkLine(score);
+
+    // Hero stats
+    document.getElementById('stat-reviews-done').textContent = reviewsDoneCount;
+    document.getElementById('stat-issued').textContent = totalFC > 999 ? (totalFC/1000).toFixed(1) + 'k' : totalFC;
+
+    // Stewardship subtitle
+    if (_subs.length > 0) {
+      document.getElementById('stw-review-sub').textContent = _subs.length + ' quest' + (_subs.length === 1 ? '' : 's') + ' waiting your judgment';
+    } else {
+      const reviewItem = document.querySelectorAll('.stw-item')[1];
+      if (reviewItem && !reviewItem.classList.contains('done')) reviewItem.classList.add('done');
+    }
+
+    // Nav badge
+    const badge = document.getElementById('nav-reviews-badge');
+    const tbadge = document.getElementById('topbar-badge');
+    if (_subs.length > 0) {
+      badge.textContent = _subs.length; badge.style.display = '';
+      tbadge.textContent = _subs.length; tbadge.style.display = '';
+    } else {
+      badge.style.display = 'none'; tbadge.style.display = 'none';
+    }
+
+    // Economy
+    const rate   = fam.point_rate
+      ? (fam.point_rate < 1 ? Math.round(1 / fam.point_rate) : Math.round(fam.point_rate))
+      : 100;
+    const budget = fam.weekly_budget ?? 50;
+    document.getElementById('eco-budget').innerHTML = '$' + budget + '<small>/wk</small>';
+    document.getElementById('eco-rate').innerHTML   = rate + '<small> ' + coin.symbol + '/$</small>';
+    document.getElementById('eco-score').innerHTML  = totalFC + '<small> ' + coin.symbol + '</small>';
+    document.getElementById('coin-label-head').textContent = coin.symbol + ' = ' + coin.name;
+    document.getElementById('fcLabel').textContent = coin.symbol + ' Balance';
+
+    // Bucket split
+    const sp = fam.bucket_auto_split || { spend:70, save:10, invest:10, charity:10 };
+    ['spend','save','invest','charity'].forEach(b => {
+      const el = document.getElementById('seg-' + b);
+      if (el) { el.style.flex = sp[b] || 0; el.childNodes[0].textContent = (sp[b] || 0) + '%'; }
+    });
+
+    // Render family and reviews
+    renderFamilyProgress(_kids);
+    renderReviews(_subs);
+
+    // Populate kid chips in modals
+    populateKidChips();
+
+  } catch(e) {
+    showNotif('Load error: ' + e.message, '⚠', 'rose');
+    console.error(e);
+  }
+}
+
+function updateSparkLine(score) {
+  // Generate a simple ascending curve ending at score
+  const pts = [];
+  for (let i = 0; i < 8; i++) {
+    const base = Math.max(5, score - 20 + i * (20/7));
+    const noise = (Math.sin(i * 1.7) * 6);
+    pts.push(Math.min(95, Math.max(5, base + noise)));
+  }
+  const w = 280, h = 36, pad = 4;
+  const toY = v => pad + (1 - v / 100) * (h - pad * 2);
+  const toX = i => (i / (pts.length - 1)) * w;
+  const line = pts.map((v, i) => (i === 0 ? 'M' : 'L') + toX(i) + ',' + toY(v)).join(' ');
+  const fill = line + ' L' + w + ',' + h + ' L0,' + h + ' Z';
+  document.getElementById('spark-line').setAttribute('d', line);
+  document.getElementById('spark-fill-path').setAttribute('d', fill);
+  const lastX = toX(pts.length - 1), lastY = toY(pts[pts.length - 1]);
+  document.getElementById('spark-dot').setAttribute('cx', lastX);
+  document.getElementById('spark-dot').setAttribute('cy', lastY);
+  document.getElementById('spark-glow').setAttribute('cx', lastX);
+  document.getElementById('spark-glow').setAttribute('cy', lastY);
+}
+
+/* ── FAMILY PROGRESS RENDER ── */
+function renderFamilyProgress(kids) {
+  const el = document.getElementById('family-list');
+  if (!kids.length) {
+    el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--ink-3)">No kids yet. <a href="children.html" style="color:var(--mint)">Add some!</a></div>';
+    return;
+  }
+  el.innerHTML = kids.map((k, i) => {
+    const pct   = k.today_pct || 0;
+    const done  = k.today_complete || 0;
+    const total = k.today_total || 0;
+    const cls   = kidColorClass(k.display_name, i);
+    const dotCls = pct >= 75 ? 'good' : pct >= 40 ? 'warn' : 'lag';
+    const barCls = pct >= 75 ? '' : pct >= 40 ? 'warn' : 'lag';
+    const initial = (k.display_name || '?').charAt(0).toUpperCase();
+    const coin = getCoinConfig();
+    return `
+      <div class="kid-row" onclick="location.href='../parent/children.html'">
+        <div class="kid-avatar ${cls}">${initial}<div class="kid-lvl">L${k.level || 1}</div></div>
+        <div class="kid-info">
+          <div class="kid-top">
+            <span class="kid-name">${k.display_name}</span>
+            <span class="kid-class">${k.class_name || 'Adventurer'}</span>
+            <span class="kid-status-dot ${dotCls}"></span>
+          </div>
+          <div class="kid-meta">
+            <span class="km">${coin.icon} <b>${k.balance || 0}</b></span>
+            <span class="km">🔥 <b>${k.streak || 0}d</b></span>
+            <span class="km">⭐ <b>${k.xp || 0} XP</b></span>
+          </div>
+        </div>
+        <div class="kid-prog">
+          <div class="kid-prog-bar"><div class="kid-prog-fill ${barCls}" style="width:${pct}%"></div></div>
+          <div class="kid-prog-text">${done} / ${total} today</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ── REVIEWS RENDER ── */
+function renderReviews(subs) {
+  const el = document.getElementById('reviewsList');
+  if (!subs.length) {
+    el.innerHTML = '<div class="review-empty">🎉 All caught up — your judgment seat is empty.</div>';
+    return;
+  }
+  const coin = getCoinConfig();
+  el.innerHTML = subs.map(s => {
+    const kidName   = s.child?.display_name || 'Kid';
+    const choreName = s.chore?.title || 'Quest';
+    const _c = s.chore || {};
+    const pts = s.points_awarded || (_c.usd_value ? getCoinConfig().usdToFC(_c.usd_value) : (_c.points || 10));
+    const initial = kidName.charAt(0).toUpperCase();
+    const cls = kidColorClass(kidName, 0);
+    return `
+      <div class="review-row" id="rev-${s.id}">
+        <div class="rev-avatar ${cls}">${initial}</div>
+        <div class="rev-body">
+          <div class="rev-quest">${choreName}</div>
+          <div class="rev-meta">
+            <span>${kidName} · ${relativeTime(s.submitted_at)}</span>
+            <span>${coin.icon} <b>+${pts} ${coin.symbol}</b></span>
+            <span class="xp-tag">+2 XP</span>
+          </div>
+        </div>
+        <div class="rev-actions">
+          <button class="rev-btn approve" onclick="approveReview('${s.id}',${pts},this)" title="Approve">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button class="rev-btn deny" onclick="denyReview('${s.id}',this)" title="Deny">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function slideOut(row, dir, cb) {
+  row.style.transition = 'all .32s';
+  row.style.opacity    = '0';
+  row.style.transform  = 'translateX(' + (dir > 0 ? 40 : -40) + 'px)';
+  setTimeout(cb, 330);
+}
+
+async function approveReview(id, pts, btn) {
+  btn.disabled = true;
+  btn.closest('.rev-btn.deny') && (btn.closest('.review-row').querySelector('.rev-btn.deny').disabled = true);
+  const row = document.getElementById('rev-' + id);
+  try {
+    await SubmissionsAPI.review({ submission_id: id, action: 'approve', points: pts, feedback: '' });
+    reviewsDoneCount++;
+    document.getElementById('stat-reviews-done').textContent = reviewsDoneCount;
+    awardXP(2);
+    showNotif('✓ Approved · +2 XP', '⚜');
+    slideOut(row, 1, () => { row.remove(); afterReview(); });
+  } catch(e) {
+    showNotif(e.message, '⚠', 'rose');
+    btn.disabled = false;
+  }
+}
+
+async function denyReview(id, btn) {
+  btn.disabled = true;
+  const row = document.getElementById('rev-' + id);
+  try {
+    await SubmissionsAPI.review({ submission_id: id, action: 'reject', points: 0, feedback: '' });
+    reviewsDoneCount++;
+    awardXP(2);
+    showNotif('✗ Denied · +2 XP', '⚖', 'rose');
+    slideOut(row, -1, () => { row.remove(); afterReview(); });
+  } catch(e) {
+    showNotif(e.message, '⚠', 'rose');
+    btn.disabled = false;
+  }
+}
+
+function afterReview() {
+  const remaining = document.querySelectorAll('.review-row').length;
+  if (remaining === 0) {
+    document.getElementById('reviewsList').innerHTML = '<div class="review-empty">🎉 All caught up — your judgment seat is empty.</div>';
+    document.getElementById('reviewCount').textContent = '0';
+    document.getElementById('stat-card-reviews').classList.remove('alert');
+    // Mark stewardship review item done
+    const stw = document.querySelectorAll('.stw-item')[1];
+    if (stw && !stw.classList.contains('done')) toggleStw(stw);
+    const badge = document.getElementById('nav-reviews-badge');
+    const tb    = document.getElementById('topbar-badge');
+    badge.style.display = 'none'; tb.style.display = 'none';
+  } else {
+    document.getElementById('reviewCount').textContent = remaining;
+    document.getElementById('reviews-trend').textContent = remaining;
+  }
+  saveXP();
+}
+
+async function autoAwardAll() {
+  const rows = document.querySelectorAll('.review-row');
+  if (!rows.length) { showNotif('Nothing to award!', '⚜'); return; }
+  for (const row of rows) {
+    const id  = row.id.replace('rev-','');
+    const pts = parseInt(row.querySelector('.rev-meta b')?.textContent || '10') || 10;
+    try { await SubmissionsAPI.review({ submission_id: id, action: 'approve', points: pts }); } catch {}
+    reviewsDoneCount++;
+    slideOut(row, 1, () => { row.remove(); });
+    await new Promise(r => setTimeout(r, 90));
+  }
+  awardXP(rows.length); // 1 XP each vs 2 for manual (intentional)
+  document.getElementById('reviewsList').innerHTML = '<div class="review-empty">🎉 All caught up — your judgment seat is empty.</div>';
+  document.getElementById('reviewCount').textContent = '0';
+  document.getElementById('stat-card-reviews').classList.remove('alert');
+  document.getElementById('nav-reviews-badge').style.display = 'none';
+  document.getElementById('topbar-badge').style.display = 'none';
+  const stw = document.querySelectorAll('.stw-item')[1];
+  if (stw && !stw.classList.contains('done')) toggleStw(stw);
+  showNotif('Auto-awarded ' + rows.length + ' quests · +' + rows.length + ' XP', '⚡', 'gold');
+  saveXP();
+}
+
+/* ── MODAL HELPERS ── */
+function closeActModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function populateKidChips() {
+  ['awardKids','demeritKids'].forEach(gid => {
+    const el = document.getElementById(gid);
+    if (!el) return;
+    const isDemerit = gid.includes('demerit');
+    el.innerHTML = _kids.map((k, i) => {
+      const cls = kidColorClass(k.display_name, i);
+      const init = (k.display_name || '?').charAt(0).toUpperCase();
+      return `<button class="chip" data-kid-id="${k.id}" onclick="selectChip(this,'${gid}',${isDemerit})">
+        <span class="chip-avatar ${cls}">${init}</span>${k.display_name}
+      </button>`;
+    }).join('');
+  });
+}
+
+function selectChip(el, groupId, demerit=false) {
+  document.getElementById(groupId).querySelectorAll('.chip').forEach(c => c.classList.remove('selected','rose'));
+  el.classList.add('selected');
+  if (demerit) el.classList.add('rose');
+}
+
+function openQuickAward() {
+  if (!_kids.length) {
+    ChildrenAPI.list().then(r => { _kids = Array.isArray(r) ? r : (r?.data || r?.children || []); populateKidChips(); });
+  }
+  document.getElementById('award-desc').value = '';
+  document.getElementById('awardModal').classList.add('open');
+  // Also mark stewardship award task done on next award
+  document.getElementById('awardModal').dataset.stw = '1';
+}
+
+function openDemerit() {
+  if (!_kids.length) {
+    ChildrenAPI.list().then(r => { _kids = Array.isArray(r) ? r : (r?.data || r?.children || []); populateKidChips(); });
+  }
+  document.getElementById('demerit-desc').value = '';
+  document.getElementById('demeritModal').classList.add('open');
+}
+
+async function confirmQuickAward() {
+  const kidEl = document.querySelector('#awardKids .chip.selected');
+  const desc  = document.getElementById('award-desc').value.trim();
+  if (!kidEl) { showNotif('Pick a kid first', '⚠', 'rose'); return; }
+  if (!desc)  { showNotif('Describe what happened', '⚠', 'rose'); return; }
+  const childId = kidEl.dataset.kidId;
+  const r       = behaviorEngine(desc, 'award');
+  closeActModal('awardModal');
+  awardXP(10);
+  try {
+    await PointsAPI.grant({ child_id: childId, points: r.finalFc, reason: desc });
+    showNotif('+' + r.finalFc + ' ' + getCoinConfig().symbol + ' → ' + kidEl.textContent.trim() + ' · +10 XP', '⭐', 'gold');
+    // Mark stewardship award task done
+    const stw = document.querySelectorAll('.stw-item')[2];
+    if (stw && !stw.classList.contains('done')) toggleStw(stw);
+    loadDashboard();
+  } catch(e) { showNotif(e.message, '⚠', 'rose'); }
+}
+
+async function confirmQuickDemerit() {
+  const kidEl = document.querySelector('#demeritKids .chip.selected');
+  const desc  = document.getElementById('demerit-desc').value.trim();
+  if (!kidEl) { showNotif('Pick a kid first', '⚠', 'rose'); return; }
+  if (!desc)  { showNotif('Describe what happened', '⚠', 'rose'); return; }
+  const childId = kidEl.dataset.kidId;
+  const r       = behaviorEngine(desc, 'demerit');
+  closeActModal('demeritModal');
+  awardXP(5);
+  try {
+    await PointsAPI.deduct({ child_id: childId, points: r.finalFc, reason: desc });
+    showNotif('Demerit → ' + kidEl.textContent.trim() + ' · −' + r.finalFc + ' ' + getCoinConfig().symbol + ' · +5 XP', '⚖', 'rose');
+    loadDashboard();
+  } catch(e) { showNotif(e.message, '⚠', 'rose'); }
+}
+
+/* ── BEHAVIOR ENGINE (keep existing logic) ── */
+function behaviorEngine(description, type) {
+  const d = description.toLowerCase();
+  if (type === 'award') {
+    let category = 'Effort';
+    if (/kind|help(ed|ing)|share|generous|nice|compli|thank|gift|surprise/.test(d))    category = 'Kindness';
+    else if (/honest|told truth|admitted|confess|came clean|fessed/.test(d))           category = 'Honesty';
+    else if (/leader|taught|organi|plan|responsible|initiative|without.ask/.test(d))   category = 'Leadership';
+    else if (/school|homework|study|read|practice|learn|grade|improve/.test(d))        category = 'Academic';
+    let level = 2;
+    if (/little|small|quick|minor/.test(d)) level = 1;
+    if (/amazing|fantastic|incredible|above.?beyond|impressed|wow|extra/.test(d)) level = 3;
+    if (/outstanding|exceptional|best ever|blew me away|unbelievable/.test(d))    level = 4;
+    let bonusMod = 1;
+    if (/without.ask|on (their|his|her) own|unprompted|spontan|proactive/.test(d)) bonusMod = 1.5;
+    if (/again|consistent|every (day|week|time)|habit|always/.test(d)) bonusMod = Math.max(bonusMod, 1.25);
+    const baseFcMap = {1:2,2:5,3:10,4:20};
+    const baseFc = baseFcMap[level];
+    const finalFc = Math.max(1, Math.round(baseFc * bonusMod));
+    return { category, finalFc, severity: level, severityLabel: ['','Nice','Great','Excellent','Outstanding'][level] };
+  }
+  let category = 'Responsibility';
+  if (/fight|hit |punch|scream|yell|argu|back.?talk|rude|disrespect|tantrum|attitud/.test(d)) category = 'Respect';
+  else if (/li(e|ed|ing)|cheat|hid|blame|deny|denied|dishonest|sneak|stole|steal|cover/.test(d)) category = 'Honesty';
+  else if (/mess|dirty|clean|scatter|left out|disorgani|didn.t pick|floor/.test(d)) category = 'Order';
+  let severity = 2;
+  if (/minor|small|little|slight|tiny|quick/.test(d)) severity = 1;
+  if (/serious|major|really bad|bad attitude|punched|stole|lied/.test(d)) severity = 3;
+  if (/dangerous|extreme|violence|attack|critical|worst|completely/.test(d)) severity = 4;
+  let repeatMod = 1;
+  if (/again|second time|keeps |always |repeatedly|another time/.test(d)) repeatMod = 1.5;
+  if (/third|3rd|over and over|always does|keeps doing/.test(d)) repeatMod = 2;
+  let attMod = 1;
+  if (/argued|bad attitude|stormed|rude|slammed|screamed|yelled|tantrum|defiant/.test(d)) attMod = 1.25;
+  if (/good attitude|cooperative|apologized|sorry|calm/.test(d)) attMod = 0.75;
+  let honMod = 1;
+  if (/li(e|ed|ing)|dishonest|sneak|hid|deny|denied|covered up/.test(d)) honMod = 1.25;
+  if (/admitted|told truth|honest|came clean|fessed/.test(d)) honMod = 0.75;
+  const baseFcMap = {1:1,2:2,3:4,4:8};
+  const baseFc  = baseFcMap[severity];
+  const finalFc = Math.max(1, Math.round(baseFc * repeatMod * attMod * honMod));
+  return { category, finalFc, severity, severityLabel: ['','Minor','Moderate','Serious','Critical'][severity] };
+}
+
+/* ── ECONOMY EDIT (reuse existing openModal from ui.js) ── */
+function openEconomyEdit() {
+  const fam     = Auth.getFamily() || {};
+  const coinCfg = getCoinConfig();
+  openModal(`
+    <h2 style="font-family:'Bungee';font-size:14px;letter-spacing:.06em;color:var(--gold);margin-bottom:1rem">💰 Economy Settings</h2>
+    <div class="form-group">
+      <label class="form-label">Coin Name</label>
+      <input class="form-control" id="eco-coin-name" value="${coinCfg.name}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Coin Symbol</label>
+      <input class="form-control" id="eco-coin-sym" value="${coinCfg.symbol}" maxlength="4">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Coin Icon (emoji)</label>
+      <input class="form-control" id="eco-coin-icon" value="${coinCfg.icon}" maxlength="2" style="font-size:1.5rem">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Weekly Budget ($)</label>
+      <div style="position:relative">
+        <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);font-weight:700">$</span>
+        <input class="form-control" id="eco-wk-budget" type="number" min="0" step="1"
+          value="${fam.weekly_budget || 50}" style="padding-left:1.75rem" oninput="syncEcoBudget()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">${coinCfg.symbol} per $1</label>
+      <input class="form-control" id="eco-pt-rate" type="number" min="1"
+        value="${fam.point_rate ? Math.round(1/fam.point_rate) : 100}" oninput="syncEcoBudget()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">${coinCfg.icon} Weekly Budget in ${coinCfg.symbol}</label>
+      <input class="form-control" id="eco-budget-fc" type="text" readonly
+        style="background:var(--bg-2);color:var(--primary);font-size:1.2rem;font-weight:700;text-align:center">
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveEconomy(this)">Save</button>
+    </div>
+  `);
+  setTimeout(syncEcoBudget, 0);
+}
+
+function syncEcoBudget() {
+  const budget = parseFloat(document.getElementById('eco-wk-budget')?.value) || 0;
+  const rate   = parseInt(document.getElementById('eco-pt-rate')?.value) || 100;
+  const coin   = getCoinConfig();
+  const el     = document.getElementById('eco-budget-fc');
+  if (el) el.value = budget > 0 ? Math.round(budget * rate).toLocaleString() + ' ' + coin.symbol : '';
+}
+
+async function saveEconomy(btn) {
+  const name   = document.getElementById('eco-coin-name').value.trim();
+  const symbol = document.getElementById('eco-coin-sym').value.trim();
+  const icon   = document.getElementById('eco-coin-icon').value.trim();
+  const budget = parseFloat(document.getElementById('eco-wk-budget').value) || 50;
+  const ptsRate= parseInt(document.getElementById('eco-pt-rate').value) || 100;
+  setLoading(btn, true);
+  try {
+    await FamilyAPI.update({ weekly_budget: budget, point_rate: 1/ptsRate, coin_name: name, coin_symbol: symbol, coin_icon: icon });
+    const fam = Auth.getFamily() || {};
+    Auth.save(Auth.getToken(), Auth.getUser(), { ...fam, weekly_budget: budget, point_rate: 1/ptsRate, coin_name: name, coin_symbol: symbol, coin_icon: icon });
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    showNotif('Economy settings saved!', '💰', 'gold');
+    loadDashboard();
+  } catch(e) { showNotif(e.message,'⚠','rose'); setLoading(btn, false); }
+}
+
+function openBucketConfig() {
+  const fam = Auth.getFamily() || {};
+  const sp  = fam.bucket_auto_split || { spend:70, save:10, invest:10, charity:10 };
+  openModal(`
+    <h2 style="font-family:'Bungee';font-size:14px;letter-spacing:.06em;color:var(--gold);margin-bottom:1rem">💰 Bucket Split Config</h2>
+    <p class="text-sm text-muted mb-2">Percentages must add to 100%.</p>
+    ${['spend','save','invest','charity'].map(b => `
+      <div class="form-group">
+        <label class="form-label">${{spend:'💳 Spend',save:'🏦 Save',invest:'📈 Invest',charity:'❤️ Charity'}[b]}</label>
+        <input class="form-control" id="bk-cfg-${b}" type="number" min="0" max="100" value="${sp[b] || 0}">
+      </div>`).join('')}
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveBuckets(this)">Save</button>
+    </div>
+  `);
+}
+
+async function saveBuckets(btn) {
+  const spend   = parseInt(document.getElementById('bk-cfg-spend').value)   || 0;
+  const save    = parseInt(document.getElementById('bk-cfg-save').value)    || 0;
+  const invest  = parseInt(document.getElementById('bk-cfg-invest').value)  || 0;
+  const charity = parseInt(document.getElementById('bk-cfg-charity').value) || 0;
+  if (spend + save + invest + charity !== 100) { showNotif('Must add to 100%','⚠','rose'); return; }
+  setLoading(btn, true);
+  try {
+    await BucketsAPI.saveConfig({ spend, save, invest, charity });
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    showNotif('Bucket config saved!', '💰', 'gold');
+    loadDashboard();
+  } catch(e) { showNotif(e.message,'⚠','rose'); setLoading(btn, false); }
+}
+
+function openSwitchUser() {
+  openModal(`
+    <h2 style="font-family:'Bungee';font-size:14px;letter-spacing:.06em;margin-bottom:1rem">Switch User</h2>
+    <p class="text-sm text-muted mb-2">Switch to a kid's view or sign out.</p>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="Auth.logout()">Sign Out</button>
+    </div>
+  `);
+}
+
+/* ── THEME ── */
+const PARENT_THEME_KEY = 'fos_parent_theme_' + (user?.id || 'guest');
+
+function setParentTheme(mode) {
+  if (mode === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  localStorage.setItem(PARENT_THEME_KEY, mode);
+}
+
+function openSettings() {
+  const current = localStorage.getItem(PARENT_THEME_KEY) || 'dark';
+  const isDark  = current !== 'light';
+  openModal(`
+    <h2 style="font-family:'Bungee';font-size:14px;letter-spacing:.06em;margin-bottom:1.25rem">⚙️ Steward Settings</h2>
+
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.6rem">Display Mode</div>
+      <div style="display:flex;gap:.5rem">
+        <button id="theme-dark-btn" onclick="setParentTheme('dark');syncThemeBtns()"
+          style="flex:1;padding:.7rem;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;border:2px solid ${isDark ? 'var(--primary,#6366f1)' : 'var(--border)'};background:${isDark ? 'var(--primary-soft,#EFF6FF)' : 'var(--bg-2)'};color:${isDark ? 'var(--primary,#6366f1)' : 'var(--text-2)'}">
+          🌙 Dark Mode
+        </button>
+        <button id="theme-light-btn" onclick="setParentTheme('light');syncThemeBtns()"
+          style="flex:1;padding:.7rem;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;border:2px solid ${!isDark ? '#d49019' : 'var(--border)'};background:${!isDark ? '#fdf7e8' : 'var(--bg-2)'};color:${!isDark ? '#a86e0d' : 'var(--text-2)'}">
+          ☀️ Light Mode
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.6rem">Economy & Coins</div>
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'));openEconomyEdit()">💰 Edit Economy Settings</button>
+    </div>
+
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.6rem">Bucket Split</div>
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'));openBucketConfig()">⚙️ Configure Buckets</button>
+    </div>
+
+    <div style="margin-bottom:1rem">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:.6rem">Account</div>
+      <button class="btn btn-secondary btn-full" onclick="Auth.logout()">🚪 Sign Out</button>
+    </div>
+
+    <button class="btn btn-ghost btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Close</button>
+  `);
+}
+
+function syncThemeBtns() {
+  const current = localStorage.getItem(PARENT_THEME_KEY) || 'dark';
+  const isDark  = current !== 'light';
+  const db = document.getElementById('theme-dark-btn');
+  const lb = document.getElementById('theme-light-btn');
+  if (db) {
+    db.style.borderColor  = isDark ? 'var(--primary,#6366f1)' : 'var(--border)';
+    db.style.background   = isDark ? 'var(--primary-soft,#EFF6FF)' : 'var(--bg-2)';
+    db.style.color        = isDark ? 'var(--primary,#6366f1)' : 'var(--text-2)';
+  }
+  if (lb) {
+    lb.style.borderColor  = !isDark ? '#d49019' : 'var(--border)';
+    lb.style.background   = !isDark ? '#fdf7e8' : 'var(--bg-2)';
+    lb.style.color        = !isDark ? '#a86e0d' : 'var(--text-2)';
+  }
+}
+
+/* ── BOOT ── */
+initHero();
+initStewardship();
+loadDashboard();
+// Award boot XP + mark first stewardship task done
+setTimeout(() => {
+  const firstItem = document.querySelectorAll('.stw-item')[0];
+  if (firstItem && !firstItem.classList.contains('done')) {
+    firstItem.classList.add('done');
+    stwDone++;
+    document.getElementById('stwDone').textContent = stwDone;
+    awardXP(5, true);
+  }
+}, 500);
+</script>
+</body>
+</html>

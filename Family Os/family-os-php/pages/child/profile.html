@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Profile — Family OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/family-os/assets/css/main.css">
+<link rel="stylesheet" href="/family-os/assets/css/child-theme.css">
+<script>
+/* Apply saved display mode ASAP to avoid flash */
+(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var m=localStorage.getItem('fos_child_theme_'+(u.id||'guest'))||'dark';document.documentElement.setAttribute('data-theme',m);}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="ct-app">
+
+  <!-- TOP BAR -->
+  <div class="ct-topbar">
+    <div class="ct-brand">
+      <div class="ct-brand-mark">F</div>
+      <div class="ct-brand-text">FAMILY · OS</div>
+    </div>
+    <a href="dashboard.html" class="ct-icon-btn" title="Back to Quests">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4h-2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+    </a>
+  </div>
+
+  <!-- PROFILE HERO -->
+  <div class="ct-profile-hero">
+    <div style="position:relative;display:inline-block" onclick="openAvatarPickerModal()">
+      <div class="ct-profile-avatar" id="prof-avatar" style="background:linear-gradient(135deg,#ff7aa6,#c76bff)">A</div>
+      <div class="ct-profile-edit-badge">✏️</div>
+    </div>
+    <div class="ct-profile-name" id="prof-name">Loading…</div>
+    <div class="ct-profile-class" id="prof-class">🌱 Apprentice</div>
+
+    <!-- XP Bar -->
+    <div class="ct-xp-block" style="max-width:300px;margin:0 auto">
+      <div class="ct-xp-meta">
+        <span class="ct-xp-label" id="prof-xp-label">Level 1</span>
+        <span class="ct-xp-num"><b id="prof-xp-cur">0</b> / <span id="prof-xp-max">100</span> XP</span>
+      </div>
+      <div class="ct-xp-track"><div class="ct-xp-fill" id="prof-xp-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="ct-stat-row" style="margin-bottom:14px">
+    <div class="ct-stat gold">
+      <div class="ct-stat-ico">📋</div>
+      <div class="ct-stat-meta">
+        <div class="ct-stat-val" id="prof-chores">—</div>
+        <div class="ct-stat-cap">Quests Done</div>
+      </div>
+    </div>
+    <div class="ct-stat fire">
+      <div class="ct-stat-ico">🪙</div>
+      <div class="ct-stat-meta">
+        <div class="ct-stat-val" id="prof-coins">—</div>
+        <div class="ct-stat-cap" id="prof-coins-label">Earned</div>
+      </div>
+    </div>
+    <div class="ct-stat rank">
+      <div class="ct-stat-ico">🏅</div>
+      <div class="ct-stat-meta">
+        <div class="ct-stat-val" id="prof-ach">—</div>
+        <div class="ct-stat-cap">Badges</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PR STREAK BANNER -->
+  <div class="ct-card" style="text-align:center;padding:12px 16px">
+    <div style="font-family:'Bungee',cursive;font-size:10px;letter-spacing:.12em;color:var(--ct-ink-3);margin-bottom:4px">🏆 PERSONAL RECORD</div>
+    <div style="font-family:'Bungee',cursive;font-size:28px;color:var(--ct-rose)" id="prof-pr-val">— days</div>
+    <div style="font-size:11px;color:var(--ct-ink-3);margin-top:2px">Best streak ever achieved</div>
+  </div>
+
+  <!-- DISPLAY MODE -->
+  <div class="ct-card">
+    <div class="ct-card-title">🌗 DISPLAY MODE</div>
+    <div class="ct-mode-toggle">
+      <button id="mode-dark-btn"  class="ct-mode-btn" onclick="setDisplayMode('dark')">🌙 Dark</button>
+      <button id="mode-light-btn" class="ct-mode-btn" onclick="setDisplayMode('light')">☀️ Light</button>
+    </div>
+  </div>
+
+  <!-- THEME PICKER -->
+  <div class="ct-card">
+    <div class="ct-card-title">🎨 THEME COLOR <span id="theme-name"></span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap" id="theme-chips"></div>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div class="ct-card">
+    <div class="ct-card-title">🏆 ACHIEVEMENTS <span id="ach-count"></span></div>
+    <div class="ct-ach-grid" id="ach-grid">
+      <div class="ct-empty" style="grid-column:1/-1"><span class="ct-spinner"></span></div>
+    </div>
+  </div>
+
+  <!-- SWITCH PROFILE -->
+  <div class="ct-card">
+    <div class="ct-card-title">👥 SWITCH PROFILE</div>
+    <div class="ct-family-grid" id="switch-family-grid">
+      <div class="ct-empty" style="grid-column:1/-1"><span class="ct-spinner"></span></div>
+    </div>
+    <button onclick="window._suSignOutFully ? window._suSignOutFully() : Auth.logout()"
+      style="width:100%;margin-top:12px;background:none;border:none;color:var(--ct-ink-3);font-size:.8rem;cursor:pointer;padding:.4rem;text-decoration:underline">
+      Sign out completely
+    </button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="ct-bottom-nav">
+  <a href="dashboard.html" class="ct-nav-item">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4h-2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg></div>
+    <span class="ct-nav-label">Quests</span>
+  </a>
+  <a href="rewards.html" class="ct-nav-item">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a1 1 0 00-1 1v3a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1zM5 12v8a1 1 0 001 1h12a1 1 0 001-1v-8M12 7V3m0 0l-3 4m3-4l3 4"/></svg></div>
+    <span class="ct-nav-label">Store</span>
+  </a>
+  <a href="profile.html" class="ct-nav-item active">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+    <span class="ct-nav-label">Profile</span>
+  </a>
+</nav>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireChild();
+const user = Auth.getUser();
+
+/* ── Display mode (dark / light) ── */
+(function initDisplayMode() {
+  const saved = localStorage.getItem('fos_child_theme_' + (user?.id || 'guest')) || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function setDisplayMode(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  localStorage.setItem('fos_child_theme_' + (user?.id || 'guest'), mode);
+  document.getElementById('mode-dark-btn').classList.toggle('active',  mode === 'dark');
+  document.getElementById('mode-light-btn').classList.toggle('active', mode === 'light');
+  if (typeof Toast !== 'undefined') Toast.success(mode === 'light' ? '☀️ Light mode on!' : '🌙 Dark mode on!');
+}
+
+(function syncModeButtons() {
+  const saved = localStorage.getItem('fos_child_theme_' + (user?.id || 'guest')) || 'dark';
+  document.getElementById('mode-dark-btn').classList.toggle('active',  saved === 'dark');
+  document.getElementById('mode-light-btn').classList.toggle('active', saved === 'light');
+})();
+
+const AVATAR_GRADIENTS = {
+  pink:'linear-gradient(135deg,#ff7aa6,#c76bff)',
+  blue:'linear-gradient(135deg,#60a5fa,#818cf8)',
+  green:'linear-gradient(135deg,#34d399,#059669)',
+  red:'linear-gradient(135deg,#f87171,#ef4444)',
+  orange:'linear-gradient(135deg,#fb923c,#f59e0b)',
+  purple:'linear-gradient(135deg,#a78bfa,#7c3aed)',
+};
+const THEME_COLORS = { blue:'#3B82F6', pink:'#EC4899', green:'#22C55E', red:'#EF4444', orange:'#F97316', purple:'#8B5CF6' };
+const THEMES = ['blue','pink','green','red','orange','purple'];
+
+function classForLevel(lv) {
+  if (lv >= 10) return '👑 Legend';
+  if (lv >= 7)  return '⚡ Champion';
+  if (lv >= 5)  return '🛡 Guardian';
+  if (lv >= 3)  return '⚔ Warrior';
+  return '🌱 Apprentice';
+}
+function xpForLevel(lv) { return Math.round(100 * Math.pow(lv, 1.5)); }
+
+function applyProfileHero(u) {
+  const lv   = u.level || 1;
+  const bal  = u.balance || 0;
+  const xpMax = xpForLevel(lv + 1);
+  const pct  = Math.min(100, Math.round(bal / xpMax * 100));
+  const init = (u.display_name || 'K')[0].toUpperCase();
+  const grad = AVATAR_GRADIENTS[u.theme] || AVATAR_GRADIENTS.pink;
+  const coin = getCoinConfig();
+
+  document.getElementById('prof-avatar').textContent = init;
+  document.getElementById('prof-avatar').style.background = grad;
+  document.getElementById('prof-name').textContent  = u.display_name || 'Champion';
+  document.getElementById('prof-class').textContent = classForLevel(lv);
+  document.getElementById('prof-xp-label').textContent = 'Level ' + lv;
+  document.getElementById('prof-xp-cur').textContent   = bal;
+  document.getElementById('prof-xp-max').textContent   = xpMax;
+  document.getElementById('prof-coins').textContent = bal;
+  document.getElementById('prof-coins-label').textContent = coin.symbol + ' Earned';
+  // PR: personal record streak
+  const pr = Math.max(u.best_streak || 0, u.streak || 0);
+  const prEl = document.getElementById('prof-pr-val');
+  if (prEl) prEl.textContent = pr + (pr === 1 ? ' day' : ' days');
+  setTimeout(() => { document.getElementById('prof-xp-fill').style.width = pct + '%'; }, 120);
+}
+applyProfileHero(user);
+
+// Theme chips
+(function() {
+  const current = user?.theme || 'blue';
+  document.getElementById('theme-name').textContent = current.charAt(0).toUpperCase() + current.slice(1);
+  document.getElementById('theme-chips').innerHTML = THEMES.map(t => `
+    <label style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <input type="radio" name="theme" value="${t}" ${t===current?'checked':''} style="display:none" onchange="changeTheme('${t}')">
+      <span id="theme-chip-${t}" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:${THEME_COLORS[t]};border:3px solid ${t===current?'var(--ct-ink)':'transparent'};transition:border .15s"></span>
+      <span style="font-size:.6rem;color:var(--ct-ink-3);text-transform:capitalize">${t}</span>
+    </label>`).join('');
+})();
+
+function changeTheme(theme) {
+  THEMES.forEach(t => {
+    document.getElementById('theme-chip-'+t).style.border = t===theme ? '3px solid var(--ct-ink)' : '3px solid transparent';
+  });
+  document.getElementById('theme-name').textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+  const upd = { ...user, theme };
+  Auth.updateUser(upd);
+  const grad = AVATAR_GRADIENTS[theme] || AVATAR_GRADIENTS.pink;
+  document.getElementById('prof-avatar').style.background = grad;
+  ChildrenAPI.update(user.id, { theme }).catch(() => {});
+  Toast.success('Theme updated!');
+}
+
+function openAvatarPickerModal() {
+  if (typeof openAvatarPicker === 'function') {
+    openAvatarPicker(user, (key) => {
+      ChildrenAPI.update(user.id, { avatar_key: key }).catch(() => {});
+      Toast.success('Avatar updated!');
+    });
+  }
+}
+
+async function loadProfile() {
+  try {
+    const [meRes, subsRes] = await Promise.all([
+      AuthAPI.me(),
+      SubmissionsAPI.list(),
+    ]);
+    const _me  = meRes?.data || meRes;
+    const u    = _me?.user || user;
+    const ach  = _me?.achievements || [];
+    const all  = _me?.all_achievements || [];
+    const subs = Array.isArray(subsRes) ? subsRes : (subsRes?.data || []);
+    const done = subs.filter(s => s.status === 'approved' && s.child_id === u.id).length;
+
+    applyProfileHero(u);
+    document.getElementById('prof-chores').textContent = done || u.chore_count || 0;
+    document.getElementById('prof-ach').textContent    = ach.length || u.achievement_count || 0;
+    document.getElementById('ach-count').textContent   = ach.length + '/' + (all.length || ach.length);
+
+    renderAchievements(ach, all);
+  } catch {
+    document.getElementById('prof-chores').textContent = user?.chore_count || 0;
+    document.getElementById('prof-ach').textContent    = user?.achievement_count || 0;
+    renderAchievements([], []);
+  }
+}
+
+function renderAchievements(earned, all) {
+  const el       = document.getElementById('ach-grid');
+  const earnedSet = new Set(earned.map(ua => ua.achievement?.key || ua.key));
+  const list     = all.length ? all : earned.map(ua => ua.achievement || ua);
+
+  if (!list.length) {
+    el.innerHTML = '<div class="ct-empty" style="grid-column:1/-1">Complete quests to earn achievements! 🎯</div>';
+    return;
+  }
+  el.innerHTML = list.map(a => {
+    const unlocked = earnedSet.has(a.key);
+    return `
+      <div class="ct-ach-item${unlocked ? ' earned' : ''}">
+        <span class="ct-ach-icon">${a.icon || '🏅'}</span>
+        <div class="ct-ach-title">${a.title}</div>
+        <div class="ct-ach-status">${unlocked ? '✅ Earned' : '🔒 Locked'}</div>
+      </div>`;
+  }).join('');
+}
+
+async function loadFamilyGrid() {
+  const grid = document.getElementById('switch-family-grid');
+  try {
+    const kids = await ChildrenAPI.list()
+      .then(r => Array.isArray(r) ? r : (r?.data || r?.children || []))
+      .catch(() => []);
+
+    if (!kids.length) {
+      grid.innerHTML = '<div class="ct-empty" style="grid-column:1/-1">No family members found.</div>';
+      return;
+    }
+
+    const GRADS = AVATAR_GRADIENTS;
+    grid.innerHTML = kids.map(k => {
+      const isMe = k.id === user.id;
+      const init = (k.display_name || 'K')[0].toUpperCase();
+      const grad = GRADS[k.theme] || GRADS.pink;
+      return `
+        <div class="ct-family-card${isMe ? '' : ''}" onclick="${isMe ? '' : 'openSwitchUser()'}"
+             style="opacity:${isMe?'.65':'1'};cursor:${isMe?'default':'pointer'}">
+          <div style="position:relative;display:inline-block">
+            <div style="width:48px;height:48px;border-radius:14px;background:${grad};display:grid;place-items:center;font-family:'Bungee',cursive;font-size:18px;color:#fff;margin:0 auto;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)">${init}</div>
+            ${isMe ? '<div style="position:absolute;bottom:-3px;right:-3px;background:var(--ct-mint);color:#02211c;border-radius:6px;font-size:.45rem;padding:2px 4px;font-weight:800;border:1.5px solid var(--ct-bg-1);line-height:1.3">YOU</div>' : ''}
+          </div>
+          <div class="ct-family-name" style="color:${isMe?'var(--ct-gold)':'var(--ct-ink-2)'}">${k.display_name || 'Kid'}</div>
+        </div>`;
+    }).join('');
+  } catch {
+    grid.innerHTML = '';
+  }
+}
+
+loadProfile();
+loadFamilyGrid();
+</script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;padding:1rem">
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+      <h1 style="font-size:1.2rem;font-weight:700;margin:0">👨‍👩‍👧‍👦 Family</h1>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="copyLink()" title="Copy family login link">🔗 Share</button>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:2px solid var(--border);margin:0 1rem">
+    <button class="tab-btn active" id="tab-kids" onclick="switchTab('kids')" style="flex:1;padding:.6rem;background:none;border:none;font-weight:700;cursor:pointer;border-bottom:2px solid var(--primary);margin-bottom:-2px;color:var(--primary)">👧 Kids</button>
+    <button class="tab-btn" id="tab-parents" onclick="switchTab('parents')" style="flex:1;padding:.6rem;background:none;border:none;font-weight:700;cursor:pointer;color:var(--text-2)">👨 Parents</button>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px">
+
+    <!-- Kids Tab -->
+    <div id="pane-kids">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+        <button class="btn btn-primary btn-sm" id="btn-add-kid" onclick="openAddChild()"></button>
+      </div>
+      <div id="kids-list">
+        <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- Parents Tab -->
+    <div id="pane-parents" class="hidden">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+        <button class="btn btn-primary btn-sm" onclick="openAddParent()" id="btn-add-parent"></button>
+      </div>
+      <div id="parents-list">
+        <div class="text-center text-muted" style="padding:2rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="chores.html"    class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="children.html"  class="nav-item active" id="nav-family"><span class="nav-icon"></span><span>Family</span></a>
+    <a href="reviews.html"   class="nav-item" id="nav-reviews" style="position:relative"><span class="nav-icon"></span><span>Reviews</span><span id="nav-reviews-badge" style="display:none;position:absolute;top:6px;right:10px;background:#EF4444;color:#fff;font-size:.6rem;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:1.5"></span></a>
+    <a href="rewards.html"   class="nav-item" id="nav-rewards"><span class="nav-icon"></span><span>Rewards</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+(function(){
+  document.getElementById('btn-back').innerHTML     = iconBack();
+  document.getElementById('btn-add-kid').innerHTML  = iconPlus() + ' Add Kid';
+  document.getElementById('btn-add-parent').innerHTML = iconPlus() + ' Add Parent';
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconUsers,'nav-family'],[iconCheck,'nav-reviews'],[iconGift,'nav-rewards']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+const THEMES = ['blue','pink','green','red','orange','purple'];
+const THEME_COLORS = { blue:'#3B82F6', pink:'#EC4899', green:'#22C55E', red:'#EF4444', orange:'#F97316', purple:'#8B5CF6' };
+const THEME_EMOJIS = ['😀','😎','🤩','🥳','😜','🤓','😇','🦊','🐱','🐸','🦄','🤖','🧙','🏆','⭐','🔥','💎','🌟'];
+
+function switchTab(name) {
+  document.getElementById('pane-kids').classList.toggle('hidden', name !== 'kids');
+  document.getElementById('pane-parents').classList.toggle('hidden', name !== 'parents');
+  document.getElementById('tab-kids').classList.toggle('active', name === 'kids');
+  document.getElementById('tab-parents').classList.toggle('active', name === 'parents');
+  ['tab-kids','tab-parents'].forEach(id => {
+    const el = document.getElementById(id);
+    const active = el.classList.contains('active');
+    el.style.borderBottom = active ? '2px solid var(--primary)' : 'none';
+    el.style.color        = active ? 'var(--primary)' : 'var(--text-2)';
+    el.style.marginBottom = active ? '-2px' : '0';
+  });
+  if (name === 'parents') loadParents();
+}
+
+// ── KIDS ──────────────────────────────────────────────────
+async function loadKids() {
+  try {
+    const res  = await ChildrenAPI.list();
+    const kids = Array.isArray(res) ? res : (res?.data || res?.children || []);
+    const el   = document.getElementById('kids-list');
+    if (!kids.length) {
+      el.innerHTML = '<div class="empty-state">No kids yet! Add one to get started.</div>';
+      return;
+    }
+    el.innerHTML = kids.map(k => `
+      <div class="card mb-2" style="display:flex;align-items:center;gap:.75rem">
+        ${avatarHtml(k, 'md')}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700">${k.display_name}</div>
+          <div class="text-sm text-muted">Lv.${k.level || 1} · 🔥${k.streak || 0}d · ${coinBadge(k.balance || 0)}</div>
+          <div class="text-sm text-muted">⭐ Rating: ${k.rating || '—'} · ${k.achievement_count || 0} achievements</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.3rem">
+          <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick="openEditChild(${JSON.stringify(k).replace(/"/g,'&quot;')})">${iconEdit()}</button>
+          <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteChild('${k.id}','${k.display_name.replace(/'/g,"\\'")}' )">${iconTrash()}</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('kids-list').innerHTML = '<div class="empty-state text-danger">Failed to load children.</div>';
+  }
+}
+
+function themeChips(selected) {
+  return THEMES.map(t => `
+    <label style="cursor:pointer">
+      <input type="radio" name="kid-theme" value="${t}" ${t === selected ? 'checked' : ''} style="display:none">
+      <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:${THEME_COLORS[t]};border:3px solid ${t === selected ? '#000' : 'transparent'};transition:border .15s" onclick="this.parentElement.querySelector('input').checked=true;document.querySelectorAll('[name=kid-theme]').forEach(r=>{r.parentElement.querySelector('span').style.border=r.checked?'3px solid #000':'3px solid transparent'})"></span>
+    </label>
+  `).join(' ');
+}
+
+function emojiPicker(selected) {
+  return `<div style="display:flex;flex-wrap:wrap;gap:.35rem" id="emoji-picker">
+    ${THEME_EMOJIS.map(e => `<span class="emoji-opt" onclick="selectEmoji('${e}')" style="font-size:1.4rem;cursor:pointer;padding:.2rem;border-radius:6px;${e === selected ? 'background:var(--primary-soft);outline:2px solid var(--primary)' : ''}">${e}</span>`).join('')}
+  </div>`;
+}
+let _selectedEmoji = '😀';
+function selectEmoji(e) {
+  _selectedEmoji = e;
+  document.querySelectorAll('.emoji-opt').forEach(el => {
+    el.style.background = el.textContent.trim() === e ? 'var(--primary-soft)' : '';
+    el.style.outline    = el.textContent.trim() === e ? '2px solid var(--primary)' : '';
+  });
+}
+
+function openAddChild() {
+  _selectedEmoji = '😀';
+  openModal(`
+    <h2 style="margin-bottom:1rem">👧 Add Child</h2>
+    <div class="form-group">
+      <label class="form-label">Name *</label>
+      <input class="form-control" id="kid-name" placeholder="Child's name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">PIN (4 digits) *</label>
+      <input class="form-control" id="kid-pin" type="password" maxlength="4" placeholder="••••" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Theme Color</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">${themeChips('blue')}</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      ${emojiPicker('😀')}
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveNewChild(this)">Add Child</button>
+    </div>
+  `);
+}
+
+async function saveNewChild(btn) {
+  const name  = document.getElementById('kid-name').value.trim();
+  const pin   = document.getElementById('kid-pin').value.trim();
+  const theme = document.querySelector('[name=kid-theme]:checked')?.value || 'blue';
+  if (!name) { Toast.error('Name is required.'); return; }
+  if (!pin || pin.length < 4) { Toast.error('PIN must be 4 digits.'); return; }
+  setLoading(btn, true);
+  try {
+    await ChildrenAPI.create({ display_name: name, pin, theme, emoji: _selectedEmoji });
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success(name + ' added!');
+    loadKids();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+function openEditChild(k) {
+  _selectedEmoji = k.emoji || '😀';
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit ${k.display_name}</h2>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-control" id="edit-kid-name" value="${k.display_name}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">New PIN (leave blank to keep)</label>
+      <input class="form-control" id="edit-kid-pin" type="password" maxlength="4" placeholder="••••" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Theme Color</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">${themeChips(k.theme || 'blue')}</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      ${emojiPicker(k.emoji || '😀')}
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveEditChild('${k.id}', this)">Save</button>
+    </div>
+  `);
+}
+
+async function saveEditChild(id, btn) {
+  const name  = document.getElementById('edit-kid-name').value.trim();
+  const pin   = document.getElementById('edit-kid-pin').value.trim();
+  const theme = document.querySelector('[name=kid-theme]:checked')?.value || 'blue';
+  if (!name) { Toast.error('Name is required.'); return; }
+  setLoading(btn, true);
+  const payload = { display_name: name, theme, emoji: _selectedEmoji };
+  if (pin) payload.pin = pin;
+  try {
+    await ChildrenAPI.update(id, payload);
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success('Saved!');
+    loadKids();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function deleteChild(id, name) {
+  if (!await typeConfirm(`Permanently delete ${name} and all their data?`)) return;
+  try {
+    await ChildrenAPI.delete(id);
+    Toast.success(name + ' removed.');
+    loadKids();
+  } catch(e) { Toast.error(e.message); }
+}
+
+// ── PARENTS ───────────────────────────────────────────────
+function loadParents() {
+  const _parents = JSON.parse(localStorage.getItem('fos_real_parents') || '[]');
+  const el = document.getElementById('parents-list');
+  const me = Auth.getUser();
+  if (!_parents.length) {
+    el.innerHTML = '<div class="empty-state">No parents yet. Add one!</div>';
+    return;
+  }
+  el.innerHTML = _parents.map((p, idx) => {
+    const isMe = me && (p.id === me.id);
+    const isMain = idx === 0;
+    const canDelete = !isMe && !isMain;
+    return `
+    <div class="card mb-2" style="display:flex;align-items:center;gap:.75rem">
+      <div style="font-size:2rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--bg-2);border-radius:50%">${p.emoji || '👤'}</div>
+      <div style="flex:1">
+        <div style="font-weight:700">${p.display_name}${isMain ? ' <span style="font-size:.7rem;background:var(--primary);color:#fff;padding:.1rem .4rem;border-radius:10px;font-weight:600">Main</span>' : ''}</div>
+        <div class="text-sm text-muted">Parent · PIN set${isMe ? ' · You' : ''}</div>
+      </div>
+      <div style="display:flex;gap:.35rem;align-items:center">
+        <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--primary)" onclick="openEditParent(${JSON.stringify(p).replace(/"/g,'&quot;')})">${iconEdit()}</button>
+        <button class="btn btn-ghost btn-sm" style="font-size:.75rem" onclick="openResetParentPin('${p.id}', '${p.display_name}')">🔑 PIN</button>
+        ${canDelete ? `<button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" title="Remove parent" onclick="deleteParent('${p.id}','${p.display_name.replace(/'/g,"\\'")}')">
+          ${iconTrash()}
+        </button>` : `<div style="width:32px"></div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteParent(id, name) {
+  if (!await typeConfirm(`Remove ${name} as a parent? They will no longer be able to log in.`)) return;
+  const _parents = JSON.parse(localStorage.getItem('fos_real_parents') || '[]');
+  const updated = _parents.filter(p => p.id !== id);
+  localStorage.setItem('fos_real_parents', JSON.stringify(updated));
+  Toast.success(name + ' removed.');
+  loadParents();
+}
+
+function openAddParent() {
+  openModal(`
+    <h2 style="margin-bottom:1rem">👨 Add Parent</h2>
+    <div class="form-group">
+      <label class="form-label">Name *</label>
+      <input class="form-control" id="p-name" placeholder="e.g. Mom, Dad, Grandma">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input class="form-control" id="p-emoji" value="👤" maxlength="2" style="font-size:1.5rem">
+    </div>
+    <div class="form-group">
+      <label class="form-label">PIN (4 digits) *</label>
+      <input class="form-control" id="p-pin" type="password" maxlength="4" placeholder="••••" inputmode="numeric">
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveNewParent(this)">Add Parent</button>
+    </div>
+  `);
+}
+
+function saveNewParent(btn) {
+  const name  = document.getElementById('p-name').value.trim();
+  const emoji = document.getElementById('p-emoji').value.trim() || '👤';
+  const pin   = document.getElementById('p-pin').value.trim();
+  if (!name) { Toast.error('Name is required.'); return; }
+  if (!pin || pin.length < 4) { Toast.error('PIN must be 4 digits.'); return; }
+  const _parents = JSON.parse(localStorage.getItem('fos_real_parents') || '[]');
+  _parents.push({ id: 'parent-' + Date.now(), display_name: name, emoji, pin, role: 'parent' });
+  localStorage.setItem('fos_real_parents', JSON.stringify(_parents));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  Toast.success(name + ' added!');
+  loadParents();
+}
+
+function openEditParent(p) {
+  openModal(`
+    <h2 style="margin-bottom:1rem">✏️ Edit ${p.display_name}</h2>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-control" id="ep-name" value="${p.display_name}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input class="form-control" id="ep-emoji" value="${p.emoji || '👤'}" maxlength="2" style="font-size:1.5rem">
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveEditParent('${p.id}', this)">Save</button>
+    </div>
+  `);
+}
+
+function saveEditParent(id, btn) {
+  const name  = document.getElementById('ep-name').value.trim();
+  const emoji = document.getElementById('ep-emoji').value.trim() || '👤';
+  if (!name) { Toast.error('Name is required.'); return; }
+  const _parents = JSON.parse(localStorage.getItem('fos_real_parents') || '[]');
+  const idx = _parents.findIndex(p => p.id === id);
+  if (idx >= 0) { _parents[idx].display_name = name; _parents[idx].emoji = emoji; }
+  localStorage.setItem('fos_real_parents', JSON.stringify(_parents));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  Toast.success('Saved!');
+  loadParents();
+}
+
+function openResetParentPin(id, name) {
+  openModal(`
+    <h2 style="margin-bottom:1rem">🔑 Reset PIN — ${name}</h2>
+    <div class="form-group">
+      <label class="form-label">New PIN (4 digits)</label>
+      <input class="form-control" id="rp-pin" type="password" maxlength="4" placeholder="••••" inputmode="numeric">
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveResetPin('${id}', this)">Reset PIN</button>
+    </div>
+  `);
+}
+
+function saveResetPin(id, btn) {
+  const pin = document.getElementById('rp-pin').value.trim();
+  if (!pin || pin.length < 4) { Toast.error('PIN must be 4 digits.'); return; }
+  const _parents = JSON.parse(localStorage.getItem('fos_real_parents') || '[]');
+  const idx = _parents.findIndex(p => p.id === id);
+  if (idx >= 0) _parents[idx].pin = pin;
+  localStorage.setItem('fos_real_parents', JSON.stringify(_parents));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  Toast.success('PIN reset!');
+}
+
+function copyLink() {
+  const fam = Auth.getFamily();
+  const famId = fam?.id || localStorage.getItem('fos_last_family') || '';
+  const url = location.origin + '/family-os/pages/pin-login.html' + (famId ? '?family=' + famId : '');
+  navigator.clipboard.writeText(url).then(() => Toast.success('Login link copied!')).catch(() => {
+    openModal(`<h2 style="margin-bottom:.5rem">Family Login Link</h2><input class="form-control" value="${url}" onclick="this.select()" readonly style="margin-bottom:1rem"><button class="btn btn-primary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Close</button>`);
+  });
+}
+
+loadKids();
+loadReviewsBadge();
+</script>
+</body>
+</html>
+

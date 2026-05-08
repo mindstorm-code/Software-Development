@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Store — Family OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/family-os/assets/css/main.css">
+<link rel="stylesheet" href="/family-os/assets/css/child-theme.css">
+<script>
+/* Apply saved display mode ASAP to avoid flash */
+(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var m=localStorage.getItem('fos_child_theme_'+(u.id||'guest'))||'dark';document.documentElement.setAttribute('data-theme',m);}catch(e){}})();
+</script>
+</head>
+<body>
+
+<!-- STORE HEADER (fixed) -->
+<div class="ct-store-header" style="position:sticky;top:0;z-index:40">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-family:'Bungee',cursive;font-size:18px;letter-spacing:.04em;color:var(--ct-ink)">🛒 THE STORE</div>
+    <div style="text-align:right">
+      <div class="ct-bal-label">Your Balance</div>
+      <div class="ct-bal-main" id="bal-main">—</div>
+    </div>
+  </div>
+
+  <!-- Buckets -->
+  <div class="ct-buckets">
+    <div class="ct-bucket">
+      <div class="ct-bucket-val" style="color:#60a5fa" id="bk-spend">—</div>
+      <div class="ct-bucket-label">💳 Spend</div>
+    </div>
+    <div class="ct-bucket">
+      <div class="ct-bucket-val" style="color:var(--ct-mint)" id="bk-save">—</div>
+      <div class="ct-bucket-label">🏦 Save</div>
+    </div>
+    <div class="ct-bucket">
+      <div class="ct-bucket-val" style="color:var(--ct-hard)" id="bk-invest">—</div>
+      <div class="ct-bucket-label">📈 Invest</div>
+    </div>
+    <div class="ct-bucket">
+      <div class="ct-bucket-val" style="color:var(--ct-boss)" id="bk-charity">—</div>
+      <div class="ct-bucket-label">❤️ Give</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="ct-tabs">
+    <button class="ct-tab active" id="tab-rewards"  onclick="switchTab('rewards')">🎁 Rewards</button>
+    <button class="ct-tab"        id="tab-coupons"  onclick="switchTab('coupons')">🎟 Coupons</button>
+    <button class="ct-tab"        id="tab-layaway"  onclick="switchTab('layaway')">🎯 Goals</button>
+    <button class="ct-tab"        id="tab-requests" onclick="switchTab('requests')">✉️ Ask</button>
+  </div>
+</div>
+
+<div class="ct-app" style="padding-top:12px">
+
+  <!-- Rewards pane -->
+  <div id="pane-rewards">
+    <div id="rewards-list"><div class="ct-empty"><span class="ct-spinner"></span></div></div>
+  </div>
+
+  <!-- Coupons pane -->
+  <div id="pane-coupons" style="display:none">
+    <div id="coupons-list"><div class="ct-empty"><span class="ct-spinner"></span></div></div>
+  </div>
+
+  <!-- Goals pane -->
+  <div id="pane-layaway" style="display:none">
+    <div id="layaway-list"><div class="ct-empty"><span class="ct-spinner"></span></div></div>
+  </div>
+
+  <!-- Ask pane -->
+  <div id="pane-requests" style="display:none">
+    <button onclick="openRequestModal()" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--ct-gold),var(--ct-gold-deep));color:#1a1308;font-family:'Bungee',cursive;font-size:13px;letter-spacing:.06em;cursor:pointer;margin-bottom:14px">✉️ SEND A REQUEST</button>
+    <div id="requests-list"><div class="ct-empty"><span class="ct-spinner"></span></div></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="ct-bottom-nav">
+  <a href="dashboard.html" class="ct-nav-item">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4h-2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg></div>
+    <span class="ct-nav-label">Quests</span>
+  </a>
+  <a href="rewards.html" class="ct-nav-item active">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a1 1 0 00-1 1v3a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1zM5 12v8a1 1 0 001 1h12a1 1 0 001-1v-8M12 7V3m0 0l-3 4m3-4l3 4"/></svg></div>
+    <span class="ct-nav-label">Store</span>
+  </a>
+  <a href="profile.html" class="ct-nav-item">
+    <div class="ct-nav-ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+    <span class="ct-nav-label">Profile</span>
+  </a>
+</nav>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireChild();
+const user = Auth.getUser();
+let _balance = user?.balance || 0;
+
+function switchTab(name) {
+  ['rewards','coupons','layaway','requests'].forEach(t => {
+    document.getElementById('pane-' + t).style.display = t === name ? '' : 'none';
+    const btn = document.getElementById('tab-' + t);
+    btn.classList.toggle('active', t === name);
+  });
+  if (name === 'coupons'  && document.getElementById('coupons-list').querySelector('.ct-spinner'))  loadCoupons();
+  if (name === 'layaway'  && document.getElementById('layaway-list').querySelector('.ct-spinner'))   loadLayaway();
+  if (name === 'requests' && document.getElementById('requests-list').querySelector('.ct-spinner'))  loadRequests();
+}
+
+async function loadBalance() {
+  try {
+    const res    = await PointsAPI.ledger();
+    const ledger = res?.data || res;
+    _balance = ledger?.balance ?? _balance;
+    document.getElementById('bal-main').textContent = _balance + ' 🪙';
+  } catch {}
+  try {
+    const bk = await BucketsAPI.balances();
+    const b  = bk?.data || (Array.isArray(bk) ? bk[0] : bk);
+    document.getElementById('bk-spend').textContent   = b?.spend   ?? b?.balance           ?? (user?.balance || 0);
+    document.getElementById('bk-save').textContent    = b?.save    ?? b?.balance_save       ?? 0;
+    document.getElementById('bk-invest').textContent  = b?.invest  ?? b?.balance_invest     ?? 0;
+    document.getElementById('bk-charity').textContent = b?.charity ?? b?.balance_charity    ?? 0;
+  } catch {
+    document.getElementById('bk-spend').textContent = user?.balance || 0;
+  }
+}
+
+function rewardEmoji(title) {
+  if (/screen|tv|youtube/i.test(title)) return '📺';
+  if (/sleep|late|bedtime/i.test(title)) return '🌙';
+  if (/movie|film/i.test(title)) return '🎬';
+  if (/skip|pass/i.test(title)) return '⏭';
+  if (/food|pizza|dinner|restaurant/i.test(title)) return '🍕';
+  if (/game|gaming/i.test(title)) return '🎮';
+  if (/park|outside|playground/i.test(title)) return '🌳';
+  if (/friend|sleepover/i.test(title)) return '👫';
+  if (/toy|lego/i.test(title)) return '🧸';
+  if (/money|cash/i.test(title)) return '💵';
+  return '🎁';
+}
+
+async function loadRewards() {
+  try {
+    const res     = await RewardsAPI.list();
+    const rewards = Array.isArray(res) ? res : (res?.data || res?.rewards || []);
+    const el      = document.getElementById('rewards-list');
+    if (!rewards.length) {
+      el.innerHTML = '<div class="ct-empty">No rewards yet.<br>Ask a parent to add some! 🎁</div>';
+      return;
+    }
+    const coin = getCoinConfig();
+    el.innerHTML = rewards.map(r => {
+      const fc       = r.usd_value ? coin.usdToFC(r.usd_value) : r.points_cost;
+      const canAfford = _balance >= fc;
+      return `
+        <div class="ct-store-item">
+          <div class="ct-store-ico">${rewardEmoji(r.title)}</div>
+          <div class="ct-store-body">
+            <h4>${r.title}</h4>
+            ${r.description ? `<div class="ct-store-desc">${r.description}</div>` : ''}
+            <div class="ct-store-tags">
+              <span class="ct-tag ct-tag-cost">🪙 ${fc} ${coin.symbol}</span>
+              ${r.requires_approval
+                ? '<span class="ct-tag ct-tag-approval">⏳ Needs Approval</span>'
+                : '<span class="ct-tag ct-tag-instant">⚡ Instant</span>'}
+            </div>
+            <button class="ct-redeem-btn ${canAfford ? 'can' : 'cant'}"
+              ${canAfford ? '' : 'disabled'}
+              onclick="redeemReward('${r.id}','${r.title.replace(/'/g,"\\'")}',${fc})">
+              ${canAfford ? `REDEEM — ${fc} 🪙` : `🔒 Need ${fc - _balance} more`}
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('rewards-list').innerHTML = '<div class="ct-empty" style="color:var(--ct-rose)">Failed to load rewards.</div>';
+  }
+}
+
+async function redeemReward(id, title, cost) {
+  const sym = getCoinConfig().symbol;
+  if (!await confirm(`Redeem "${title}" for ${cost} ${sym}?`, 'Redeem 🎁')) return;
+  try {
+    await RewardsAPI.redeem({ reward_id: id, points_cost: cost });
+    Toast.success('Redeemed! ' + title + ' 🎉');
+    _balance -= cost;
+    document.getElementById('bal-main').textContent = _balance + ' 🪙';
+    loadRewards();
+  } catch(e) { Toast.error(e.message); }
+}
+
+async function loadCoupons() {
+  try {
+    const res     = await CouponsAPI.list();
+    const coupons = Array.isArray(res) ? res : (res?.data || res?.coupons || []);
+    const el      = document.getElementById('coupons-list');
+    if (!coupons.length) {
+      el.innerHTML = '<div class="ct-empty">No coupons available yet. 🎟</div>';
+      return;
+    }
+    const coin = getCoinConfig();
+    el.innerHTML = coupons.map(c => {
+      const fc       = c.usd_value ? coin.usdToFC(c.usd_value) : c.points_cost;
+      const canAfford = _balance >= fc;
+      return `
+        <div class="ct-store-item">
+          <div class="ct-store-ico">🎟</div>
+          <div class="ct-store-body">
+            <h4>${c.title}</h4>
+            ${c.description ? `<div class="ct-store-desc">${c.description}</div>` : ''}
+            <div class="ct-store-tags">
+              <span class="ct-tag ct-tag-cost">🪙 ${fc} ${coin.symbol}</span>
+              <span class="ct-tag" style="background:rgba(127,135,168,.1);color:var(--ct-ink-3);border:1px solid var(--ct-line)">${c.is_repeatable ? '🔄 Repeatable' : '1× Only'}</span>
+            </div>
+            <button class="ct-redeem-btn ${canAfford ? 'can' : 'cant'}"
+              ${canAfford ? '' : 'disabled'}
+              onclick="redeemCoupon('${c.id}','${c.title.replace(/'/g,"\\'")}',${fc})">
+              ${canAfford ? `REDEEM — ${fc} 🪙` : `🔒 Need ${fc - _balance} more`}
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('coupons-list').innerHTML = '<div class="ct-empty" style="color:var(--ct-rose)">Failed to load coupons.</div>';
+  }
+}
+
+async function redeemCoupon(id, title, cost) {
+  const sym = getCoinConfig().symbol;
+  if (!await confirm(`Redeem "${title}" for ${cost} ${sym}?`, 'Redeem 🎟️')) return;
+  try {
+    await CouponsAPI.redeem({ coupon_id: id, points_cost: cost });
+    Toast.success('Redeemed! ' + title + ' 🎉');
+    _balance -= cost;
+    document.getElementById('bal-main').textContent = _balance + ' 🪙';
+    loadCoupons();
+  } catch(e) { Toast.error(e.message); }
+}
+
+async function loadLayaway() {
+  try {
+    const res   = await LayawayAPI.list();
+    const goals = Array.isArray(res) ? res : (res?.data || res?.goals || []);
+    const el    = document.getElementById('layaway-list');
+    if (!goals.length) {
+      el.innerHTML = '<div class="ct-empty">No group goals yet.<br>Ask a parent to create one! 🎯</div>';
+      return;
+    }
+    el.innerHTML = goals.map(g => {
+      const contribs   = g.contributions || [];
+      const raised     = contribs.reduce((s, c) => s + (c.amount || 0), 0);
+      const total      = g.total_cost || 1;
+      const pct        = Math.min(100, Math.round(raised / total * 100));
+      const myContrib  = contribs.find(c => c.child_id === user?.id);
+      return `
+        <div class="ct-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="font-size:28px">🎯</div>
+            <div style="flex:1">
+              <div style="font-weight:700;color:var(--ct-ink)">${g.title}</div>
+              ${g.description ? `<div style="font-size:12px;color:var(--ct-ink-3)">${g.description}</div>` : ''}
+            </div>
+            <div style="font-family:'Bungee',cursive;font-size:14px;color:${pct>=100?'var(--ct-mint)':'var(--ct-gold)'}">${pct}%</div>
+          </div>
+          <div style="height:10px;background:rgba(0,0,0,.4);border-radius:99px;overflow:hidden;margin-bottom:8px;border:1px solid var(--ct-line-soft)">
+            <div style="height:100%;width:${pct}%;background:${pct>=100?'linear-gradient(90deg,var(--ct-mint),#4ee3b3)':'linear-gradient(90deg,var(--ct-gold),#ffe082)'};border-radius:99px;transition:width .6s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ct-ink-3);margin-bottom:10px">
+            <span>Raised: <b style="color:var(--ct-gold)">${raised}</b> 🪙</span>
+            ${myContrib ? `<span>Your share: <b style="color:var(--ct-mint)">${myContrib.amount} 🪙</b></span>` : ''}
+          </div>
+          ${pct < 100
+            ? `<button class="ct-redeem-btn can" onclick="openContribute('${g.id}','${g.title.replace(/'/g,"\\'")}')">💰 CONTRIBUTE COINS</button>`
+            : `<div style="text-align:center;font-family:'Bungee',cursive;font-size:12px;color:var(--ct-mint)">🎉 FULLY FUNDED!</div>`}
+        </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('layaway-list').innerHTML = '<div class="ct-empty" style="color:var(--ct-rose)">Failed to load goals.</div>';
+  }
+}
+
+function openContribute(goalId, goalTitle) {
+  openModal(`
+    <h2 style="margin-bottom:1rem">🎯 Contribute to Goal</h2>
+    <div style="font-weight:600;margin-bottom:.75rem;color:var(--ct-gold)">${goalTitle}</div>
+    <div class="form-group">
+      <label class="form-label">Amount (coins from Save bucket)</label>
+      <input class="form-control" id="contrib-amt" type="number" min="1" max="${_balance}" placeholder="How many coins?">
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="submitContribution('${goalId}', this)">Contribute 💰</button>
+    </div>`);
+}
+
+async function submitContribution(goalId, btn) {
+  const amount = parseInt(document.getElementById('contrib-amt').value) || 0;
+  if (!amount || amount < 1) { Toast.error('Enter a valid amount.'); return; }
+  setLoading(btn, true);
+  try {
+    await LayawayAPI.contribute({ goal_id: goalId, amount, child_id: user?.id });
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success('Contributed ' + amount + ' 🪙! 🎯');
+    loadLayaway(); loadBalance();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+async function loadRequests() {
+  const el = document.getElementById('requests-list');
+  try {
+    const res  = await api.get('/coupons/request.php');
+    const all  = Array.isArray(res) ? res : (res?.data || []);
+    const mine = all.filter(r => r.child_id === user?.id);
+    if (!mine.length) {
+      el.innerHTML = '<div class="ct-empty">No requests yet.<br>Tap the button above to ask your parent! ✉️</div>';
+      return;
+    }
+    el.innerHTML = mine.map(r => {
+      const statusColor = r.status === 'approved' ? 'var(--ct-mint)' : r.status === 'denied' ? 'var(--ct-rose)' : 'var(--ct-med)';
+      const statusIcon  = r.status === 'approved' ? '✅' : r.status === 'denied' ? '❌' : '⏳';
+      return `
+        <div class="ct-card" style="display:flex;align-items:flex-start;gap:12px">
+          <div style="font-size:22px">${statusIcon}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;color:var(--ct-ink)">${r.title}</div>
+            ${r.description ? `<div style="font-size:12px;color:var(--ct-ink-3);margin-top:3px">${r.description}</div>` : ''}
+            <div style="font-size:10px;font-weight:700;color:${statusColor};margin-top:5px;text-transform:uppercase;letter-spacing:.06em">${r.status}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch {
+    el.innerHTML = '<div class="ct-empty" style="color:var(--ct-rose)">Failed to load requests.</div>';
+  }
+}
+
+function openRequestModal() {
+  openModal(`
+    <h2 style="margin-bottom:1rem">✉️ Ask a Parent</h2>
+    <div class="form-group">
+      <label class="form-label">What do you want to ask for?</label>
+      <input class="form-control" id="req-title" placeholder="e.g. Movie night, sleepover, extra screen time" maxlength="80">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Details (optional)</label>
+      <textarea class="form-control" id="req-desc" rows="3" placeholder="Give your parent a little more info…"></textarea>
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="submitRequest(this)">Send Request ✉️</button>
+    </div>`);
+  setTimeout(() => document.getElementById('req-title')?.focus(), 100);
+}
+
+async function submitRequest(btn) {
+  const title = document.getElementById('req-title')?.value.trim();
+  const desc  = document.getElementById('req-desc')?.value.trim();
+  if (!title) { Toast.error('What do you want to ask for?'); return; }
+  setLoading(btn, true);
+  try {
+    await api.post('/coupons/request.php', { title, description: desc, child_id: user?.id });
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success('Request sent! Your parent will review it. 🎉');
+    loadRequests();
+  } catch(e) { Toast.error(e.message); setLoading(btn, false); }
+}
+
+loadBalance();
+loadRewards();
+</script>
+</body>
+</html>

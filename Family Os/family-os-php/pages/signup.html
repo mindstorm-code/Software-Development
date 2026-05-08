@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Family — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <style>
+    .signup-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:1.5rem; background:var(--bg); }
+    .signup-card { width:100%; max-width:420px; }
+    .step { display:none; }
+    .step.active { display:block; }
+    .step-indicator { display:flex; justify-content:center; gap:.5rem; margin-bottom:1.5rem; }
+    .step-dot { width:10px; height:10px; border-radius:50%; background:var(--border); transition:background .2s; }
+    .step-dot.active { background:var(--primary); }
+    .step-dot.done   { background:var(--success); }
+    .person-chip { display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem; background:var(--bg-2); border-radius:var(--radius); margin-bottom:.35rem; }
+    .theme-swatch { width:26px; height:26px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:border .15s; flex-shrink:0; }
+    .theme-swatch.sel { border-color:#000; }
+    .emoji-grid { display:flex; flex-wrap:wrap; gap:.35rem; }
+    .emoji-opt  { font-size:1.3rem; cursor:pointer; padding:.2rem .3rem; border-radius:6px; border:2px solid transparent; transition:border .15s; }
+    .emoji-opt.sel { border-color:var(--primary); background:var(--primary-soft,#EFF6FF); }
+  </style>
+</head>
+<body>
+<div class="signup-wrap">
+  <div class="signup-card">
+
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:1.25rem">
+      <div style="font-size:2.2rem">🏠</div>
+      <div style="font-size:1.4rem;font-weight:800">Family OS</div>
+      <div class="text-sm text-muted">Set up your family in minutes</div>
+    </div>
+
+    <!-- Step dots -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-0"></div>
+      <div class="step-dot" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+    </div>
+
+    <!-- ── Step 0: Family setup ── -->
+    <div class="step active" id="step-0">
+      <h2 style="margin-bottom:.25rem">👨‍👩‍👧‍👦 Your Family</h2>
+      <p class="text-sm text-muted mb-2">Let's get the basics set up.</p>
+
+      <div class="form-group">
+        <label class="form-label">Family Name *</label>
+        <input class="form-control" id="fam-name" placeholder="e.g. The Jensons">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Family Email *</label>
+        <input class="form-control" id="fam-email" type="email" placeholder="family@example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password (min 4 chars) *</label>
+        <input class="form-control" id="fam-password" type="password" placeholder="Choose a password" minlength="4">
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:1rem 0;padding-top:1rem">
+        <div style="font-weight:700;margin-bottom:.5rem">🪙 Coin Name <span class="text-muted" style="font-weight:400;font-size:.8rem">(optional)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:.5rem">
+          <div class="form-group" style="margin:0">
+            <input class="form-control" id="coin-name" placeholder="FamCoins" value="FamCoins">
+          </div>
+          <div class="form-group" style="margin:0">
+            <input class="form-control" id="coin-symbol" placeholder="FC" value="FC" maxlength="4">
+          </div>
+          <div class="form-group" style="margin:0">
+            <input class="form-control" id="coin-icon" placeholder="🪙" value="🪙" maxlength="2" style="font-size:1.3rem;text-align:center">
+          </div>
+        </div>
+        <div class="form-hint">Name · Symbol · Icon</div>
+      </div>
+
+      <button class="btn btn-primary btn-full mt-1" onclick="nextStep(0)">Next: Add Parents →</button>
+    </div>
+
+    <!-- ── Step 1: Add Parents ── -->
+    <div class="step" id="step-1">
+      <h2 style="margin-bottom:.25rem">👨 Parents</h2>
+      <p class="text-sm text-muted mb-2">Add the grown-ups. At least one required.</p>
+
+      <div id="parents-list" style="margin-bottom:.75rem"></div>
+
+      <button class="btn btn-secondary btn-full btn-sm mb-2" onclick="openAddParentForm()">+ Add Parent</button>
+
+      <!-- Add parent form (inline) -->
+      <div id="parent-form" class="hidden card" style="margin-bottom:.75rem">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input class="form-control" id="p-name" placeholder="e.g. Mom, Dad, Grandma">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Emoji</label>
+          <div class="emoji-grid" id="p-emoji-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PIN (4 digits) *</label>
+          <input class="form-control" id="p-pin" type="password" maxlength="4" placeholder="••••" inputmode="numeric">
+        </div>
+        <div class="flex gap-sm">
+          <button class="btn btn-secondary btn-full btn-sm" onclick="cancelParentForm()">Cancel</button>
+          <button class="btn btn-primary btn-full btn-sm" onclick="addParent()">Add</button>
+        </div>
+      </div>
+
+      <div class="flex gap-sm mt-1">
+        <button class="btn btn-ghost btn-full" onclick="prevStep(1)">← Back</button>
+        <button class="btn btn-primary btn-full" onclick="nextStep(1)">Next: Add Kids →</button>
+      </div>
+    </div>
+
+    <!-- ── Step 2: Add Kids ── -->
+    <div class="step" id="step-2">
+      <h2 style="margin-bottom:.25rem">👧 Kids</h2>
+      <p class="text-sm text-muted mb-2">Add your children. You can add more later.</p>
+
+      <div id="kids-list" style="margin-bottom:.75rem"></div>
+
+      <button class="btn btn-secondary btn-full btn-sm mb-2" onclick="openAddKidForm()">+ Add Child</button>
+
+      <!-- Add kid form (inline) -->
+      <div id="kid-form" class="hidden card" style="margin-bottom:.75rem">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input class="form-control" id="k-name" placeholder="Child's name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Theme Color</label>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="k-theme-swatches"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PIN (4 digits) *</label>
+          <input class="form-control" id="k-pin" type="password" maxlength="4" placeholder="••••" inputmode="numeric">
+        </div>
+        <div class="flex gap-sm">
+          <button class="btn btn-secondary btn-full btn-sm" onclick="cancelKidForm()">Cancel</button>
+          <button class="btn btn-primary btn-full btn-sm" onclick="addKid()">Add</button>
+        </div>
+      </div>
+
+      <div class="flex gap-sm mt-1">
+        <button class="btn btn-ghost btn-full" onclick="prevStep(2)">← Back</button>
+        <button class="btn btn-primary btn-full" onclick="nextStep(2)">Next: Launch! →</button>
+      </div>
+    </div>
+
+    <!-- ── Step 3: Success ── -->
+    <div class="step" id="step-3" style="text-align:center">
+      <div style="font-size:3.5rem;margin-bottom:.5rem">🚀</div>
+      <h2 style="margin-bottom:.5rem">Your family is ready!</h2>
+      <p class="text-muted mb-2" id="success-summary"></p>
+
+      <div class="card mb-2" style="text-align:left;background:var(--bg-2)">
+        <div style="font-weight:700;margin-bottom:.35rem">Quick tips:</div>
+        <div class="text-sm text-muted">• Parents log in and create chore assignments</div>
+        <div class="text-sm text-muted">• Kids log in with their PIN to see missions</div>
+        <div class="text-sm text-muted">• Earn coins, unlock rewards, hit streaks!</div>
+      </div>
+
+      <button class="btn btn-primary btn-full" style="font-size:1.05rem;padding:.9rem" onclick="launchFamilyOS()">
+        🚀 Launch Family OS
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+const THEMES      = ['blue','pink','green','red','orange','purple'];
+const THEME_COLORS= { blue:'#3B82F6', pink:'#EC4899', green:'#22C55E', red:'#EF4444', orange:'#F97316', purple:'#8B5CF6' };
+const PARENT_EMOJIS = ['👨','👩','👴','👵','🧑','👱','🧔','👮','👷','🎅','🤶','🧙'];
+
+let _parents = [];
+let _kids    = [];
+let _selectedParentEmoji = '👨';
+let _selectedKidTheme    = 'blue';
+
+// Init emoji grids
+(function initEmojis() {
+  const pg = document.getElementById('p-emoji-grid');
+  if (pg) {
+    pg.innerHTML = PARENT_EMOJIS.map(e =>
+      `<span class="emoji-opt${e === _selectedParentEmoji ? ' sel' : ''}" onclick="selectParentEmoji('${e}')">${e}</span>`
+    ).join('');
+  }
+})();
+
+function selectParentEmoji(e) {
+  _selectedParentEmoji = e;
+  document.querySelectorAll('#p-emoji-grid .emoji-opt').forEach(el => {
+    el.classList.toggle('sel', el.textContent.trim() === e);
+  });
+}
+
+function initThemeSwatches() {
+  const el = document.getElementById('k-theme-swatches');
+  if (!el) return;
+  el.innerHTML = THEMES.map(t =>
+    `<span class="theme-swatch${t === _selectedKidTheme ? ' sel' : ''}" style="background:${THEME_COLORS[t]}"
+       onclick="selectKidTheme('${t}')"></span>`
+  ).join('');
+}
+
+function selectKidTheme(t) {
+  _selectedKidTheme = t;
+  document.querySelectorAll('.theme-swatch').forEach(el => {
+    el.classList.toggle('sel', el.style.background === THEME_COLORS[t] || el.dataset?.theme === t);
+  });
+  // Re-render to apply selection properly
+  initThemeSwatches();
+}
+
+// ── Step navigation ─────────────────────────────────────
+function updateDots(current) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.remove('active','done');
+    if (i < current)      dot.classList.add('done');
+    else if (i === current) dot.classList.add('active');
+  }
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  updateDots(n);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function prevStep(current) { goStep(current - 1); }
+
+function nextStep(current) {
+  if (current === 0) {
+    const name  = document.getElementById('fam-name').value.trim();
+    const email = document.getElementById('fam-email').value.trim();
+    const pass  = document.getElementById('fam-password').value;
+    if (!name)              { Toast.error('Family name is required.'); return; }
+    if (!email)             { Toast.error('Email is required.'); return; }
+    if (pass.length < 4)    { Toast.error('Password must be at least 4 characters.'); return; }
+    goStep(1);
+  } else if (current === 1) {
+    if (!_parents.length) { Toast.error('Add at least one parent.'); return; }
+    goStep(2);
+  } else if (current === 2) {
+    completeSignup();
+  }
+}
+
+// ── Parents ─────────────────────────────────────────────
+function openAddParentForm() {
+  _selectedParentEmoji = '👨';
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-pin').value  = '';
+  const pg = document.getElementById('p-emoji-grid');
+  pg.innerHTML = PARENT_EMOJIS.map(e =>
+    `<span class="emoji-opt${e === _selectedParentEmoji ? ' sel' : ''}" onclick="selectParentEmoji('${e}')">${e}</span>`
+  ).join('');
+  document.getElementById('parent-form').classList.remove('hidden');
+}
+function cancelParentForm() { document.getElementById('parent-form').classList.add('hidden'); }
+
+function addParent() {
+  const name = document.getElementById('p-name').value.trim();
+  const pin  = document.getElementById('p-pin').value.trim();
+  if (!name)          { Toast.error('Name is required.'); return; }
+  if (pin.length < 4) { Toast.error('PIN must be 4 digits.'); return; }
+  _parents.push({ id: 'parent-' + Date.now() + '-' + _parents.length, display_name: name, emoji: _selectedParentEmoji, pin, role: 'parent' });
+  renderParentsList();
+  cancelParentForm();
+}
+
+function removeParent(idx) { _parents.splice(idx, 1); renderParentsList(); }
+
+function renderParentsList() {
+  document.getElementById('parents-list').innerHTML = _parents.map((p, i) => `
+    <div class="person-chip">
+      <span style="font-size:1.3rem">${p.emoji}</span>
+      <span style="font-weight:600;flex:1">${p.display_name}</span>
+      <span class="text-sm text-muted">PIN: ${'•'.repeat(p.pin.length)}</span>
+      <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="removeParent(${i})">${iconTrash()}</button>
+    </div>
+  `).join('') || '<div class="text-sm text-muted">No parents added yet.</div>';
+}
+
+// ── Kids ─────────────────────────────────────────────────
+function openAddKidForm() {
+  _selectedKidTheme = 'blue';
+  document.getElementById('k-name').value = '';
+  document.getElementById('k-pin').value  = '';
+  initThemeSwatches();
+  document.getElementById('kid-form').classList.remove('hidden');
+}
+function cancelKidForm() { document.getElementById('kid-form').classList.add('hidden'); }
+
+function addKid() {
+  const name = document.getElementById('k-name').value.trim();
+  const pin  = document.getElementById('k-pin').value.trim();
+  if (!name)          { Toast.error('Name is required.'); return; }
+  if (pin.length < 4) { Toast.error('PIN must be 4 digits.'); return; }
+  _kids.push({ id: 'child-' + Date.now() + '-' + _kids.length, display_name: name, theme: _selectedKidTheme, pin, role: 'child', level: 1, streak: 0, balance: 0 });
+  renderKidsList();
+  cancelKidForm();
+}
+
+function removeKid(idx) { _kids.splice(idx, 1); renderKidsList(); }
+
+function renderKidsList() {
+  document.getElementById('kids-list').innerHTML = _kids.map((k, i) => `
+    <div class="person-chip">
+      <span style="width:20px;height:20px;border-radius:50%;background:${THEME_COLORS[k.theme] || '#3B82F6'};flex-shrink:0"></span>
+      <span style="font-weight:600;flex:1">${k.display_name}</span>
+      <span class="text-sm text-muted">${k.theme}</span>
+      <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKid(${i})">${iconTrash()}</button>
+    </div>
+  `).join('') || '<div class="text-sm text-muted">No kids added yet (optional).</div>';
+}
+
+// ── Complete signup ───────────────────────────────────────
+function completeSignup() {
+  const name     = document.getElementById('fam-name').value.trim();
+  const email    = document.getElementById('fam-email').value.trim();
+  const pass     = document.getElementById('fam-password').value;
+  const coinName = document.getElementById('coin-name').value.trim()   || 'FamCoins';
+  const coinSym  = document.getElementById('coin-symbol').value.trim() || 'FC';
+  const coinIcon = document.getElementById('coin-icon').value.trim()   || '🪙';
+
+  const familyId = 'family-' + Date.now();
+
+  const family = {
+    id: familyId,
+    name,
+    email,
+    coin_name:   coinName,
+    coin_symbol: coinSym,
+    coin_icon:   coinIcon,
+    weekly_budget: 50,
+    point_rate:    0.01,
+    house_score:   100,
+    bucket_auto_split: { spend:70, save:10, invest:10, charity:10 },
+  };
+
+  // Save to localStorage
+  localStorage.setItem('fos_family',          JSON.stringify(family));
+  localStorage.setItem('fos_family_email',    email);
+  localStorage.setItem('fos_family_password', pass);
+  localStorage.setItem('fos_real_family',     JSON.stringify(family));
+  localStorage.setItem('fos_real_children',   JSON.stringify(_kids));
+  localStorage.setItem('fos_real_parents',    JSON.stringify(_parents));
+  localStorage.setItem('fos_last_family',     familyId);
+
+  // Success summary
+  document.getElementById('success-summary').textContent =
+    `${name} — ${_parents.length} parent${_parents.length !== 1 ? 's' : ''}, ${_kids.length} kid${_kids.length !== 1 ? 's' : ''} ready to go!`;
+
+  goStep(3);
+}
+
+function launchFamilyOS() {
+  location.href = '/family-os/pages/pin-login.html';
+}
+</script>
+</body>
+</html>

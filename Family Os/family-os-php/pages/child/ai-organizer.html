@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Organizer — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;gap:.5rem;padding:1rem;background:var(--child-header-bg,var(--bg-2))">
+    <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+    <h1 style="font-size:1.2rem;font-weight:700;margin:0">🤖 AI Organizer</h1>
+  </div>
+
+  <div class="page-content" style="padding-bottom:40px">
+
+    <!-- Intro Card -->
+    <div class="card mb-2" style="background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff">
+      <div style="font-size:1.5rem;margin-bottom:.35rem">🤖✨</div>
+      <div style="font-weight:700;font-size:1rem;margin-bottom:.25rem">AI Task Organizer</div>
+      <div style="font-size:.85rem;opacity:.9">Paste your homework, tasks, or to-dos and the AI will organize and prioritize them for you!</div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="card mb-2">
+      <div style="font-weight:700;margin-bottom:.5rem">📝 Paste Your Tasks</div>
+      <textarea class="form-control" id="tasks-input" rows="6"
+        placeholder="Paste your tasks here, one per line. For example:
+- Math homework chapter 5
+- Clean my room
+- Study for science test Friday
+- Read 20 pages
+- Practice piano"></textarea>
+      <div class="form-hint">Tip: You can paste homework lists, notes, or anything you need to get done.</div>
+    </div>
+
+    <!-- Options -->
+    <div class="card mb-2">
+      <div style="font-weight:700;margin-bottom:.5rem">⚙️ Options</div>
+      <div class="form-group">
+        <label class="form-label">Organize by</label>
+        <select class="form-control" id="organize-by">
+          <option value="priority">🔴 Priority (most important first)</option>
+          <option value="time">⏱️ Time (quickest first)</option>
+          <option value="subject">📚 Subject / Category</option>
+          <option value="deadline">📅 Deadline</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">My available time today</label>
+        <select class="form-control" id="available-time">
+          <option value="30">30 minutes</option>
+          <option value="60" selected>1 hour</option>
+          <option value="120">2 hours</option>
+          <option value="180">3+ hours</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full mb-2" id="btn-organize" onclick="organizeTasksAI()">
+      🤖 Organize with AI
+    </button>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+      <div style="font-weight:700;font-size:1rem;margin-bottom:.5rem">✅ Organized Plan</div>
+      <div id="results-list"></div>
+
+      <div class="card mt-2" style="background:var(--primary-soft,#EFF6FF);border:1.5px solid var(--primary)">
+        <div style="font-weight:700;color:var(--primary);margin-bottom:.35rem">💡 AI Tips</div>
+        <div id="ai-tips" style="font-size:.85rem;color:var(--text-2)"></div>
+      </div>
+
+      <button class="btn btn-secondary btn-full mt-2" onclick="resetOrganizer()">
+        🔄 Start Over
+      </button>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="dashboard.html" class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="rewards.html" class="nav-item" id="nav-store"><span class="nav-icon"></span><span>Store</span></a>
+    <a href="profile.html" class="nav-item" id="nav-profile"><span class="nav-icon"></span><span>Profile</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireChild();
+
+document.getElementById('btn-back').innerHTML = iconBack();
+
+(function(){
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconGift,'nav-store'],[iconUser,'nav-profile']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+const user = Auth.getUser();
+applyChildTheme(user);
+
+async function organizeTasksAI() {
+  const input = document.getElementById('tasks-input').value.trim();
+  if (!input) {
+    Toast.error('Please paste some tasks first!');
+    return;
+  }
+
+  const btn = document.getElementById('btn-organize');
+  setLoading(btn, true);
+
+  try {
+    const organizeBy    = document.getElementById('organize-by').value;
+    const availableTime = document.getElementById('available-time').value;
+
+    const res = await AIAPI.organize({
+      tasks:          input,
+      organize_by:    organizeBy,
+      available_time: parseInt(availableTime),
+      child_name:     user?.display_name || 'Student',
+    });
+
+    renderResults(res);
+    document.getElementById('results-section').classList.remove('hidden');
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+
+  } catch(e) {
+    // Demo fallback — parse input manually
+    const lines = input.split('\n')
+      .map(l => l.replace(/^[-*•]\s*/, '').trim())
+      .filter(l => l.length > 0);
+
+    const demoResult = {
+      organized: lines.map((task, i) => ({
+        order:      i + 1,
+        task,
+        priority:   i < 2 ? 'high' : i < 4 ? 'medium' : 'low',
+        est_minutes: Math.floor(Math.random() * 30) + 10,
+        tip:        '',
+      })),
+      tips: `Great list! Start with the most important tasks first. Take a 5-minute break every 25 minutes. You've got this, ${user?.display_name || 'champ'}! 🌟`,
+    };
+
+    renderResults(demoResult);
+    document.getElementById('results-section').classList.remove('hidden');
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+  } finally {
+    setLoading(btn, false);
+  }
+}
+
+function renderResults(res) {
+  const tasks = res?.organized || res?.tasks || [];
+  const tips  = res?.tips || res?.summary || '';
+
+  const PRIORITY_COLORS = { high: 'var(--danger)', medium: 'var(--warning)', low: 'var(--success)' };
+  const PRIORITY_LABELS = { high: '🔴 High', medium: '🟡 Medium', low: '🟢 Low' };
+
+  document.getElementById('results-list').innerHTML = tasks.map((item, i) => `
+    <div class="card mb-2" style="display:flex;align-items:flex-start;gap:.75rem">
+      <div style="width:28px;height:28px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;margin-top:.1rem">
+        ${item.order || i + 1}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;margin-bottom:.25rem">${item.task || item.title || ''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem">
+          ${item.priority ? `<span class="badge" style="background:${PRIORITY_COLORS[item.priority]}20;color:${PRIORITY_COLORS[item.priority]}">${PRIORITY_LABELS[item.priority] || item.priority}</span>` : ''}
+          ${item.est_minutes ? `<span class="badge badge-neutral">⏱️ ~${item.est_minutes} min</span>` : ''}
+          ${item.subject ? `<span class="badge badge-info">📚 ${item.subject}</span>` : ''}
+        </div>
+        ${item.tip ? `<div class="text-sm text-muted mt-1">💡 ${item.tip}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  if (tips) {
+    document.getElementById('ai-tips').textContent = tips;
+  } else {
+    document.getElementById('ai-tips').textContent = 'Work through your list one step at a time. You\'ve got this! 🌟';
+  }
+}
+
+function resetOrganizer() {
+  document.getElementById('tasks-input').value = '';
+  document.getElementById('results-section').classList.add('hidden');
+  document.getElementById('results-list').innerHTML = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

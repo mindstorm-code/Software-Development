@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Log — Family OS</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <script>(function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var t=localStorage.getItem('fos_parent_theme_'+(u.id||'guest'))||'dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
+  <link rel="stylesheet" href="/family-os/assets/css/parent-dark.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header" style="display:flex;align-items:center;gap:.5rem;padding:1rem">
+    <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back"></a>
+    <h1 style="font-size:1.2rem;font-weight:700;margin:0;flex:1">📊 Activity Log</h1>
+  </div>
+
+  <!-- Filter bar -->
+  <div style="padding:.5rem 1rem;display:flex;gap:.5rem;flex-wrap:wrap;border-bottom:1px solid var(--border)">
+    <select class="form-control" id="filter-child" onchange="applyFilters()" style="flex:1;min-width:120px;font-size:.85rem">
+      <option value="">All Kids</option>
+    </select>
+    <select class="form-control" id="filter-type" onchange="applyFilters()" style="flex:1;min-width:120px;font-size:.85rem">
+      <option value="">All Activity</option>
+      <option value="earned">Earned</option>
+      <option value="deducted">Deducted / Demerits</option>
+      <option value="redeemed">Redeemed</option>
+    </select>
+  </div>
+
+  <div class="page-content" style="padding-bottom:80px">
+    <div id="log-list">
+      <div class="text-center text-muted" style="padding:3rem"><span class="spinner"></span></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item" id="nav-home"><span class="nav-icon"></span><span>Home</span></a>
+    <a href="chores.html"    class="nav-item" id="nav-chores"><span class="nav-icon"></span><span>Chores</span></a>
+    <a href="children.html"  class="nav-item" id="nav-family"><span class="nav-icon"></span><span>Family</span></a>
+    <a href="reviews.html"   class="nav-item" id="nav-reviews"><span class="nav-icon"></span><span>Reviews</span></a>
+    <a href="rewards.html"   class="nav-item" id="nav-rewards"><span class="nav-icon"></span><span>Rewards</span></a>
+  </nav>
+</div>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireParent();
+
+(function(){
+  document.getElementById('btn-back').innerHTML = iconBack();
+  const navIcons = [[iconHome,'nav-home'],[iconList,'nav-chores'],[iconUsers,'nav-family'],[iconCheck,'nav-reviews'],[iconGift,'nav-rewards']];
+  navIcons.forEach(([fn, id]) => { const el = document.querySelector('#' + id + ' .nav-icon'); if(el) el.innerHTML = fn(); });
+})();
+
+const coin = getCoinConfig();
+let _allEntries = [];
+let _kids = [];
+
+const REASON_LABELS = {
+  chore_approved:  { icon:'✅', label:'Chore Completed',  color:'var(--success)' },
+  bonus:           { icon:'⭐', label:'Bonus Award',       color:'var(--primary)' },
+  quick_award:     { icon:'⭐', label:'Quick Award',       color:'var(--primary)' },
+  demerit:         { icon:'⚠️', label:'Demerit',           color:'#F59E0B' },
+  reward_redeemed: { icon:'🎁', label:'Reward Redeemed',   color:'var(--danger)' },
+  coupon_redeemed: { icon:'🎟️', label:'Coupon Redeemed',   color:'var(--danger)' },
+};
+
+function entryMeta(reason) {
+  if (!reason) return { icon:'📝', label:'Activity', color:'var(--text-2)' };
+  for (const [key, val] of Object.entries(REASON_LABELS)) {
+    if (reason.toLowerCase().includes(key)) return val;
+  }
+  if (reason.startsWith('layaway:')) return { icon:'🎯', label:'Goal Contribution', color:'#8B5CF6' };
+  if (reason.startsWith('charity:')) return { icon:'❤️', label:'Charity Donation',   color:'#EC4899' };
+  return { icon:'📝', label: reason.slice(0,30), color:'var(--text-2)' };
+}
+
+async function loadLog() {
+  try {
+    const [childRes, ledgerRes] = await Promise.all([
+      ChildrenAPI.list(),
+      PointsAPI.ledger(),
+    ]);
+
+    _kids = Array.isArray(childRes) ? childRes : (childRes?.data || childRes?.children || []);
+    const ledger = ledgerRes?.data || ledgerRes?.entries || ledgerRes || [];
+
+    // Fill child dropdown
+    const sel = document.getElementById('filter-child');
+    _kids.forEach(k => {
+      const o = document.createElement('option');
+      o.value = k.id; o.textContent = k.display_name;
+      sel.appendChild(o);
+    });
+
+    // Collect all entries from all kids if ledger is empty (demo has per-kid data)
+    if (!ledger.length) {
+      const allEntries = [];
+      for (const kid of _kids) {
+        const r = await PointsAPI.ledger(kid.id);
+        const entries = r?.data?.entries || r?.entries || [];
+        entries.forEach(e => { if (!e.child_id) e.child_id = kid.id; });
+        allEntries.push(...entries);
+      }
+      _allEntries = allEntries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } else {
+      _allEntries = ledger.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
+    renderLog(_allEntries);
+  } catch(e) {
+    document.getElementById('log-list').innerHTML = '<div class="empty-state text-danger">Failed to load activity log.</div>';
+    console.error(e);
+  }
+}
+
+function applyFilters() {
+  const childFilter = document.getElementById('filter-child').value;
+  const typeFilter  = document.getElementById('filter-type').value;
+  let filtered = _allEntries;
+  if (childFilter) filtered = filtered.filter(e => e.child_id === childFilter);
+  if (typeFilter === 'earned')   filtered = filtered.filter(e => e.delta > 0 && !e.reason?.includes('redeem'));
+  if (typeFilter === 'deducted') filtered = filtered.filter(e => e.delta < 0 && !e.reason?.includes('redeem'));
+  if (typeFilter === 'redeemed') filtered = filtered.filter(e => e.reason?.includes('redeem') || e.reason?.includes('coupon') || e.reason?.includes('layaway') || e.reason?.includes('charity'));
+  renderLog(filtered);
+}
+
+function renderLog(entries) {
+  const el = document.getElementById('log-list');
+  if (!entries.length) {
+    el.innerHTML = '<div class="empty-state">No activity found.</div>';
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  entries.forEach(e => {
+    const day = e.created_at ? e.created_at.slice(0, 10) : 'Unknown';
+    if (!groups[day]) groups[day] = [];
+    groups[day].push(e);
+  });
+
+  el.innerHTML = Object.entries(groups).map(([day, dayEntries]) => {
+    const label = formatDayLabel(day);
+    return `
+      <div style="margin-bottom:.25rem">
+        <div style="font-size:.75rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;padding:.5rem 0 .25rem">${label}</div>
+        ${dayEntries.map(e => {
+          const kid  = _kids.find(k => k.id === e.child_id);
+          const meta = entryMeta(e.reason);
+          const isPos = e.delta > 0;
+          return `
+          <div class="card mb-1" style="display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem">
+            <div style="width:36px;height:36px;border-radius:50%;background:${meta.color}18;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">${meta.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:.9rem">${meta.label}</div>
+              <div class="text-sm text-muted">${kid?.display_name || 'Unknown'} · ${relativeTime(e.created_at)}</div>
+              ${e.reason && !Object.keys(REASON_LABELS).some(k=>e.reason.includes(k)) ? `<div class="text-sm text-muted truncate" style="font-style:italic">"${e.reason}"</div>` : ''}
+            </div>
+            <div style="font-weight:800;font-size:1rem;color:${isPos ? 'var(--success)' : '#EF4444'};flex-shrink:0">
+              ${isPos ? '+' : ''}${e.delta} <span style="font-size:.7rem;font-weight:600">${coin.symbol}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+}
+
+function formatDayLabel(dateStr) {
+  if (!dateStr || dateStr === 'Unknown') return 'Unknown Date';
+  const d   = new Date(dateStr + 'T00:00:00');
+  const now  = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((now - d) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  if (diff < 7)  return d.toLocaleDateString('en-US', { weekday:'long' });
+  return d.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+}
+
+loadLog();
+</script>
+</body>
+</html>
+

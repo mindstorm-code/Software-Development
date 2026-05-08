@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Quest — Family OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+  <link rel="stylesheet" href="/family-os/assets/css/child-theme.css">
+  <script>
+  /* Apply saved display mode ASAP to avoid flash */
+  (function(){try{var u=JSON.parse(localStorage.getItem('fos_user')||'{}');var m=localStorage.getItem('fos_child_theme_'+(u.id||'guest'))||'dark';document.documentElement.setAttribute('data-theme',m);}catch(e){}})();
+  </script>
+  <style>
+    /* Timer banner */
+    #timer-banner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      background: linear-gradient(135deg, #1d2f5e, #2d1f5e);
+      border-bottom: 1px solid rgba(176,116,255,.4);
+      color: #fff; padding: .6rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+      transform: translateY(-100%); transition: transform .3s ease;
+    }
+    #timer-banner.visible { transform: translateY(0); }
+    #timer-banner.urgent  { background: linear-gradient(135deg, #5e1d1d, #5e3d1d); animation: pulse-bg 1s infinite; }
+    @keyframes pulse-bg { 0%,100%{opacity:1} 50%{opacity:.85} }
+    #timer-clock { font-family: 'Bungee', cursive; font-size: 1.8rem; letter-spacing: .04em; font-variant-numeric: tabular-nums; color: var(--ct-gold); }
+    #timer-label { font-size: .78rem; opacity: .85; font-weight: 600; color: var(--ct-ink-2); }
+
+    /* Timer FAB */
+    #timer-fab {
+      position: fixed; bottom: 90px; right: 1rem; z-index: 200;
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--ct-gold), var(--ct-gold-deep));
+      color: #1a1308; border: none; font-size: 1.5rem; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(255,201,67,.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+    }
+    #timer-fab:hover { transform: scale(1.08); }
+    #timer-fab.running { background: linear-gradient(135deg, var(--ct-rose), var(--ct-rose-deep, #c5314f)); color: #fff; box-shadow: 0 6px 20px rgba(255,85,119,.5); }
+
+    /* Timer modal presets */
+    .time-preset {
+      flex: 1; padding: .55rem .25rem; border: 2px solid var(--ct-line);
+      border-radius: 10px; background: var(--ct-bg-1); cursor: pointer;
+      font-weight: 700; font-size: .9rem; text-align: center; color: var(--ct-ink-2);
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .time-preset:hover, .time-preset.selected {
+      border-color: var(--ct-gold); background: rgba(255,201,67,.08); color: var(--ct-gold);
+    }
+
+    /* Timer tabs */
+    .timer-tab { transition: border-color .15s, color .15s; }
+    .timer-tab.active { border-bottom-color: var(--ct-gold) !important; color: var(--ct-gold) !important; }
+
+    @keyframes ring-shake { 0%,100%{transform:rotate(0)} 15%{transform:rotate(-12deg)} 30%{transform:rotate(12deg)} 45%{transform:rotate(-8deg)} 60%{transform:rotate(8deg)} 75%{transform:rotate(-4deg)} 90%{transform:rotate(4deg)} }
+    .ring-anim { animation: ring-shake .6s ease 3; }
+
+    /* Page layout */
+    .page { background: none !important; }
+    .page-header {
+      background: var(--ct-bg-2) !important;
+      border-bottom: 1px solid var(--ct-line-soft) !important;
+    }
+    .page-content { background: none !important; }
+    .page-header h1 { color: var(--ct-ink) !important; font-family: 'Bungee', cursive !important; font-size: 1rem !important; }
+    .btn-ghost { background: var(--ct-bg-3) !important; border-color: var(--ct-line) !important; color: var(--ct-ink-2) !important; }
+
+    /* Quest content dark cards */
+    .card { background: var(--ct-bg-2) !important; border-color: var(--ct-line-soft) !important; color: var(--ct-ink) !important; }
+    .badge { font-family: 'Outfit', sans-serif !important; }
+    .badge-info    { background: rgba(176,116,255,.15) !important; color: #dcc4ff !important; border: 1px solid rgba(176,116,255,.3) !important; }
+    .badge-success { background: rgba(34,211,154,.15) !important; color: var(--ct-mint) !important; border: 1px solid rgba(34,211,154,.3) !important; }
+    .badge-warning { background: rgba(255,201,67,.12) !important; color: var(--ct-gold) !important; border: 1px solid rgba(255,201,67,.3) !important; }
+    .badge-danger  { background: rgba(255,85,119,.14) !important; color: var(--ct-rose) !important; border: 1px solid rgba(255,85,119,.3) !important; }
+    .badge-neutral { background: var(--ct-bg-3) !important; color: var(--ct-ink-3) !important; border: 1px solid var(--ct-line) !important; }
+
+    /* Steps — base dark style is set inline in renderChore(), toggled by applyStepVisual() */
+
+    /* Submit bar */
+    #submit-bar {
+      background: rgba(10,14,26,.95) !important;
+      border-top-color: var(--ct-line-soft) !important;
+      backdrop-filter: blur(12px);
+    }
+    #submit-bar .btn-primary {
+      background: linear-gradient(135deg, var(--ct-gold), var(--ct-gold-deep)) !important;
+      color: #1a1308 !important; border: none !important;
+      font-family: 'Bungee', cursive !important; font-size: 14px !important;
+      letter-spacing: .06em !important;
+      box-shadow: 0 8px 22px -8px rgba(255,201,67,.6) !important;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Timer banner (shown when active) -->
+  <div id="timer-banner">
+    <div>
+      <div id="timer-label">⏱️ Timer running</div>
+      <div id="timer-clock">00:00</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <button onclick="pauseResumeTimer()" id="btn-pause"
+        style="background:rgba(255,255,255,.22);border:none;color:#fff;border-radius:8px;padding:.35rem .7rem;font-size:.85rem;font-weight:700;cursor:pointer">
+        ⏸ Pause
+      </button>
+      <button onclick="stopTimer()"
+        style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.35rem .6rem;font-size:.85rem;cursor:pointer">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <div class="page-header" style="display:flex;align-items:center;gap:.5rem;padding:.85rem 1rem">
+    <a href="dashboard.html" class="btn btn-icon btn-ghost" id="btn-back" style="flex-shrink:0"></a>
+    <h1 style="font-size:1rem;font-weight:400;margin:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="page-title">Quest</h1>
+  </div>
+
+  <div class="page-content" style="padding-bottom:110px;background:none;max-width:520px;margin:0 auto;padding-left:16px;padding-right:16px" id="chore-content">
+    <div class="text-center text-muted" style="padding:3rem"><span class="spinner"></span></div>
+  </div>
+
+  <!-- Sticky submit bar -->
+  <div id="submit-bar" class="hidden" style="position:fixed;bottom:0;left:0;right:0;padding:.75rem 1rem;background:var(--bg);border-top:1px solid var(--border);z-index:100">
+    <button class="btn btn-primary btn-full" onclick="openSubmitModal()">✅ Submit for Review</button>
+  </div>
+</div>
+
+<!-- Timer FAB (always visible when chore is pending) -->
+<button id="timer-fab" class="hidden" onclick="openTimerModal()" title="Start Timer">⏱️</button>
+
+<script src="/family-os/assets/js/demo.js"></script>
+<script src="/family-os/assets/js/auth.js"></script>
+<script src="/family-os/assets/js/api.js"></script>
+<script src="/family-os/assets/js/ui.js"></script>
+<script>
+Auth.requireChild();
+document.getElementById('btn-back').innerHTML = iconBack();
+
+const user = Auth.getUser();
+
+const params     = new URLSearchParams(location.search);
+const instanceId = params.get('id');
+
+let _instance      = null;
+let _chore         = null;
+let _checklistState = {};
+let _stepPhotos     = {};
+let _mainPhotoData  = null;
+
+// ── Timer state ──────────────────────────────────────────────
+let _timerTotal    = 0;
+let _timerLeft     = 0;
+let _timerInterval = null;
+let _timerPaused   = false;
+let _timerPreset   = null;
+let _timerMode     = 'countdown'; // 'countdown' | 'reminder'
+let _reminderTarget = null;       // Date object for reminder mode
+
+function fmtTime(sec) {
+  if (sec >= 3600) {
+    const h = Math.floor(sec / 3600);
+    const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  }
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function fmtClock(date) {
+  if (!date) return '';
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function switchTimerTab(mode) {
+  _timerMode = mode;
+  document.querySelectorAll('.timer-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  document.getElementById('timer-pane-countdown').style.display = mode === 'countdown' ? '' : 'none';
+  document.getElementById('timer-pane-reminder').style.display  = mode === 'reminder'  ? '' : 'none';
+}
+
+function openTimerModal() {
+  const suggested = _chore?.suggested_timer_min || null;
+
+  // If timer already running, show control modal
+  if (_timerInterval || _timerPaused) {
+    const isReminder = _timerMode === 'reminder';
+    const display    = isReminder ? fmtClock(_reminderTarget) : fmtTime(_timerLeft);
+    const label      = isReminder ? `🔔 Reminder at ${display}` : fmtTime(_timerLeft);
+    openModal(`
+      <h2 style="margin-bottom:.5rem">${isReminder ? '🔔 Reminder Set' : '⏱️ Timer Running'}</h2>
+      <div style="text-align:center;font-size:${isReminder?'1.8':'3'}rem;font-weight:800;color:var(--primary);margin:1rem 0;font-variant-numeric:tabular-nums">${label}</div>
+      ${!isReminder ? `<div class="flex gap-sm" style="margin-bottom:.5rem">
+        <button class="btn btn-secondary btn-full" onclick="pauseResumeTimer();closeModal(this.closest('.modal-overlay'))">${_timerPaused ? '▶ Resume' : '⏸ Pause'}</button>
+      </div>` : ''}
+      <button class="btn btn-full" style="background:#FEE2E2;color:#DC2626;font-weight:700" onclick="stopTimer();closeModal(this.closest('.modal-overlay'))">✕ Cancel ${isReminder?'Reminder':'Timer'}</button>
+    `);
+    return;
+  }
+
+  _timerPreset = suggested || 10;
+
+  // Default reminder time = 30 min from now
+  const now30 = new Date(Date.now() + 30 * 60000);
+  const defHH  = String(now30.getHours()).padStart(2,'0');
+  const defMM  = String(now30.getMinutes()).padStart(2,'0');
+
+  const presets = [5, 10, 15, 20, 30, 45, 60, 90, 120];
+  function presetLabel(m) {
+    if (m < 60) return m + 'm';
+    const h = m / 60;
+    return Number.isInteger(h) ? h + 'h' : (Math.floor(h) + 'h ' + (m % 60) + 'm');
+  }
+
+  openModal(`
+    <h2 style="margin-bottom:.75rem">⏱️ Timer & Reminder</h2>
+
+    <!-- Tab bar -->
+    <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:.85rem">
+      <button class="timer-tab active" data-mode="countdown"
+        style="flex:1;padding:.5rem;font-weight:700;font-size:.88rem;border:none;background:none;cursor:pointer;border-bottom:3px solid var(--primary);margin-bottom:-2px;color:var(--primary)"
+        onclick="switchTimerTab('countdown')">⏱️ Countdown</button>
+      <button class="timer-tab" data-mode="reminder"
+        style="flex:1;padding:.5rem;font-weight:700;font-size:.88rem;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--text-3)"
+        onclick="switchTimerTab('reminder')">🔔 Remind Me At</button>
+    </div>
+
+    <!-- Countdown pane -->
+    <div id="timer-pane-countdown">
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem" id="preset-row">
+        ${presets.map(m => `
+          <button class="time-preset${m === _timerPreset ? ' selected' : ''}" onclick="selectPreset(${m},this)">${presetLabel(m)}</button>
+        `).join('')}
+      </div>
+      <div class="form-group" style="margin-bottom:.5rem">
+        <label class="form-label">Custom (minutes)</label>
+        <input class="form-control" id="timer-custom" type="number" min="1" max="480"
+          placeholder="Enter minutes…" value="${suggested || ''}"
+          oninput="_timerPreset=parseInt(this.value)||null;document.querySelectorAll('.time-preset').forEach(b=>b.classList.remove('selected'))">
+      </div>
+      ${suggested ? `<div class="form-hint" style="margin-bottom:.25rem">💡 Parent suggested ${suggested} min</div>` : ''}
+    </div>
+
+    <!-- Reminder pane -->
+    <div id="timer-pane-reminder" style="display:none">
+      <div class="form-group" style="margin-bottom:.5rem">
+        <label class="form-label">Remind me at this time</label>
+        <input class="form-control" id="reminder-time" type="time" value="${defHH}:${defMM}"
+          style="font-size:1.4rem;text-align:center;font-weight:700">
+      </div>
+      <div class="form-hint" id="reminder-hint" style="margin-bottom:.25rem">You'll get an alarm at that time</div>
+    </div>
+
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="startTimerOrReminder();closeModal(this.closest('.modal-overlay'))">▶ Set</button>
+    </div>
+  `);
+
+  // Re-apply active tab style on switch
+  document.querySelectorAll('.timer-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.timer-tab').forEach(x => {
+        x.style.borderBottomColor = x.dataset.mode === _timerMode ? 'var(--primary)' : 'transparent';
+        x.style.color             = x.dataset.mode === _timerMode ? 'var(--primary)' : 'var(--text-3)';
+      });
+    });
+  });
+}
+
+function selectPreset(min, btn) {
+  _timerPreset = min;
+  document.querySelectorAll('.time-preset').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const custom = document.getElementById('timer-custom');
+  if (custom) custom.value = min;
+}
+
+function startTimerOrReminder() {
+  if (_timerMode === 'reminder') {
+    startReminder();
+  } else {
+    startTimer();
+  }
+}
+
+function startReminder() {
+  const timeVal = document.getElementById('reminder-time')?.value;
+  if (!timeVal) { Toast.error('Please pick a time.'); return; }
+
+  const [hh, mm] = timeVal.split(':').map(Number);
+  const target   = new Date();
+  target.setHours(hh, mm, 0, 0);
+  if (target <= new Date()) target.setDate(target.getDate() + 1); // next day if past
+
+  _reminderTarget = target;
+  _timerMode      = 'reminder';
+  _timerLeft      = Math.round((target - Date.now()) / 1000);
+  _timerTotal     = _timerLeft;
+  _timerPaused    = false;
+
+  const banner = document.getElementById('timer-banner');
+  const fab    = document.getElementById('timer-fab');
+  banner.classList.add('visible');
+  banner.classList.remove('urgent');
+  fab.classList.add('running');
+  document.getElementById('btn-pause').style.display = 'none'; // no pause for reminder
+
+  updateTimerDisplay();
+
+  _timerInterval = setInterval(() => {
+    const secsLeft = Math.round((_reminderTarget - Date.now()) / 1000);
+    _timerLeft     = Math.max(0, secsLeft);
+    updateTimerDisplay();
+
+    if (_timerLeft <= 60 && _timerLeft > 0) {
+      banner.classList.add('urgent');
+    }
+    if (_timerLeft <= 0) {
+      clearInterval(_timerInterval);
+      _timerInterval = null;
+      timerDone();
+    }
+  }, 1000);
+
+  Toast.success(`🔔 Reminder set for ${fmtClock(target)}`);
+}
+
+function startTimer() {
+  const mins = _timerPreset || parseInt(document.getElementById('timer-custom')?.value) || 10;
+  _timerMode   = 'countdown';
+  _timerTotal  = mins * 60;
+  _timerLeft   = _timerTotal;
+  _timerPaused = false;
+
+  const banner = document.getElementById('timer-banner');
+  const fab    = document.getElementById('timer-fab');
+  banner.classList.add('visible');
+  banner.classList.remove('urgent');
+  fab.classList.add('running');
+  const pauseBtn = document.getElementById('btn-pause');
+  if (pauseBtn) { pauseBtn.style.display = ''; pauseBtn.textContent = '⏸ Pause'; }
+
+  updateTimerDisplay();
+
+  _timerInterval = setInterval(() => {
+    if (_timerPaused) return;
+    _timerLeft--;
+    updateTimerDisplay();
+
+    if (_timerLeft <= 60 && _timerLeft > 0) {
+      banner.classList.add('urgent');
+    }
+    if (_timerLeft <= 30 && _timerLeft % 10 === 0 && _timerLeft > 0) {
+      playTick();
+    }
+
+    if (_timerLeft <= 0) {
+      clearInterval(_timerInterval);
+      _timerInterval = null;
+      timerDone();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const clock = document.getElementById('timer-clock');
+  const label = document.getElementById('timer-label');
+  if (_timerMode === 'reminder') {
+    if (clock) clock.textContent = fmtTime(_timerLeft);
+    if (label) label.textContent = `🔔 Reminder at ${fmtClock(_reminderTarget)}`;
+  } else {
+    if (clock) clock.textContent = fmtTime(_timerLeft);
+    if (label) label.textContent = _timerPaused ? '⏸ Paused' : '⏱️ Timer running';
+  }
+}
+
+function pauseResumeTimer() {
+  _timerPaused = !_timerPaused;
+  const btn = document.getElementById('btn-pause');
+  if (btn) btn.textContent = _timerPaused ? '▶ Resume' : '⏸ Pause';
+  updateTimerDisplay();
+}
+
+function stopTimer() {
+  if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+  _timerLeft   = 0;
+  _timerPaused = false;
+  document.getElementById('timer-banner').classList.remove('visible', 'urgent');
+  document.getElementById('timer-fab').classList.remove('running');
+}
+
+function timerDone() {
+  _timerLeft = 0;
+  const banner  = document.getElementById('timer-banner');
+  const fab     = document.getElementById('timer-fab');
+  const isReminder = _timerMode === 'reminder';
+  banner.classList.remove('urgent');
+
+  playAlarm();
+  if (navigator.vibrate) navigator.vibrate([600, 200, 600, 200, 600]);
+
+  const clock = document.getElementById('timer-clock');
+  const label = document.getElementById('timer-label');
+  if (clock) { clock.textContent = isReminder ? '🔔' : '00:00'; clock.classList.add('ring-anim'); }
+  if (label) label.textContent = isReminder ? 'Time to do your chore!' : '🔔 Time\'s up!';
+  banner.style.background = 'linear-gradient(135deg,#16A34A,#22C55E)';
+
+  Toast.success(isReminder ? '🔔 Reminder: Time to work on your chore!' : '⏰ Time\'s up! Great work!');
+
+  setTimeout(() => {
+    banner.classList.remove('visible');
+    banner.style.background = '';
+    fab.classList.remove('running');
+    if (clock) clock.classList.remove('ring-anim');
+  }, 6000);
+}
+
+function playTick() {
+  try {
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 660; osc.type = 'sine';
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start(); osc.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+function playAlarm() {
+  try {
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    // 3 beeps
+    [0, 0.45, 0.9].forEach(offset => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880; osc.type = 'sine';
+      gain.gain.setValueAtTime(0, ctx.currentTime + offset);
+      gain.gain.linearRampToValueAtTime(0.6, ctx.currentTime + offset + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.4);
+      osc.start(ctx.currentTime + offset);
+      osc.stop(ctx.currentTime + offset + 0.4);
+    });
+  } catch(e) {}
+}
+
+// ── Chore loading ────────────────────────────────────────────
+async function loadChore() {
+  try {
+    if (!instanceId) {
+      const res       = await ChoresAPI.instances();
+      const instances = Array.isArray(res) ? res : (res?.data || res?.chores || []);
+      const pending   = instances.filter(i => i.status === 'pending');
+      const el        = document.getElementById('chore-content');
+      document.getElementById('page-title').textContent = '📋 My Chores';
+      if (!pending.length) {
+        el.innerHTML = '<div class="empty-state">🎉 All chores done for today!</div>';
+        return;
+      }
+      const _coin = getCoinConfig();
+      el.innerHTML = pending.map(i => {
+        const c = i.chore || {};
+        const _fc = c.usd_value ? _coin.usdToFC(c.usd_value) : (c.points || 0);
+        return `
+          <a href="chore-detail.html?id=${i.id}" style="text-decoration:none;color:inherit">
+            <div class="card mb-2" style="display:flex;align-items:center;gap:.75rem">
+              <div style="font-size:1.4rem;width:44px;height:44px;background:var(--primary-soft,#EFF6FF);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                ${{ bedroom:'🛏️',kitchen:'🍽️',cleaning:'🧹',yard:'🌿',laundry:'👕',pets:'🐾',cooking:'👨‍🍳' }[c.category] || '📋'}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700">${c.title || 'Chore'}</div>
+                <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.2rem">
+                  ${diffBadge(c.difficulty)} ${ptsBadge(_fc)}
+                  ${c.suggested_timer_min ? `<span class="badge badge-info">⏱️ ${c.suggested_timer_min}min</span>` : ''}
+                </div>
+              </div>
+              <span style="color:var(--text-3);font-size:1.2rem">›</span>
+            </div>
+          </a>`;
+      }).join('');
+      return;
+    }
+
+    const res       = await ChoresAPI.instances();
+    const instances = Array.isArray(res) ? res : (res?.data || res?.chores || []);
+    _instance       = instances.find(i => i.id === instanceId) || instances[0];
+
+    if (!_instance) {
+      document.getElementById('chore-content').innerHTML = '<div class="empty-state">Chore not found.</div>';
+      return;
+    }
+
+    _chore = _instance.chore || await ChoresAPI.get(_instance.chore_id).then(r => r?.data || r).catch(() => _instance.chore || {});
+
+    renderChore();
+
+    if (_instance.status === 'pending') {
+      document.getElementById('submit-bar').classList.remove('hidden');
+      document.getElementById('timer-fab').classList.remove('hidden');
+    }
+
+  } catch(e) {
+    document.getElementById('chore-content').innerHTML = '<div class="empty-state text-danger">Failed to load chore.</div>';
+    Toast.error(e.message);
+  }
+}
+
+function getSteps() {
+  const c = _chore || {};
+  return (c.game_plan || []).length
+    ? c.game_plan
+    : (c.checklist || []).map((item, i) => ({ step: i+1, title: item.text, description: '', id: item.id || ('step-' + i) }));
+}
+
+function renderChore() {
+  const c    = _chore || {};
+  const i    = _instance;
+  const el   = document.getElementById('chore-content');
+  const coin = getCoinConfig();
+  const fc   = c.usd_value ? coin.usdToFC(c.usd_value) : (c.points || 0);
+  const photoPerStep = !!c.photo_per_step;
+  const steps = getSteps();
+
+  document.getElementById('page-title').textContent = c.title || 'Chore';
+  // Reset all steps to false, then restore any saved progress from localStorage
+  steps.forEach((s, idx) => { _checklistState[s.id || ('step-' + idx)] = false; });
+  if (instanceId) {
+    try {
+      const saved = localStorage.getItem('fos_checklist_' + instanceId);
+      if (saved) Object.assign(_checklistState, JSON.parse(saved));
+    } catch(e) {}
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+      ${statusBadge(i.status)}
+      ${ptsBadge(fc)}
+      ${diffBadge(c.difficulty || 'easy')}
+      ${c.suggested_timer_min ? `<span class="badge badge-info" style="cursor:pointer" onclick="openTimerModal()">⏱️ ${c.suggested_timer_min}min suggested</span>` : ''}
+      ${photoPerStep ? '<span class="badge badge-warning">📸 Photo per step</span>' : ''}
+    </div>
+
+    ${c.description ? `
+      <div class="card mb-2">
+        <div style="font-weight:600;margin-bottom:.35rem">📋 About</div>
+        <div style="color:var(--text-2)">${c.description}</div>
+      </div>
+    ` : ''}
+
+    ${c.suggested_timer_min ? `
+      <div class="card mb-2" style="background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border:1.5px solid var(--primary);cursor:pointer" onclick="openTimerModal()">
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <div style="font-size:2rem">⏱️</div>
+          <div style="flex:1">
+            <div style="font-weight:700;color:var(--primary)">Start ${c.suggested_timer_min}-minute timer</div>
+            <div style="font-size:.8rem;color:var(--text-3)">Tap to start · you can adjust the time</div>
+          </div>
+          <div style="font-size:1.5rem;color:var(--primary)">▶</div>
+        </div>
+      </div>
+    ` : ''}
+
+    ${steps.length ? `
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:.5rem">
+        📋 Steps ${photoPerStep ? '<span style="font-size:.75rem;font-weight:500;color:var(--warning,#F59E0B)">— photo per step</span>' : ''}
+      </div>
+      ${steps.map((step, idx) => {
+        const key = step.id || ('step-' + idx);
+        return `
+        <div id="step-row-${key}" onclick="toggleStep('${key}')" style="cursor:pointer;background:var(--ct-bg-1,#0f1528);border:2px solid var(--ct-line-soft,#1c2440);border-radius:14px;padding:.85rem 1rem;margin-bottom:.5rem;transition:background .2s,border-color .2s,box-shadow .2s">
+          <div style="display:flex;align-items:center;gap:.75rem">
+            <div id="step-check-${key}" style="width:36px;height:36px;border-radius:50%;border:2.5px solid var(--ct-line,#2a3354);background:var(--ct-bg-0,#0a0e1a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;transition:all .2s">
+              <span style="color:var(--ct-ink-3,#7f87a8);font-weight:700;font-size:.85rem">${idx + 1}</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div id="step-title-${key}" style="font-weight:700;font-size:1rem;color:var(--ct-ink,#f6f4ee);transition:color .2s">${step.title}</div>
+              ${step.description ? `<div class="text-sm text-muted" style="margin-top:.15rem">${step.description}</div>` : ''}
+            </div>
+          </div>
+          ${photoPerStep ? `
+            <div style="margin-top:.65rem;padding-top:.65rem;border-top:1px solid var(--border)" onclick="event.stopPropagation()">
+              <div id="step-thumb-${key}" style="margin-bottom:.4rem"></div>
+              <label for="step-photo-input-${key}" style="display:block;width:100%;padding:.6rem;border:2px dashed var(--border);border-radius:10px;background:var(--bg);color:var(--primary);font-size:.9rem;font-weight:600;cursor:pointer;text-align:center;box-sizing:border-box">📷 Tap to Add Photo</label>
+              <input type="file" id="step-photo-input-${key}" accept="image/*" style="display:none" onchange="onStepPhotoSelected(this,'${key}')">
+            </div>
+          ` : ''}
+        </div>`;
+      }).join('')}
+    ` : ''}
+
+    ${(c.proof_type === 'photo' || c.proof_type === 'photo_checklist') && i.status === 'pending' ? `
+      <div class="card mb-2" style="padding:1rem">
+        <div style="font-weight:700;margin-bottom:.6rem">📷 Photo Proof Required</div>
+        <div id="main-photo-preview" style="display:none;margin-bottom:.6rem;position:relative">
+          <img id="main-photo-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px;border:2.5px solid var(--success)">
+          <span style="position:absolute;top:8px;right:8px;background:var(--success);color:#fff;border-radius:20px;padding:.25rem .7rem;font-size:.8rem;font-weight:700">✓ Photo Ready</span>
+        </div>
+        <label for="main-photo-input" style="display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;padding:1.1rem;border:2.5px dashed var(--primary);border-radius:12px;background:var(--primary-soft,#EFF6FF);color:var(--primary);font-size:1rem;font-weight:700;cursor:pointer;box-sizing:border-box">
+          📷 Tap to Take / Upload Photo
+        </label>
+        <input type="file" id="main-photo-input" accept="image/*" style="display:none" onchange="onMainPhotoSelected(this)">
+      </div>
+    ` : ''}
+
+    ${i.status === 'submitted' ? `
+      <div class="card" style="text-align:center;background:var(--primary-soft,#EFF6FF)">
+        <div style="font-size:2rem;margin-bottom:.35rem">📤</div>
+        <div style="font-weight:700;color:var(--primary)">Submitted! Waiting for review.</div>
+      </div>
+    ` : ''}
+
+    ${i.status === 'approved' ? `
+      <div class="card" style="text-align:center;background:#F0FDF4">
+        <div style="font-size:2rem;margin-bottom:.35rem">✅</div>
+        <div style="font-weight:700;color:var(--success)">Approved! ${fc} ${coin.symbol} earned.</div>
+        ${i.submission?.feedback ? `<div style="font-size:.85rem;color:var(--text-2);margin-top:.4rem;font-style:italic">💬 "${i.submission.feedback}"</div>` : ''}
+      </div>
+    ` : ''}
+    ${i.status === 'rejected' ? `
+      <div class="card" style="text-align:center;background:#FEF2F2">
+        <div style="font-size:2rem;margin-bottom:.35rem">❌</div>
+        <div style="font-weight:700;color:var(--danger)">Not approved this time.</div>
+        ${i.submission?.feedback ? `<div style="font-size:.85rem;color:var(--text-2);margin-top:.4rem;font-style:italic">💬 "${i.submission.feedback}"</div>` : '<div style="font-size:.82rem;color:var(--text-3);margin-top:.3rem">Try again when you\'re ready!</div>'}
+      </div>
+    ` : ''}
+  `;
+  initStepNumbers();
+  // Re-apply saved visual state (steps that were checked before navigating away)
+  Object.keys(_checklistState).forEach(key => {
+    if (_checklistState[key]) applyStepVisual(key, true);
+  });
+}
+
+function applyStepVisual(id, done) {
+  const row   = document.getElementById('step-row-' + id);
+  const check = document.getElementById('step-check-' + id);
+  const title = document.getElementById('step-title-' + id);
+  if (row) {
+    row.style.background   = done ? 'rgba(34,211,154,.13)' : 'var(--ct-bg-1,#0f1528)';
+    row.style.borderColor  = done ? '#22d39a' : 'var(--ct-line-soft,#1c2440)';
+    row.style.boxShadow    = done ? '0 0 0 1px rgba(34,211,154,.25)' : 'none';
+  }
+  if (check) {
+    check.style.background  = done ? '#22d39a' : 'var(--ct-bg-0,#0a0e1a)';
+    check.style.borderColor = done ? '#22d39a' : 'var(--ct-line,#2a3354)';
+    check.style.color       = done ? '#02211c' : 'var(--ct-ink-3,#7f87a8)';
+    check.style.fontWeight  = done ? '900' : '700';
+    check.style.fontSize    = done ? '1.2rem' : '.9rem';
+    check.innerHTML         = done ? '✓' : `<span style="font-weight:700;font-size:.85rem">${check.dataset.num || ''}</span>`;
+  }
+  if (title) {
+    title.style.color          = done ? '#22d39a' : 'var(--ct-ink,#f6f4ee)';
+    title.style.textDecoration = done ? 'line-through' : 'none';
+  }
+}
+
+function toggleStep(id) {
+  _checklistState[id] = !_checklistState[id];
+  applyStepVisual(id, _checklistState[id]);
+  // Persist checklist progress so it survives page navigation
+  if (_instance?.id) {
+    try { localStorage.setItem('fos_checklist_' + _instance.id, JSON.stringify(_checklistState)); } catch(e) {}
+  }
+}
+
+// Initialise step number data attr after render so toggle can restore the number
+function initStepNumbers() {
+  document.querySelectorAll('[id^="step-check-"]').forEach((el, idx) => {
+    el.dataset.num = idx + 1;
+  });
+}
+
+function compressImage(file, maxPx = 900, quality = 0.72) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale  = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+function onMainPhotoSelected(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  compressImage(file).then(data => {
+    if (!data) return;
+    _mainPhotoData = data;
+    const img     = document.getElementById('main-photo-img');
+    const preview = document.getElementById('main-photo-preview');
+    const lbl     = document.querySelector('label[for="main-photo-input"]');
+    if (img)     img.src = data;
+    if (preview) preview.style.display = '';
+    if (lbl)     lbl.textContent = '📷 Change Photo';
+  });
+}
+
+function onStepPhotoSelected(input, stepId) {
+  const file = input.files?.[0];
+  if (!file) return;
+  compressImage(file).then(data => {
+    if (!data) return;
+    _stepPhotos[stepId] = data;
+    const thumb = document.getElementById('step-thumb-' + stepId);
+    if (thumb) thumb.innerHTML = `
+      <div style="position:relative;margin-bottom:.4rem">
+        <img src="${data}" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;border:2.5px solid var(--success)">
+        <span style="position:absolute;top:6px;right:6px;background:var(--success);color:#fff;border-radius:20px;padding:.2rem .5rem;font-size:.75rem;font-weight:700">✓ Photo Added</span>
+      </div>`;
+    const lbl = document.querySelector(`label[for="step-photo-input-${stepId}"]`);
+    if (lbl) lbl.textContent = '📷 Change Photo';
+    if (!_checklistState[stepId]) toggleStep(stepId);
+  });
+}
+
+async function openSubmitModal() {
+  const c = _chore || {};
+  const needsPhoto     = c.proof_type === 'photo' || c.proof_type === 'photo_checklist';
+  const needsChecklist = c.proof_type === 'checklist' || c.proof_type === 'photo_checklist';
+  const photoPerStep   = !!c.photo_per_step;
+  const steps          = getSteps();
+
+  if (steps.length) {
+    const requiredSteps = steps.filter(s => s.required !== false);
+    const doneCount = requiredSteps.filter((s, i) => _checklistState[s.id || ('step-' + steps.indexOf(s))]).length;
+    const allDone = doneCount === requiredSteps.length;
+    if (!allDone && (needsChecklist || photoPerStep)) {
+      Toast.error(`Complete all steps first! (${doneCount}/${requiredSteps.length} done)`); return;
+    }
+    if (!allDone && doneCount < requiredSteps.length) {
+      // Soft nudge for non-required checklist chores — don't block, just warn
+      const proceed = await confirm(`${doneCount}/${requiredSteps.length} steps checked. Submit anyway?`, 'Submit Anyway');
+      if (!proceed) return;
+    }
+  }
+  if (photoPerStep && steps.length) {
+    const missing = steps.find((s, i) => !_stepPhotos[s.id || ('step-' + i)]);
+    if (missing) { Toast.error(`📸 Photo required for: "${missing.title}"`); return; }
+  }
+
+  const stepPhotoGrid = photoPerStep && steps.length ? `
+    <div class="form-group">
+      <label class="form-label">📸 Step Photos</label>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+        ${steps.map((s, idx) => {
+          const key = s.id || ('step-' + idx);
+          const photo = _stepPhotos[key];
+          return photo
+            ? `<img src="${photo}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:2px solid var(--success)">`
+            : `<div style="width:56px;height:56px;border-radius:8px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--text-3)">Step ${idx+1}</div>`;
+        }).join('')}
+      </div>
+    </div>` : '';
+
+  openModal(`
+    <h2 style="margin-bottom:1rem">📤 Submit Chore</h2>
+    <div style="font-weight:600;margin-bottom:.75rem">${c.title}</div>
+    ${stepPhotoGrid}
+    ${needsPhoto ? `
+      <div class="form-group">
+        <label class="form-label">📷 Photo Proof</label>
+        ${_mainPhotoData ? `
+          <div style="position:relative;margin-bottom:.5rem">
+            <img src="${_mainPhotoData}" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:2.5px solid var(--success)">
+            <span style="position:absolute;top:8px;right:8px;background:var(--success);color:#fff;border-radius:20px;padding:.25rem .7rem;font-size:.8rem;font-weight:700">✓ Photo Ready</span>
+          </div>` : `
+          <div style="background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:10px;padding:.75rem;color:#92400E;font-size:.9rem;font-weight:600;text-align:center">
+            ⚠️ Go back and add a photo before submitting
+          </div>`}
+      </div>` : ''}
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-control" id="sub-notes" rows="2" placeholder="Anything to add?"></textarea>
+    </div>
+    <div class="flex gap-sm mt-2">
+      <button class="btn btn-secondary btn-full" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="submitChore(this)">Submit ✅</button>
+    </div>
+  `);
+}
+
+async function submitChore(btn) {
+  const needsPhoto = _chore?.proof_type === 'photo' || _chore?.proof_type === 'photo_checklist';
+  if (needsPhoto && !_mainPhotoData) {
+    Toast.error('Please add a photo proof first!');
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    return;
+  }
+  setLoading(btn, true);
+  try {
+    const notes = document.getElementById('sub-notes')?.value.trim() || '';
+    const photo_urls = [
+      ...(_mainPhotoData ? [_mainPhotoData] : []),
+      ...Object.values(_stepPhotos),
+    ];
+
+    await SubmissionsAPI.submit({
+      chore_id:        _chore?.id || _instance?.chore_id,
+      instance_id:     _instance?.id,
+      notes, photo_urls,
+      checklist_state: _checklistState,
+      step_photos:     _stepPhotos,
+    });
+
+    stopTimer();
+    // Clear saved checklist progress now that it's submitted
+    if (_instance?.id) { try { localStorage.removeItem('fos_checklist_' + _instance.id); } catch(e) {} }
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    Toast.success('Submitted! Waiting for parent review. 🎉');
+    document.getElementById('submit-bar').classList.add('hidden');
+    document.getElementById('timer-fab').classList.add('hidden');
+    if (_instance) _instance.status = 'submitted';
+    renderChore();
+    setTimeout(() => { location.href = 'dashboard.html'; }, 2000);
+  } catch(e) {
+    Toast.error('Submit failed: ' + e.message);
+    setLoading(btn, false);
+  }
+}
+
+loadChore();
+</script>
+</body>
+</html>

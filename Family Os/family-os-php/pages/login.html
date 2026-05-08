@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family OS — Login</title>
+  <link rel="stylesheet" href="/family-os/assets/css/main.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">🏠</div>
+      <h1>Family OS</h1>
+      <p>Your family's command center</p>
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-control" type="email" id="email" placeholder="demo@familyos.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" type="password" id="password" placeholder="demo1234" required autocomplete="current-password">
+      </div>
+      <div id="login-error" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full mt-2" type="submit" id="login-btn">Sign In</button>
+    </form>
+
+    <div class="divider"></div>
+
+    <div class="text-center">
+      <p class="text-sm text-muted mb-1">Child? Use your PIN instead</p>
+      <a href="/family-os/pages/pin-login.html" class="btn btn-ghost btn-full">🔢 PIN Login</a>
+    </div>
+
+    <div class="text-center mt-2">
+      <p class="text-sm text-muted">No account? <a href="/family-os/pages/signup.html">Create one</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Redirect if already logged in
+  const existingToken = localStorage.getItem('fos_token');
+  if (existingToken) {
+    const u = JSON.parse(localStorage.getItem('fos_user') || '{}');
+    location.href = u.role === 'parent'
+      ? '/family-os/pages/parent/dashboard.html'
+      : '/family-os/pages/child/dashboard.html';
+  }
+
+  // Redirect to the proper PIN-based login flow
+  location.href = '/family-os/pages/pin-login.html';
+</script>
+</body>
+</html>
